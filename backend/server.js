@@ -1,30 +1,44 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
+require("dotenv").config(); // Load environment variables
+const express = require("express");
+const mongoose = require("mongoose");
+const WebSocket = require("ws");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const path = require("path");
+const https = require("https"); // Import the http module
+const mongoConnect = require("./db/mongodb"); // MongoDB connection utility
 
-dotenv.config();
-
+// Initialize app
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Fetch public IP
+https.get("https://api.ipify.org", (res) => {
+  let data = "";
+
+  res.on("data", (chunk) => {
+    data += chunk;
+  });
+
+  res.on("end", () => {
+    console.log("Your public IP address is: " + data);
+  });
+}).on("error", (e) => {
+  console.log("Error: " + e.message);
+});
+
+// MongoDB connection
+mongoConnect(); 
 
 // Simple route
 app.get('/', (req, res) => {
   res.send('TechFest Admin Panel API is running...');
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
-
-// Start server
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
