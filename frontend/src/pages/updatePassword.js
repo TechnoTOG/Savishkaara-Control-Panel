@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for programmatic navigation
 import {
   Container,
   TextField,
@@ -11,49 +10,57 @@ import {
   IconButton,
 } from "@mui/material";
 
-const Login = () => {
-  const [loginData, setLoginData] = useState({
-    username: "",
-    password: "",
+const ChangePassword = () => {
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
   const [error, setError] = useState("");
-
-  const navigate = useNavigate(); // Initialize the navigate function
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
+
+    // Validate that the passwords match and are at least 6 characters long
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      setError("New passwords do not match.");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
     try {
-      const response = await fetch("/login-auth", {
+      const response = await fetch("/update-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({
+          newPassword: passwordData.newPassword,
+        }),
       });
-      console.log(loginData);
 
       if (response.ok) {
         const result = await response.json();
-        if (result.redirectToUpdatePassword) {
-          navigate("/update-password"); // Redirect to update-password page if condition met
-        } else {
-          window.location.href = "/dashboard"; // Redirect to dashboard after successful login
-        }
+        setSuccess(result.message || "Password updated successfully.");
       } else {
         const errorData = await response.json();
-        setError(errorData.error || "Login failed. Please try again.");
+        setError(errorData.error || "Password update failed. Please try again.");
       }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Password Change Error:", error);
       setError("Something went wrong. Please try again later.");
     }
   };
@@ -86,7 +93,7 @@ const Login = () => {
           }}
         >
           <Typography variant="h4" align="center" gutterBottom>
-            Login
+            Update Password
           </Typography>
 
           {error && (
@@ -100,19 +107,31 @@ const Login = () => {
             </Typography>
           )}
 
+          {success && (
+            <Typography
+              variant="body1"
+              align="center"
+              color="primary"
+              style={{ marginBottom: "10px" }}
+            >
+              {success}
+            </Typography>
+          )}
+
           <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <TextField
                 fullWidth
-                name="username"
-                placeholder="Username"
+                name="newPassword"
+                type="password"
+                placeholder="New Password"
                 variant="filled"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
                       <img
-                        src="/icons/person_24dp_EFEFEF_FILL1_wght400_GRAD0_opsz24.svg"
-                        alt="username"
+                        src="/icons/lock_24dp_EFEFEF_FILL1_wght400_GRAD0_opsz24.svg"
+                        alt="new password"
                         style={{ width: 32, height: 32 }}
                       />
                     </InputAdornment>
@@ -124,7 +143,7 @@ const Login = () => {
                   },
                 }}
                 InputLabelProps={{ style: { color: "#fff" } }}
-                value={loginData.username}
+                value={passwordData.newPassword}
                 onChange={handleChange}
                 required
                 style={{
@@ -136,9 +155,9 @@ const Login = () => {
             <Box mb={2}>
               <TextField
                 fullWidth
-                name="password"
+                name="confirmNewPassword"
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder="Confirm New Password"
                 variant="filled"
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
@@ -147,13 +166,13 @@ const Login = () => {
                     <InputAdornment position="start">
                       <img
                         src="/icons/lock_24dp_EFEFEF_FILL1_wght400_GRAD0_opsz24.svg"
-                        alt="password"
+                        alt="confirm password"
                         style={{ width: 32, height: 32 }}
                       />
                     </InputAdornment>
                   ),
                   endAdornment:
-                    (focused || loginData.password) && (
+                    (focused || passwordData.confirmNewPassword) && (
                       <InputAdornment position="end">
                         <IconButton onClick={togglePasswordVisibility} edge="end">
                           <img
@@ -175,7 +194,7 @@ const Login = () => {
                   },
                 }}
                 InputLabelProps={{ style: { color: "#fff" } }}
-                value={loginData.password}
+                value={passwordData.confirmNewPassword}
                 onChange={handleChange}
                 required
                 style={{
@@ -195,7 +214,7 @@ const Login = () => {
               }}
               type="submit"
             >
-              Login
+              Update
             </Button>
           </form>
         </Paper>
@@ -204,4 +223,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ChangePassword;
