@@ -12,9 +12,13 @@ const mongoConnect = require("./db/mongodb"); // MongoDB connection utility
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const AuthenticationRoutes = require("./routes/auth");
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use("/", AuthenticationRoutes);
 
 // Fetch public IP
 https.get("https://api.ipify.org", (res) => {
