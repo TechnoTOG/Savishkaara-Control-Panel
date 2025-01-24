@@ -46,7 +46,7 @@ const Login = () => {
         if (result.redirectToUpdatePassword) {
           navigate("/update-password"); // Redirect to update-password page if condition met
         } else {
-          window.location.href = "/dashboard"; // Redirect to dashboard after successful login
+          navigate("/"); // Redirect to dashboard after successful login
         }
       } else {
         const errorData = await response.json();

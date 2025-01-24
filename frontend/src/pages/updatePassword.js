@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   TextField,
@@ -15,6 +16,7 @@ const ChangePassword = () => {
     newPassword: "",
     confirmNewPassword: "",
   });
+  const navigate = useNavigate(); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -48,13 +50,14 @@ const ChangePassword = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          newPassword: passwordData.newPassword,
+          password: passwordData.newPassword,
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
         setSuccess(result.message || "Password updated successfully.");
+        navigate("/");
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Password update failed. Please try again.");
