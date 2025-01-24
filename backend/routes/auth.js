@@ -4,8 +4,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
 // Ensure the correct MongoDB connection (saavishkaara-aio database)
-const mongoConnect = require('../db/mongodb'); // If you are using the mongoConnect function
-mongoConnect(); // Establish connection to the database
+const mongoConnect = require('../db/mongodb');
 
 // Define your User schema (if not already defined in a separate model file)
 const UserSchema = new mongoose.Schema({
@@ -32,8 +31,14 @@ router.post('/login-auth', async (req, res) => {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 
-        // Check user status
-        if (user.status === -1 && username === password) {
+        // Check user status and redirect
+        if (user.status === -1 && user.password == password) {
+            req.session.username = user.username;
+            req.session.user_role = user.role;
+            req.session.name = user.name;
+            req.session.department = user.dept;
+            req.session.event = user.event;
+
             return res.status(200).json({ redirectToUpdatePassword: true });
         }
         
@@ -44,11 +49,11 @@ router.post('/login-auth', async (req, res) => {
         }
 
         // Set session variables if necessary (you might need session middleware)
-        req.session.user_id = user.username;
+        req.session.username = user.username;
         req.session.user_role = user.role;
-        req.session.user_name = user.name;
-        req.session.user_dept = user.dept;
-        req.session.user_event = user.event;
+        req.session.name = user.name;
+        req.session.department = user.dept;
+        req.session.event = user.event;
 
         return res.status(200).json({ message: 'Login successful', user });
     } catch (error) {
@@ -59,13 +64,22 @@ router.post('/login-auth', async (req, res) => {
     }
 });
 
+// Check authentication route
+router.get("/check-auth", (req, res) => {
+    if (req.session.username) {
+      res.json({ isAuthenticated: true, user: req.session.username });
+    } else {
+      res.json({ isAuthenticated: false });
+    }
+  });
+
 // Password update route (if needed)
 router.post('/update-password', async (req, res) => {
-    const { username, password } = req.body;
+    const { password } = req.body;
 
     try {
         // Find user by username
-        const user = await User.findOne({ username: username });
+        const user = await User.findOne({ username: req.session.username });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });

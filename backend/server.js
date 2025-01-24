@@ -1,5 +1,7 @@
 require("dotenv").config(); // Load environment variables
 const express = require("express");
+const session = require("express-session");
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const WebSocket = require("ws");
 const bodyParser = require("body-parser");
@@ -11,6 +13,23 @@ const mongoConnect = require("./db/mongodb"); // MongoDB connection utility
 // Initialize app
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Generate a secure secret for session signing
+const sessionSecret = crypto.randomBytes(64).toString("hex");
+
+// Middleware for sessions
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60, // 1 hour expiration
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+    },
+  })
+);
 
 const AuthenticationRoutes = require("./routes/auth");
 
