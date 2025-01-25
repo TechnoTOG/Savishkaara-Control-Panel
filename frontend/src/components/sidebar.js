@@ -21,9 +21,7 @@ const Sidebar = ({ isMinimized }) => {
         transition: "width 0.3s ease",
         position: "fixed",
         overflowX: "hidden",
-        "&:hover": {
-          width: isMinimized ? 250 : "auto",
-        },
+        
       }}
     >
       <Box textAlign="center" mb={4} display="flex" alignItems="center" justifyContent={isMinimized ? "center" : "space-around"}>
@@ -97,3 +95,4 @@ const Sidebar = ({ isMinimized }) => {
 };
 
 export default Sidebar;
+
