@@ -88,6 +88,7 @@ router.post('/update-password', async (req, res) => {
         // Encrypt and update password
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
+        user.status = 1;
         await user.save();
 
         return res.status(200).json({ message: 'Password updated successfully' });
