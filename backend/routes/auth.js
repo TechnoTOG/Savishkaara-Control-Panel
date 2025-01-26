@@ -15,6 +15,7 @@ const UserSchema = new mongoose.Schema({
     status: { type: Number, required: true },
     dept: { type: String },
     event: { type: String },
+    gender: { type: String }
 });
 
 const User = mongoose.model('User', UserSchema, 'users'); // Connecting to the 'users' collection
@@ -38,8 +39,14 @@ router.post('/login-auth', async (req, res) => {
             req.session.name = user.name;
             req.session.department = user.dept;
             req.session.event = user.event;
+            req.session.gender = user.gender;
 
-            return res.status(200).json({ redirectToUpdatePassword: true });
+            return res.status(200).json({ 
+                redirectToUpdatePassword: true, 
+                name: user.name, 
+                gender: user.gender,
+                department: user.dept,
+            });
         }
         
         // Validate password
@@ -54,8 +61,9 @@ router.post('/login-auth', async (req, res) => {
         req.session.name = user.name;
         req.session.department = user.dept;
         req.session.event = user.event;
+        req.session.gender = user.gender;
 
-        return res.status(200).json({ message: 'Login successful', user });
+        return res.status(200).json({ message: 'Login successful', name: user.name, gender: user.gender, department: user.dept });
     } catch (error) {
         console.error('Login Error:', error);
         return res.status(500).json({
@@ -67,11 +75,16 @@ router.post('/login-auth', async (req, res) => {
 // Check authentication route
 router.get("/check-auth", (req, res) => {
     if (req.session.username) {
-      res.json({ isAuthenticated: true, user: req.session.username });
+        res.json({
+            isAuthenticated: true,
+            name: req.session.name,
+            gender: req.session.gender,
+            department: req.session.dept
+        });
     } else {
-      res.json({ isAuthenticated: false });
+        res.json({ isAuthenticated: false });
     }
-  });
+});
 
 // Password update route (if needed)
 router.post('/update-password', async (req, res) => {

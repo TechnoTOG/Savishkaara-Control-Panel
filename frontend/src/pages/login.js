@@ -43,6 +43,9 @@ const Login = () => {
 
       if (response.ok) {
         const result = await response.json();
+        sessionStorage.setItem("userName", result.name);
+        sessionStorage.setItem("gender", result.gender);
+        sessionStorage.setItem("dept", result.department);
         if (result.redirectToUpdatePassword) {
           navigate("/update-password"); // Redirect to update-password page if condition met
         } else {

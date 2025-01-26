@@ -10,7 +10,6 @@ const checkAuth = async () => {
       credentials: "include", // Important to send cookies
     });
     const data = await response.json();
-    console.log(data.isAuthenticated);
     return data.isAuthenticated;
   } catch (error) {
     return false;

@@ -2,6 +2,9 @@ import React from "react";
 import "./header.css";
 
 const Navbar = ({ toggleSidebar }) => {
+  const name = sessionStorage.getItem('userName');
+  const gender = sessionStorage.getItem('gender');
+  const dept = sessionStorage.getItem('dept');
   return (
     <div className="navbar">
       <div className="navbar-left">
@@ -20,10 +23,10 @@ const Navbar = ({ toggleSidebar }) => {
       </div>
 
       <div className="navbar-profile">
-        <img src="/images/profile.png" alt="User" className="profile-pic" />
+        <img src={gender === "female" ? "/profile/female2.png" : "/profile/male_avatar.png"} alt="User" className="profile-pic" />
         <div className="profile-info">
-          <span className="profile-name">Json Taylor</span>
-          <span className="profile-role">Web Designer</span>
+          <span className="profile-name">{name ? name : "Guest"}</span>
+          <span className="profile-role">{dept}</span>
         </div>
       </div>
     </div>
