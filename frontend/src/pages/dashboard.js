@@ -12,14 +12,22 @@ const Dashboard = () => {
 
   return (
     <div style={{ display: "flex" }}>
+      {/* Sidebar */}
       <Sidebar isMinimized={isMinimized} />
-      <div style={{ 
-        flex: 1, 
-        transition: "margin-left 0.3s ease", 
-        marginLeft: isMinimized ? "80px" : "250px", 
-        padding: "20px" 
-      }}>
+      
+      {/* Main Content */}
+      <div
+        style={{
+          flex: 1,
+          transition: "margin-left 0.3s ease",
+          marginLeft: isMinimized ? "80px" : "250px", // Adjust margin based on sidebar state
+          padding: "20px",
+        }}
+      >
+        {/* Header */}
         <Header toggleSidebar={toggleSidebar} />
+        
+        {/* Dashboard Content */}
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
             <Card>
@@ -44,3 +52,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
