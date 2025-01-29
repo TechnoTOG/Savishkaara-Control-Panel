@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
+import CountUp from "react-countup"; // Import CountUp
 
 const MetricCard = ({ title, value }) => (
   <Card
@@ -16,8 +17,14 @@ const MetricCard = ({ title, value }) => (
     }}
   >
     <CardContent>
-      <Typography variant="h6" color="textSecondary">{title}</Typography>
-      <Typography variant="h4" color="primary">{value}</Typography>
+      <Typography variant="h6">{title}</Typography>
+      <Typography variant="h4">
+        <CountUp
+          end={value} // The target number to animate to
+          duration={2} // Duration of the animation in seconds
+          separator="," // Add a comma separator for thousands
+        />
+      </Typography>
     </CardContent>
   </Card>
 );

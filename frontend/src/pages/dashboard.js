@@ -33,10 +33,10 @@ const Dashboard = () => {
         <div style={{ marginTop: "40px", marginLeft: "20px" }}> {/* Add some space between the header and cards */}
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={3}>
-              <MetricCard title="Total Customers" value="1,02,890" />
+              <MetricCard title="Total Customers" value={102890} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <MetricCard title="Total Revenue" value="$56,562" />
+              <MetricCard title="Total Revenue" value={56562} />
             </Grid>
             {/* Add more cards as necessary */}
           </Grid>
