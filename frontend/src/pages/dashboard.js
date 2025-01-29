@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import MetricCard from "../components/metricCard"; // Import the MetricCard component
 import VisualizationCard from "../components/visualizationCard"; // Import the VisualizationCard component
+import BlurText from "../components/blurText"; // Ensure the correct import path for blurText
+import "../css/dashboard.css"
 
 const Dashboard = () => {
+  const name = sessionStorage.getItem("userName") || "Guest"; // Fallback if userName is not set
   const [isMinimized, setIsMinimized] = useState(false);
 
   const toggleSidebar = () => {
@@ -28,9 +31,23 @@ const Dashboard = () => {
       >
         {/* Header */}
         <Header toggleSidebar={toggleSidebar} />
+
+        {/* Welcome Message */}
+        <div style={{ marginTop: "30px", marginLeft: "20px" }}>
+          <BlurText
+            text={`Welcome back, ${name}!`}
+            delay={150}
+            animateBy="words"
+            direction="top"
+            className="welcome-text"
+          />
+        </div>
         
-        {/* Dashboard Content */}
-        <div style={{ marginTop: "40px", marginLeft: "20px" }}> {/* Add some space between the header and cards */}
+        {/* Spacing Between Welcome Message and Cards */}
+        <div style={{ height: "10px" }}></div>
+
+        {/* Dashboard Content (Metric Cards) */}
+        <div style={{ marginLeft: "20px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={3}>
               <MetricCard title="Total Customers" value={102890} />
