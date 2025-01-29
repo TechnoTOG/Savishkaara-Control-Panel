@@ -19,10 +19,6 @@
   transition: transform 0.3s ease;
 }
 
-.hamburger-menu:hover {
-  transform: scale(1.1);
-}
-
 .navbar-title {
   font-size: 20px;
   font-weight: bold;
