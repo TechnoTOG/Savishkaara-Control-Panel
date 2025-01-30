@@ -3,13 +3,13 @@ const express = require("express");
 const session = require("express-session");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
-const WebSocket = require("ws");
+const { Server } = require("socket.io"); // Changed from WebSocket to Socket.io
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
-const https = require("https"); // Import the http module
-const http = require("http"); 
-const mongoConnect = require("./db/mongodb"); // MongoDB connection utility
+const https = require("https");
+const http = require("http");
+const mongoConnect = require("./db/mongodb");
 
 // Initialize app
 const app = express();
@@ -56,7 +56,7 @@ https.get("https://api.ipify.org", (res) => {
 });
 
 // MongoDB connection
-mongoConnect(); 
+mongoConnect();
 
 // Simple route
 app.get('/', (req, res) => {
@@ -66,44 +66,49 @@ app.get('/', (req, res) => {
 // Create HTTP server using Express
 const server = http.createServer(app);
 
-// Create WebSocket server attached to the same HTTP server
-const wss = new WebSocket.Server({ server });
+// Create Socket.io server
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === "production",
+    methods: ["GET", "POST"]
+  }
+});
 
-// WebSocket connection handling
-wss.on("connection", (ws, req) => {
-  // Log client IP address and other details
-  const clientIp = req.socket.remoteAddress; // This will give the IP address of the client
-  const userAgent = req.headers['user-agent']; // Get the User-Agent header for client details
-  const timestamp = new Date().toISOString(); // Get the connection timestamp
+// Socket.io connection handling
+io.on("connection", (socket) => {
+  // Get client connection details
+  const clientIp = socket.handshake.address;
+  const userAgent = socket.handshake.headers['user-agent'];
+  const timestamp = new Date().toISOString();
 
-  console.log(`New WebSocket connection`);
+  console.log(`New Socket.io connection (ID: ${socket.id})`);
   console.log(`Client IP: ${clientIp}`);
   console.log(`User-Agent: ${userAgent}`);
   console.log(`Connection Timestamp: ${timestamp}`);
 
-  // Send a welcome message to the client
-  ws.send(JSON.stringify({ message: "Welcome to the WebSocket server!" }));
+  // Send welcome message to client
+  socket.emit("message", { message: "Welcome to the Socket.io server!" });
 
-  // Listen for incoming messages from the client
-  ws.on("message", (message) => {
-    console.log("Received message:", message);
-
-    // Here you can send a response back to the client, if necessary
-    ws.send(JSON.stringify({ message: `Server received: ${message}` }));
+  // Listen for incoming messages
+  socket.on("message", (data) => {
+    console.log("Received message:", data);
+    
+    // Echo back to client
+    socket.emit("message", { message: `Server received: ${JSON.stringify(data)}` });
   });
 
-  // Handle WebSocket disconnection
-  ws.on("close", () => {
-    console.log("WebSocket connection closed");
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log(`Socket disconnected (ID: ${socket.id})`);
   });
 
   // Handle errors
-  ws.on("error", (error) => {
-    console.error("WebSocket error:", error);
+  socket.on("error", (error) => {
+    console.error("Socket error:", error);
   });
 });
 
-// Start the server on the specified port
+// Start the server
 server.listen(PORT, () => {
   console.log(`
   ____              _     _     _                                ____            _             _      ____                           
@@ -113,8 +118,9 @@ server.listen(PORT, () => {
  |____/ \\__,_| \\_/ |_|___/_| |_|_|\\_\\__,_|\\__,_|_|  \\__,_|      \\____\\___/|_| |_|\\__|_|  \\___/|_|    |____/ \\___|_|    \\_/ \\___|_|   
                                                                                                                                      `);
   console.log("\nWelcome to Savishkaara-Control-Server\n");
-  console.log(`Date:        `,new Date().toLocaleDateString());
-  console.log(`Time:        `,new Date().toLocaleTimeString());
-  console.log(`TimeStamp:   `,new Date(),`\n`);
+  console.log(`Date:        `, new Date().toLocaleDateString());
+  console.log(`Time:        `, new Date().toLocaleTimeString());
+  console.log(`TimeStamp:   `, new Date(), `\n`);
   console.log(`HTTP server running on port ${PORT}`);
+  console.log(`Socket.io server initialized`);
 });
