@@ -24,12 +24,6 @@
   font-weight: bold;
 }
 
-.navbar-icons {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
 .navbar-profile {
   display: flex;
   align-items: center;
@@ -53,4 +47,26 @@
 .profile-role {
   font-size: 12px;
   color: #757474;
+}
+
+/* Dark mode styles */
+.dark-mode .navbar {
+  background-color: #1b1c1e;
+  border-bottom: 1px solid #444;
+}
+
+.dark-mode .navbar-title {
+  color: #b2b4b4;
+}
+
+.dark-mode .profile-info {
+  color: #a2a4a6;
+}
+
+.dark-mode .profile-role {
+  color: #8d8c8c;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

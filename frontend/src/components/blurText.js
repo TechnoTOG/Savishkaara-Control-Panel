@@ -13,6 +13,7 @@ const BlurText = ({
   animationTo,
   easing = 'easeOutCubic',
   onAnimationComplete,
+  style = {}, // Add style prop
 }) => {
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
   const [inView, setInView] = useState(false);
@@ -70,7 +71,7 @@ const BlurText = ({
   );
 
   return (
-    <p ref={ref} className={`blur-text ${className}`}>
+    <p ref={ref} className={`blur-text ${className}`} style={style}>
       {springs.map((props, index) => (
         <animated.span
           key={index}
@@ -78,6 +79,7 @@ const BlurText = ({
             ...props,
             display: 'inline-block',
             willChange: 'transform, filter, opacity',
+            color: style?.color, // Ensure text color is applied
           }}
         >
           {elements[index] === ' ' ? '\u00A0' : elements[index]}
@@ -86,6 +88,7 @@ const BlurText = ({
       ))}
     </p>
   );
+  
 };
 
 export default BlurText;

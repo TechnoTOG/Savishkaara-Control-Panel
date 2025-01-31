@@ -3,7 +3,7 @@ import { Box, List, ListItemButton, ListItemIcon, ListItemText, Collapse, Toolti
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
-const Sidebar = ({ isMinimized }) => {
+const Sidebar = ({ isMinimized, darkMode }) => {
   const [openEvents, setOpenEvents] = React.useState(false);
   const [openUsers, setOpenUsers] = React.useState(false);
 
@@ -15,12 +15,14 @@ const Sidebar = ({ isMinimized }) => {
       sx={{
         width: isMinimized ? 80 : 250,
         height: "100vh",
-        backgroundColor: "#101d44",
+        backgroundColor: darkMode ? "#1b1c1e" : "#101d44",
         color: "#fff",
         paddingTop: "20px",
         transition: "width 0.3s ease",
         position: "fixed",
         overflowX: "hidden",
+        borderRight: "1px solid #444",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Box 
@@ -60,6 +62,9 @@ const Sidebar = ({ isMinimized }) => {
         <Collapse in={openEvents && !isMinimized} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+              <ListItemText primary="Overview" />
+            </ListItemButton>
+            <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
               <ListItemText primary="Add Event" />
             </ListItemButton>
           </List>
@@ -88,6 +93,9 @@ const Sidebar = ({ isMinimized }) => {
         </Tooltip>
         <Collapse in={openUsers && !isMinimized} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
+            <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+              <ListItemText primary="Overview" />
+            </ListItemButton>
             <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
               <ListItemText primary="Add User" />
             </ListItemButton>
