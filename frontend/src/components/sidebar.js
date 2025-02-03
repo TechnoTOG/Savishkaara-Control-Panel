@@ -15,7 +15,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
       sx={{
         width: isMinimized ? 80 : 250,
         height: "100vh",
-        backgroundColor: darkMode ? "#1b1c1e" : "#101d44",
+        backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
         color: "#fff",
         paddingTop: "20px",
         transition: "width 0.3s ease",
