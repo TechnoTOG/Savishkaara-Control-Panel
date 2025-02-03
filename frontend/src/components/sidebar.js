@@ -39,7 +39,14 @@ const Sidebar = ({ isMinimized, darkMode }) => {
 
       <List component="nav">
         <Tooltip title="Dashboard" placement="right" disableHoverListener={!isMinimized}>
-          <ListItemButton sx={{ color: "#fff", justifyContent: isMinimized ? "left" : "flex-start" }}>
+          <ListItemButton 
+            sx={{ 
+              color: "#fff", 
+              justifyContent: isMinimized ? "left" : "flex-start", 
+              "&:hover": {
+                backgroundColor: darkMode ? "#333" : "#222a57", // Custom hover color
+              }, 
+          }}>
             <ListItemIcon sx={{paddingLeft: isMinimized ? "10px" : "0px"}}>
               <img src="/Icons/home_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="dashboard" width="24" />
             </ListItemIcon>
@@ -50,7 +57,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         <Tooltip title="Events" placement="right" disableHoverListener={!isMinimized}>
           <ListItemButton 
             onClick={handleEventsClick} 
-            sx={{ color: "#fff", justifyContent: isMinimized ? "left" : "flex-start" }}
+            sx={{ 
+              color: "#fff", 
+              justifyContent: isMinimized ? "left" : "flex-start", 
+              "&:hover": {
+                backgroundColor: darkMode ? "#333" : "#222a57", // Custom hover color
+              }, 
+          }}
           >
             <ListItemIcon sx={{paddingLeft: isMinimized ? "10px" : "0px"}}>
               <img src="/Icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="events" width="24" />
@@ -71,7 +84,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         </Collapse>
 
         <Tooltip title="Samridhi" placement="right" disableHoverListener={!isMinimized}>
-          <ListItemButton sx={{ color: "#fff", justifyContent: isMinimized ? "left" : "flex-start" }}>
+          <ListItemButton sx={{ 
+              color: "#fff", 
+              justifyContent: isMinimized ? "left" : "flex-start", 
+              "&:hover": {
+                backgroundColor: darkMode ? "#333" : "#222a57", // Custom hover color
+              }, 
+          }}>
             <ListItemIcon sx={{paddingLeft: isMinimized ? "10px" : "0px"}}>
               <img src="/Icons/fastfood_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="samridhi" width="24" />
             </ListItemIcon>
@@ -82,7 +101,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         <Tooltip title="Users" placement="right" disableHoverListener={!isMinimized}>
           <ListItemButton 
             onClick={handleUsersClick} 
-            sx={{ color: "#fff", justifyContent: isMinimized ? "left" : "flex-start" }}
+            sx={{ 
+              color: "#fff", 
+              justifyContent: isMinimized ? "left" : "flex-start", 
+              "&:hover": {
+                backgroundColor: darkMode ? "#333" : "#222a57", // Custom hover color
+              }, 
+          }}
           >
             <ListItemIcon sx={{paddingLeft: isMinimized ? "10px" : "0px"}}>
               <img src="/Icons/manage_accounts_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="users" width="24" />
@@ -103,7 +128,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         </Collapse>
 
         <Tooltip title="Server" placement="right" disableHoverListener={!isMinimized}>
-          <ListItemButton sx={{ color: "#fff", justifyContent: isMinimized ? "left" : "flex-start" }}>
+          <ListItemButton sx={{ 
+              color: "#fff", 
+              justifyContent: isMinimized ? "left" : "flex-start", 
+              "&:hover": {
+                backgroundColor: darkMode ? "#333" : "#222a57", // Custom hover color
+              }, 
+          }}>
             <ListItemIcon sx={{paddingLeft: isMinimized ? "10px" : "0px"}}>
               <img src="/Icons/host_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
             </ListItemIcon>
