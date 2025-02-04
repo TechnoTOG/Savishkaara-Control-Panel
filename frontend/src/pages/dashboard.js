@@ -110,10 +110,18 @@ const Dashboard = () => {
         </div>
         
         <div style={{ height: "10px" }}></div>
+        
+        <div style={{ marginLeft: "20px", paddingRight: "20px" , width: "100%"}}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <MetricCard title="Event Update"  darkMode={darkMode} />
+            </Grid>
+          </Grid>
+        </div>
 
         {/* Dashboard Content (Metric Cards) */}
-        <div style={{ marginLeft: "20px", paddingRight: "20px" }}>
-          <Grid container spacing={3}>
+        <div style={{ marginLeft: "300px", paddingRight: "20px" , width: "90%"}}>
+          <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
               <MetricCard 
                 title="Total Customers" 
@@ -131,6 +139,37 @@ const Dashboard = () => {
             {/* Add more cards as necessary */}
           </Grid>
         </div>
+        <div style={{ marginLeft: "300px", marginTop:"10px",paddingRight: "20px" , width: "90%"}}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <MetricCard 
+                title="Total Customers" 
+                value={102890}
+                darkMode={darkMode} // Pass dark mode prop
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <MetricCard 
+                title="Total Revenue" 
+                value={56562}
+                darkMode={darkMode} // Pass dark mode prop
+              />
+            </Grid>
+            {/* Add more cards as necessary */}
+          </Grid>
+        </div>
+        <div style={{ marginLeft: "300px",marginTop:"10px", paddingRight: "20px" , width: "182%"}}>
+<Grid container spacing={3}>
+<Grid item xs={12} sm={6} md={3}>
+<MetricCard
+title="Revenue and Event day by day"
+value={0}
+darkMode={darkMode} // Pass dark mode prop
+/>
+</Grid>
+{/* Add more cards as necessary */}
+</Grid>
+</div>
       </div>
     </div>
   );
