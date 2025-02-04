@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for programmatic navigation
+import Cookies from "js-cookie";
 import {
   Container,
   TextField,
@@ -30,7 +31,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
     try {
       const response = await fetch("/login-auth", {
         method: "POST",
@@ -40,12 +40,20 @@ const Login = () => {
         body: JSON.stringify(loginData),
       });
       console.log(loginData);
-
       if (response.ok) {
         const result = await response.json();
-        sessionStorage.setItem("userName", result.name);
-        sessionStorage.setItem("gender", result.gender);
-        sessionStorage.setItem("dept", result.department);
+
+        console.log(result.role);
+  
+        // Calculate the expiration time (6 hours from now)
+        const expirationTime = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
+
+        // Store user data in cookies with 6-hour expiration
+        Cookies.set("userName", result.name, { expires: expirationTime });
+        Cookies.set("gender", result.gender, { expires: expirationTime });
+        Cookies.set("dept", result.department, { expires: expirationTime });
+        Cookies.set("role", result.role, { expires: expirationTime });
+  
         if (result.redirectToUpdatePassword) {
           navigate("/update-password"); // Redirect to update-password page if condition met
         } else {

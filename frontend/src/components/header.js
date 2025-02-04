@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import "../css/header.css";
 
 const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
-  const name = sessionStorage.getItem('userName');
-  const gender = sessionStorage.getItem('gender');
-  const dept = sessionStorage.getItem('dept');
+  const name = Cookies.get("userName");
+  const gender = Cookies.get("gender");
+  const department = Cookies.get("dept");
 
   return (
     <div className="navbar">
@@ -40,7 +41,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
         <img src={gender === "female" ? "/profile/female2.png" : "/profile/male_avatar.png"} alt="User" className="profile-pic" />
         <div className="profile-info">
           <span className="profile-name">{name ? name : "Guest"}</span>
-          <span className="profile-role">{dept}</span>
+          <span className="profile-role">{department}</span>
         </div>
       </div>
     </div>
