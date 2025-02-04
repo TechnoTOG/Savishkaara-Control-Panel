@@ -6,9 +6,10 @@ import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import "../css/dashboard.css";
+import Cookies from "js-cookie";
 
 const Dashboard = () => {
-  const name = sessionStorage.getItem("userName") || "Guest";
+  const name = Cookies.get("userName") || "Guest";
   const [isMinimized, setIsMinimized] = useState(false);
 
   // Dark mode state (lifted to Dashboard.js)
