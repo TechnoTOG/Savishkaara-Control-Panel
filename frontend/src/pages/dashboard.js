@@ -80,16 +80,29 @@ const Dashboard = () => {
       
       {/* Main Content */}
       <div
+      style={{
+        flex: 1,
+        transition: "margin-left 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease",
+        marginLeft: isMinimized ? "80px" : "250px",
+        minHeight: "100vh",
+        backgroundColor: "transparent", // Remove background-color from here
+        color: darkMode ? "#ffffff" : "#000000", // Dark mode text color
+        willChange: "margin-left, color", // Optimize rendering
+      }}
+    >
+      {/* Background Wrapper */}
+      <div
         style={{
-          flex: 1,
-          transition: "margin-left 0.3s ease",
-          marginLeft: isMinimized ? "80px" : "250px",
-          minHeight: "100vh",
-          backgroundColor: darkMode ? "#262729" : "#f0f1f6", // Dark mode background
-          color: darkMode ? "#ffffff" : "#000000", // Dark mode text color
-          transition: "background-color 0.3s ease, color 0.3s ease",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: darkMode ? "#262729" : "#f0f1f6", // Apply background here
+          transition: "background-color 0.3s ease", // Smooth background transition
+          zIndex: -1, // Ensure it stays behind content
         }}
-      >
+      />
         {/* Header with dark mode props */}
         <Header 
           toggleSidebar={toggleSidebar} 
