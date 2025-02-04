@@ -46,6 +46,7 @@ router.post('/login-auth', async (req, res) => {
                 name: user.name, 
                 gender: user.gender,
                 department: user.dept,
+                role: user.role,
             });
         }
         
@@ -63,7 +64,7 @@ router.post('/login-auth', async (req, res) => {
         req.session.event = user.event;
         req.session.gender = user.gender;
 
-        return res.status(200).json({ message: 'Login successful', name: user.name, gender: user.gender, department: user.dept });
+        return res.status(200).json({ message: 'Login successful', name: user.name, gender: user.gender, department: user.dept, role: user.role });
     } catch (error) {
         console.error('Login Error:', error);
         return res.status(500).json({
@@ -79,7 +80,8 @@ router.get("/check-auth", (req, res) => {
             isAuthenticated: true,
             name: req.session.name,
             gender: req.session.gender,
-            department: req.session.dept
+            department: req.session.dept,
+            role: req.session.role
         });
     } else {
         res.json({ isAuthenticated: false });
