@@ -123,66 +123,96 @@ const Dashboard = () => {
         </div>
         
         <div style={{ height: "10px" }}></div>
-        
-        <div style={{ marginLeft: "20px", paddingRight: "20px" , width: "100%"}}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard title="Event Update"  darkMode={darkMode} />
-            </Grid>
-          </Grid>
-        </div>
 
         {/* Dashboard Content (Metric Cards) */}
-        <div style={{ marginLeft: "300px", paddingRight: "20px" , width: "90%"}}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard 
-                title="Total Customers" 
-                value={102890}
-                darkMode={darkMode} // Pass dark mode prop
-              />
+        <div style={{ marginLeft: "20px", width: "90%"}}>
+          {/* Dashboard Content */}
+        <Grid container spacing={3}>
+          {/* First Column (2 rows) */}
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={3} direction="column">
+              {/* First Row in First Column */}
+              <Grid item>
+                <MetricCard 
+                  title="Total Customers" 
+                  value={102890}
+                  darkMode={darkMode}
+                />
+              </Grid>
+              {/* Second Row in First Column */}
+              <Grid item>
+                <MetricCard 
+                  title="Active Users" 
+                  value={2456}
+                  darkMode={darkMode}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard 
-                title="Total Revenue" 
-                value={56562}
-                darkMode={darkMode} // Pass dark mode prop
-              />
-            </Grid>
-            {/* Add more cards as necessary */}
           </Grid>
-        </div>
-        <div style={{ marginLeft: "300px", marginTop:"10px",paddingRight: "20px" , width: "90%"}}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard 
-                title="Total Customers" 
-                value={102890}
-                darkMode={darkMode} // Pass dark mode prop
-              />
+
+          {/* Second Column (3 rows) */}
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={3} direction="column">
+              {/* First Row in Second Column (2 columns) */}
+              <Grid item>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <MetricCard 
+                      title="Total Revenue" 
+                      value={56562}
+                      darkMode={darkMode}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <MetricCard 
+                      title="Conversion Rate" 
+                      value={0.156}
+                      formatter={(val) => `${(val * 100).toFixed(1)}%`}
+                      darkMode={darkMode}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              {/* Second Row in Second Column (2 columns) */}
+              <Grid item>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <VisualizationCard
+                      title="Sales Overview"
+                      chartType="line"
+                      darkMode={darkMode}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <VisualizationCard
+                      title="User Distribution"
+                      chartType="bar"
+                      darkMode={darkMode}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              {/* Third Row in Second Column (1 column) */}
+              <Grid item>
+                <VisualizationCard
+                  title="Revenue by Category"
+                  chartType="pie"
+                  darkMode={darkMode}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard 
-                title="Total Revenue" 
-                value={56562}
-                darkMode={darkMode} // Pass dark mode prop
-              />
-            </Grid>
-            {/* Add more cards as necessary */}
           </Grid>
+
+          {/* Third Column (1 row) */}
+          <Grid item xs={12} md={4}>
+            <VisualizationCard
+              title="Monthly Performance"
+              chartType="area"
+              darkMode={darkMode}
+            />
+          </Grid>
+        </Grid>
         </div>
-        <div style={{ marginLeft: "300px",marginTop:"10px", paddingRight: "20px" , width: "182%"}}>
-<Grid container spacing={3}>
-<Grid item xs={12} sm={6} md={3}>
-<MetricCard
-title="Revenue and Event day by day"
-value={0}
-darkMode={darkMode} // Pass dark mode prop
-/>
-</Grid>
-{/* Add more cards as necessary */}
-</Grid>
-</div>
       </div>
     </div>
   );
