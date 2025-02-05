@@ -1,15 +1,12 @@
 require("dotenv").config(); // Load environment variables
-const express = require("express");
-const session = require("express-session");
-const crypto = require("crypto");
-const mongoose = require("mongoose");
-const { Server } = require("socket.io"); // Changed from WebSocket to Socket.io
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const path = require("path");
-const https = require("https");
-const http = require("http");
-const mongoConnect = require("./db/mongodb");
+const express = require("express"); // Import Express.js
+const session = require("express-session"); // Import Express Session
+const crypto = require("crypto"); // Import Crypto.js
+const { Server } = require("socket.io"); // Using the Server class from the socket.io module for realtime update
+const cors = require("cors"); // Import CORS middleware
+const https = require("https"); // Import HTTPS module
+const http = require("http"); // Import HTTP module
+const mongoConnect = require("./db/mongodb"); // Import MongoDB connection
 
 // Initialize app
 const app = express();
@@ -32,13 +29,19 @@ app.use(
   })
 );
 
-const AuthenticationRoutes = require("./routes/auth");
+const AuthenticationRoutes = require("./routes/auth"); // Import authentication routes
+const RoomUpdaterRoutes = require("./routes/roomUpdater");
+const RealTimeRoutes = require("./routes/realTime");
+const VerificationRoutes = require("./routes/verify");
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 app.use("/", AuthenticationRoutes);
+app.use("/", RoomUpdaterRoutes);
+app.use("/", RealTimeRoutes);
+app.use("/", VerificationRoutes);
 
 // Fetch public IP
 https.get("https://api.ipify.org", (res) => {
@@ -58,7 +61,7 @@ https.get("https://api.ipify.org", (res) => {
 // MongoDB connection
 mongoConnect();
 
-// Simple route
+// Server test route
 app.get('/', (req, res) => {
   res.send('TechFest Admin Panel API is running...');
 });
@@ -104,6 +107,8 @@ io.on("connection", (socket) => {
     // Echo back to client
     socket.emit("message", { message: `Server received: ${JSON.stringify(data)}` });
   });
+
+  RoomUpdaterRoutes(io);
 
   // Handle disconnection
   socket.on("disconnect", () => {

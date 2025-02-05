@@ -8,10 +8,10 @@ const ParticipantSchema = new mongoose.Schema({
     mobile: { type: String, required: true },
     attendence: { type: Number, required: true   },
     event: { type: String },
-    DateTime: { type: TimeRanges }
+    DateTime: { type: String }
 });
 
-const Participant = mongoose.model('User', ParticipantSchema, 'users');
+const Participant = mongoose.model('event_registrations', ParticipantSchema, 'event_registration');
 
 // Password update route (if needed)
 router.post('/verify-ticket', async (req, res) => {
