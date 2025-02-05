@@ -75,7 +75,6 @@ const io = new Server(server, {
 });
 
 // Socket.io connection handling
-// Socket.io connection handling
 io.on("connection", (socket) => {
   // Initialize user data
   let userName = "Unknown User"; // Default value

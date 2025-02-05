@@ -29,7 +29,7 @@ router.post('/verify-ticket', async (req, res) => {
         participant.attendence = 1;
         await participant.save();
 
-        return res.status(200).json({ message: 'Participant attendance marked successfully successfully' });
+        return res.status(200).json({ message: 'Participant attendance marked successfully' });
     } catch (error) {
         console.error('Participant attendence Error:', error);
         return res.status(500).json({
