@@ -69,19 +69,28 @@ const server = http.createServer(app);
 // Create Socket.io server
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === "production",
+    origin: process.env.NODE_ENV === "production" ? "https://your-production-domain.com" : "http://localhost:3000", // Allow localhost:3000 in development,
     methods: ["GET", "POST"]
   }
 });
 
 // Socket.io connection handling
+// Socket.io connection handling
 io.on("connection", (socket) => {
+  // Initialize user data
+  let userName = "Unknown User"; // Default value
+
+  // Listen for the 'user-connected' event to get the user's name
+  socket.on("user-connected", (data) => {
+    userName = data.name || "Unknown User";
+    console.log(`User "${userName}" connected (ID: ${socket.id})`);
+  });
+
   // Get client connection details
   const clientIp = socket.handshake.address;
   const userAgent = socket.handshake.headers['user-agent'];
   const timestamp = new Date().toISOString();
-
-  console.log(`New Socket.io connection (ID: ${socket.id})`);
+  console.log(`\nNew Socket.io connection (ID: ${socket.id})`);
   console.log(`Client IP: ${clientIp}`);
   console.log(`User-Agent: ${userAgent}`);
   console.log(`Connection Timestamp: ${timestamp}`);
@@ -92,14 +101,14 @@ io.on("connection", (socket) => {
   // Listen for incoming messages
   socket.on("message", (data) => {
     console.log("Received message:", data);
-    
+
     // Echo back to client
     socket.emit("message", { message: `Server received: ${JSON.stringify(data)}` });
   });
 
   // Handle disconnection
   socket.on("disconnect", () => {
-    console.log(`Socket disconnected (ID: ${socket.id})`);
+    console.log(`\nUser "${userName}" disconnected (ID: ${socket.id})`);
   });
 
   // Handle errors
