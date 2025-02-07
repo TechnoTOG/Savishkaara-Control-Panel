@@ -63,7 +63,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
               }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/Icons/home_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="dashboard" width="24" />
+                <img src="/icons/home_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="dashboard" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="Dashboard" />}
             </ListItemButton>
@@ -83,7 +83,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
               }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/Icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
+                <img src="/icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="Events" />}
             </ListItemButton>
@@ -105,7 +105,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
                 }}
               >
                 <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                  <img src="/Icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="events" width="24" />
+                  <img src="/icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="events" width="24" />
                 </ListItemIcon>
                 {!isMinimized && <ListItemText primary="Events" />}
                 {isMinimized ? null : openEvents ? <ExpandLess /> : <ExpandMore />}
@@ -137,7 +137,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
               }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/Icons/fastfood_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="samridhi" width="24" />
+                <img src="/icons/fastfood_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="samridhi" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="Samridhi" />}
             </ListItemButton>
@@ -159,7 +159,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
                 }}
               >
                 <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                  <img src="/Icons/manage_accounts_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="users" width="24" />
+                  <img src="/icons/manage_accounts_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="users" width="24" />
                 </ListItemIcon>
                 {!isMinimized && <ListItemText primary="Users" />}
                 {isMinimized ? null : openUsers ? <ExpandLess /> : <ExpandMore />}
@@ -191,7 +191,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
               }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/Icons/host_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
+                <img src="/icons/host_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="Server" />}
             </ListItemButton>
@@ -211,7 +211,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
               }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/Icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
+                <img src="/icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="My Event" />}
             </ListItemButton>
