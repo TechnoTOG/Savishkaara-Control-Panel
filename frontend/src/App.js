@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import UpdatePassword from "./pages/updatePassword";
+import ForbiddenPage from "./pages/forbidden"; // Import the 403 page component
 
+// Function to check authentication status
 const checkAuth = async () => {
   try {
     const response = await fetch("/check-auth", {
@@ -16,6 +18,7 @@ const checkAuth = async () => {
   }
 };
 
+// ProtectedRoute component to guard authenticated routes
 const ProtectedRoute = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
@@ -34,9 +37,16 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Protected Routes */}
         <Route path="/" element={<ProtectedRoute element={<Dashboard />} />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/update-password" element={<ProtectedRoute element={<UpdatePassword />} />} />
+
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/403" element={<ForbiddenPage />} /> {/* Add the 403 route */}
+
+        {/* Catch-all Route (Optional) */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

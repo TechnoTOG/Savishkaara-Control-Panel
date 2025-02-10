@@ -77,49 +77,7 @@ const io = new Server(server, {
   }
 });
 
-// Socket.io connection handling
-io.on("connection", (socket) => {
-  // Initialize user data
-  let userName = "Unknown User"; // Default value
-
-  // Listen for the 'user-connected' event to get the user's name
-  socket.on("user-connected", (data) => {
-    userName = data.name || "Unknown User";
-    console.log(`User "${userName}" connected (ID: ${socket.id})`);
-  });
-
-  // Get client connection details
-  const clientIp = socket.handshake.address;
-  const userAgent = socket.handshake.headers['user-agent'];
-  const timestamp = new Date().toISOString();
-  console.log(`\nNew Socket.io connection (ID: ${socket.id})`);
-  console.log(`Client IP: ${clientIp}`);
-  console.log(`User-Agent: ${userAgent}`);
-  console.log(`Connection Timestamp: ${timestamp}`);
-
-  // Send welcome message to client
-  socket.emit("message", { message: "Welcome to the Socket.io server!" });
-
-  // Listen for incoming messages
-  socket.on("message", (data) => {
-    console.log("Received message:", data);
-
-    // Echo back to client
-    socket.emit("message", { message: `Server received: ${JSON.stringify(data)}` });
-  });
-
-  RoomUpdaterRoutes(io);
-
-  // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log(`\nUser "${userName}" disconnected (ID: ${socket.id})`);
-  });
-
-  // Handle errors
-  socket.on("error", (error) => {
-    console.error("Socket error:", error);
-  });
-});
+RoomUpdaterRoutes(io);
 
 // Start the server
 server.listen(PORT, () => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 import { Grid, Typography } from "@mui/material";
@@ -10,10 +11,10 @@ import Cookies from "js-cookie";
 import io from "socket.io-client"; // Import Socket.IO client
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const name = Cookies.get("userName") || "Guest";
+  const objID = Cookies.get("objId");
   const [isMinimized, setIsMinimized] = useState(false);
-
-  // Dark mode state (lifted to Dashboard.js)
   const [darkMode, setDarkMode] = useState(() => {
     const storedDarkMode = localStorage.getItem('darkMode');
     if (storedDarkMode === null) {
@@ -22,36 +23,58 @@ const Dashboard = () => {
       return storedDarkMode === 'true';
     }
   });
-
-  // State to hold messages from the server
-  const [serverMessage, setServerMessage] = useState("");
+  const [socketError, setSocketError] = useState(null); // State to handle Socket.IO errors
 
   // Initialize Socket.IO connection
   useEffect(() => {
     // Connect to the Socket.IO server
-    const socket = io(process.env.REACT_APP_API_URL || "http://localhost:5000");
+    const socket = io(process.env.REACT_APP_API_URL || "http://localhost:5000", {
+      auth: {
+        userName: name, // User's name
+        objId: objID, // Example: Additional user data
+      },
+    });
 
-    // Send the user's name to the server
-    socket.emit("user-connected", { name });
+    const joinRoom = () => {
+      const roomName = "dashboard"; // The room you want to join
+      socket.emit("join-room", roomName);
+    };
 
-    // Listen for the "message" event from the server
-    socket.on("message", (data) => {
-      console.log("Received message from server:", data.message);
-      setServerMessage(data.message); // Update state with the received message
+    // Listen for the "connect" event
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+      joinRoom();
+    });
+
+    // Listen for the "redirect" event from the server
+    socket.on("redirect", (data) => {
+      console.log("Redirecting to:", data.url);
+      navigate(data.url); // Redirect to the specified URL
+    });
+
+    // Listen for connection errors
+    socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error.message);
+      setSocketError(error.message); // Set error state
+      if (error.message.includes("Unauthorized")) {
+        navigate("/403"); // Redirect to 403 page for unauthorized access
+      }
     });
 
     // Cleanup on unmount
     return () => {
+      const roomName = "dashboard"; // The room to leave
+      socket.emit("leave-room", roomName);
       socket.disconnect();
+      
     };
-  }, [name]);
+  }, [name, objID, navigate]);
 
   // Toggle dark mode
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     localStorage.setItem('darkMode', newDarkMode);
-
     if (newDarkMode) {
       document.documentElement.classList.add('dark-mode');
     } else {
@@ -66,7 +89,6 @@ const Dashboard = () => {
     } else {
       document.documentElement.classList.remove('dark-mode');
     }
-
     const systemPreferenceQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemPreferenceChange = (e) => {
       const newDarkMode = e.matches;
@@ -78,9 +100,7 @@ const Dashboard = () => {
         document.documentElement.classList.remove('dark-mode');
       }
     };
-
     systemPreferenceQuery.addEventListener('change', handleSystemPreferenceChange);
-
     return () => {
       systemPreferenceQuery.removeEventListener('change', handleSystemPreferenceChange);
     };
@@ -94,7 +114,6 @@ const Dashboard = () => {
     <div style={{ display: "flex" }}>
       {/* Sidebar with dark mode prop */}
       <Sidebar isMinimized={isMinimized} darkMode={darkMode} />
-
       {/* Main Content */}
       <div
         style={{
@@ -137,8 +156,15 @@ const Dashboard = () => {
             style={{ color: darkMode ? "#bec0bf" : "#000" }}
           />
         </div>
-
         <div style={{ height: "10px" }}></div>
+
+        {/* Display Server Message or Error */}
+        {socketError && (
+          <Typography variant="body1" color="error" style={{ marginLeft: "20px" }}>
+            Error: {socketError}
+          </Typography>
+        )}
+
         {/* Dashboard Content (Metric Cards) */}
         <div style={{ marginLeft: "20px", width: "90%" }}>
           {/* Dashboard Content */}

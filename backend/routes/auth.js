@@ -34,6 +34,7 @@ router.post('/login-auth', async (req, res) => {
 
         // Check user status and redirect
         if (user.status === -1 && user.password == password) {
+            req.session.objectID = user._id;
             req.session.username = user.username;
             req.session.user_role = user.role;
             req.session.name = user.name;
@@ -42,7 +43,8 @@ router.post('/login-auth', async (req, res) => {
             req.session.gender = user.gender;
 
             return res.status(200).json({ 
-                redirectToUpdatePassword: true, 
+                redirectToUpdatePassword: true,
+                objectID: user._id, 
                 name: user.name, 
                 gender: user.gender,
                 department: user.dept,
@@ -57,6 +59,7 @@ router.post('/login-auth', async (req, res) => {
         }
 
         // Set session variables if necessary (you might need session middleware)
+        req.session.objectID = user._id;
         req.session.username = user.username;
         req.session.user_role = user.role;
         req.session.name = user.name;
@@ -64,7 +67,7 @@ router.post('/login-auth', async (req, res) => {
         req.session.event = user.event;
         req.session.gender = user.gender;
 
-        return res.status(200).json({ message: 'Login successful', name: user.name, gender: user.gender, department: user.dept, role: user.role });
+        return res.status(200).json({ message: 'Login successful', objectID: user._id, name: user.name, gender: user.gender, department: user.dept, role: user.role });
     } catch (error) {
         console.error('Login Error:', error);
         return res.status(500).json({
@@ -78,6 +81,7 @@ router.get("/check-auth", (req, res) => {
     if (req.session.username) {
         res.json({
             isAuthenticated: true,
+            objectID: req.session.objectID,
             name: req.session.name,
             gender: req.session.gender,
             department: req.session.dept,

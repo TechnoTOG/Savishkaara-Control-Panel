@@ -31,11 +31,10 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
         color: "#fff",
         paddingTop: "20px",
-        transition: "width 0.6s ease",
         position: "fixed",
         overflowX: "hidden",
         borderRight: "1px solid #444",
-        transition: "background-color 0.3s ease, color 0.3s ease",
+        transition: "width 0.6s ease, background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Box
