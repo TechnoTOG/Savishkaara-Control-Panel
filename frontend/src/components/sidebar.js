@@ -3,10 +3,12 @@ import { Box, List, ListItemButton, ListItemIcon, ListItemText, Collapse, Toolti
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 const Sidebar = ({ isMinimized, darkMode }) => {
   const [openEvents, setOpenEvents] = React.useState(false);
   const [openUsers, setOpenUsers] = React.useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleEventsClick = () => setOpenEvents(!openEvents);
   const handleUsersClick = () => setOpenUsers(!openUsers);
@@ -22,6 +24,11 @@ const Sidebar = ({ isMinimized, darkMode }) => {
 
   // Get the allowed options for the current user role
   const allowedOptions = rolePermissions[userRole] || [];
+
+  // Navigation handlers
+  const navigateTo = (path) => {
+    navigate(path); // Navigate to the specified route
+  };
 
   return (
     <Box
@@ -53,6 +60,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Dashboard") && (
           <Tooltip title="Dashboard" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
+              onClick={() => navigateTo("/")} // Navigate to the dashboard
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -73,6 +81,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("vEvents") && (
           <Tooltip title="Events" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
+              onClick={() => navigateTo("/events")} // Navigate to the events page
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -112,10 +121,16 @@ const Sidebar = ({ isMinimized, darkMode }) => {
             </Tooltip>
             <Collapse in={openEvents && !isMinimized} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+                <ListItemButton
+                  onClick={() => navigateTo("/events/overview")} // Navigate to events overview
+                  sx={{ pl: 6, color: "#aaa" }}
+                >
                   <ListItemText primary="Overview" />
                 </ListItemButton>
-                <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+                <ListItemButton
+                  onClick={() => navigateTo("/events/add")} // Navigate to add event
+                  sx={{ pl: 6, color: "#aaa" }}
+                >
                   <ListItemText primary="Add Event" />
                 </ListItemButton>
               </List>
@@ -127,6 +142,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Samridhi") && (
           <Tooltip title="Samridhi" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
+              onClick={() => navigateTo("/samridhi")} // Navigate to samridhi
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -166,10 +182,16 @@ const Sidebar = ({ isMinimized, darkMode }) => {
             </Tooltip>
             <Collapse in={openUsers && !isMinimized} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+                <ListItemButton
+                  onClick={() => navigateTo("/users/overview")} // Navigate to users overview
+                  sx={{ pl: 6, color: "#aaa" }}
+                >
                   <ListItemText primary="Overview" />
                 </ListItemButton>
-                <ListItemButton sx={{ pl: 6, color: "#aaa" }}>
+                <ListItemButton
+                  onClick={() => navigateTo("/users/add")} // Navigate to add user
+                  sx={{ pl: 6, color: "#aaa" }}
+                >
                   <ListItemText primary="Add User" />
                 </ListItemButton>
               </List>
@@ -181,6 +203,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Server") && (
           <Tooltip title="Server" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
+              onClick={() => navigateTo("/server")} // Navigate to server
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -201,6 +224,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("My Event") && (
           <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
+              onClick={() => navigateTo("/my-event")} // Navigate to my event
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
