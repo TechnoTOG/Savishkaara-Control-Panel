@@ -3,7 +3,7 @@ import Sidebar from "./sidebar";
 import Header from "./header";
 import "../css/dashboard.css"; // Ensure this CSS file contains styles for dark mode and layout
 
-const Layout = ({ children }) => {
+const Layout = ({ children, title }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
@@ -91,6 +91,7 @@ const Layout = ({ children }) => {
           toggleSidebar={toggleSidebar}
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
+          title={title}
         />
 
         {/* Page Content */}

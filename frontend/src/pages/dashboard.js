@@ -54,7 +54,7 @@ const Dashboard = () => {
   }, [name, objID, navigate]);
 
   return (
-    <Layout>
+    <Layout title="Dashboard">
       {/* Welcome Message */}
       <div style={{ marginTop: "30px", marginLeft: "20px" }}>
         <BlurText

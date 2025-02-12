@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import "../css/header.css";
 
-const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
+const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   const name = Cookies.get("userName");
   const gender = Cookies.get("gender");
   const department = Cookies.get("dept");
@@ -19,7 +19,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
           className="hamburger-menu" 
           onClick={toggleSidebar} 
         />
-        <span className="navbar-title">Dashboard</span>
+        <span className="navbar-title">{title}</span>
       </div>
 
       <div className="navbar-profile">

@@ -3,7 +3,7 @@ import Layout from "../components/layout";
 
 const Samridhi = () => {
   return (
-    <Layout>
+    <Layout title="Samridhi">
       <div>
         <h1>Events</h1>
         <p>This is the main events page.</p>
