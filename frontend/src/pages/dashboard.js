@@ -6,7 +6,7 @@ import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
 import io from "socket.io-client";
-import Layout from "../components/layout"; // Import the Layout component
+import Layout from "../layouts/layout";// Import the Layout component
 
 const Dashboard = () => {
   const navigate = useNavigate();

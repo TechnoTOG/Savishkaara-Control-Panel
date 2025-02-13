@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./sidebar";
-import Header from "./header";
+import Sidebar from "../components/sidebar";
+import Header from "../components/header";
 import "../css/dashboard.css"; // Ensure this CSS file contains styles for dark mode and layout
 
 const Layout = ({ children, title }) => {
