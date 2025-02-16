@@ -121,8 +121,8 @@ const Dashboard = () => {
           }}
         />
         {/* Header with dark mode props */}
-        <Header 
-          toggleSidebar={toggleSidebar} 
+        <Header
+          toggleSidebar={toggleSidebar}
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
         />
@@ -143,88 +143,107 @@ const Dashboard = () => {
         <div style={{ marginLeft: "20px", width: "90%" }}>
           {/* Dashboard Content */}
           <Grid container spacing={3}>
-            {/* First Column (2 rows) */}
-            <Grid item xs={12} md={4}>
-              <Grid container spacing={3} direction="column">
-                {/* First Row in First Column */}
-                <Grid item>
-                  <MetricCard 
-                    title="Total Customers" 
-                    value={102890}
-                    darkMode={darkMode}
-                  />
-                </Grid>
-                {/* Second Row in First Column */}
-                <Grid item>
-                  <MetricCard 
-                    title="Active Users" 
-                    value={2456}
-                    darkMode={darkMode}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            {/* Second Column (3 rows) */}
-            <Grid item xs={12} md={4}>
-              <Grid container spacing={3} direction="column">
-                {/* First Row in Second Column (2 columns) */}
-                <Grid item>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <MetricCard 
-                        title="Total Revenue" 
-                        value={56562}
-                        darkMode={darkMode}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <MetricCard 
-                        title="Conversion Rate" 
-                        value={0.156}
-                        formatter={(val) => `${(val * 100).toFixed(1)}%`}
-                        darkMode={darkMode}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-                {/* Second Row in Second Column (2 columns) */}
-                <Grid item>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <VisualizationCard
-                        title="Sales Overview"
-                        chartType="line"
-                        darkMode={darkMode}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <VisualizationCard
-                        title="User Distribution"
-                        chartType="bar"
-                        darkMode={darkMode}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-                {/* Third Row in Second Column (1 column) */}
-                <Grid item>
-                  <VisualizationCard
-                    title="Revenue by Category"
-                    chartType="pie"
-                    darkMode={darkMode}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            {/* Third Column (1 row) */}
-            <Grid item xs={12} md={4}>
-              <VisualizationCard
-                title="Monthly Performance"
-                chartType="area"
-                darkMode={darkMode}
-              />
-            </Grid>
+  {/* First Column (2 rows) */}
+  <Grid item xs={12} md={3.3}>
+    <Grid container spacing={3} direction="column">
+      {/* First Row in First Column */}
+      <Grid item>
+        <MetricCard
+          title="Total Customers"
+          height="200px"
+          value={102890}
+          width="220px"
+          darkMode={darkMode}
+        />
+      </Grid>
+      {/* Second Row in First Column */}
+      <Grid item>
+        <MetricCard
+          title="Active Users"
+          height="200px"
+          width="220px"
+
+          value={2456}
+          darkMode={darkMode}
+        />
+      </Grid>
+    </Grid>
+  </Grid>
+  {/* Second Column (3 rows) */}
+  <Grid item xs={12} md={7}>
+    <Grid container spacing={3} direction="column">
+      {/* First Row in Second Column (2 columns) */}
+      <Grid item>
+        <Grid container spacing={3}>
+          <Grid item xs={5.1}>
+            <MetricCard
+              title="Total Revenue"
+              width="200px"
+              height="100px"
+              value={56562}
+              darkMode={darkMode}
+            />
           </Grid>
+          <Grid item xs={5.1}>
+            <MetricCard
+              title="Conversion Rate"
+              width="200px"
+              height="100px"
+              value={0.156}
+              formatter={(val) => `${(val * 100).toFixed(1)}%`}
+              darkMode={darkMode}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+      {/* Second Row in Second Column (2 columns) */}
+      <Grid item>
+        <Grid container spacing={3}>
+          <Grid item xs={5.1}>
+            <VisualizationCard
+              title="Sales Overview"
+              chartType="line"
+               width="240px"
+              height="130px"
+              darkMode={darkMode}
+            />
+          </Grid>
+          <Grid item xs={5.1}>
+            <VisualizationCard
+              title="User Distribution"
+              chartType="bar"
+              width="240px"
+              height="130px"
+              darkMode={darkMode}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+      {/* Third Row in Second Column (1 column) */}
+      <Grid item>
+        <VisualizationCard
+          title="Revenue by Category"
+          chartType="pie"
+           width="500px"
+              height="180px"
+          darkMode={darkMode}
+          
+        />
+      </Grid>
+    </Grid>
+  </Grid>
+  {/* Third Column (1 row) */}
+  <Grid item xs={10} md={4}>
+    <VisualizationCard
+      title="Monthly Performance"
+      chartType="area"
+      width="250px"
+      darkMode={darkMode}
+      height="500px" 
+       // Set desired height here
+    />
+  </Grid>
+</Grid>
         </div>
       </div>
     </div>

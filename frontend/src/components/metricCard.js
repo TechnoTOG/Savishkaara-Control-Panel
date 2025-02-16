@@ -2,13 +2,15 @@ import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import CountUp from "react-countup"; // Import CountUp
 
-const MetricCard = ({ title, value, darkMode }) => (
+const MetricCard = ({ title, value, darkMode, height,width }) => (
   <Card
     sx={{
       backgroundColor: darkMode ? "#1b1c1e" : "#f7f7f7",  // Light background color
       borderRadius: 2,  // Rounded corners
       boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",  // Subtle shadow
       padding: "20px",
+      height: height,
+      width:width,
       transition: "all 0.3s ease",  // Smooth transition
       "&:hover": {
         boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",  // Bigger shadow on hover
