@@ -77,15 +77,14 @@ const Dashboard = () => {
       <div style={{ marginLeft: "20px", width: "90%" }}>
         <Grid container spacing={3}>
           {/* First Column (2 rows) */}
-          <Grid item xs={12} md={3.3}>
+          <Grid item xs={12} md={3}>
             <Grid container spacing={3} direction="column">
               <Grid item>
                 <MetricCard
                   title="Total Customers"
                   height="200px"
                   value={102890}
-                  width="220px"
-
+                  width="200px"
                 />
 
               </Grid>
@@ -93,7 +92,7 @@ const Dashboard = () => {
                 <MetricCard
                   title="Active Users"
                   height="200px"
-                  width="220px"
+                  width="200px"
 
                   value={2456}
 
@@ -109,7 +108,7 @@ const Dashboard = () => {
               {/* First Row in Second Column (2 columns) */}
               <Grid item>
                 <Grid container spacing={3}>
-                  <Grid item xs={5.1}>
+                  <Grid item xs={5}>
                     <MetricCard
                       title="Total Revenue"
                       width="200px"
@@ -117,7 +116,7 @@ const Dashboard = () => {
                       value={56562}
                     />
                   </Grid>
-                  <Grid item xs={5.1}>
+                  <Grid item xs={5}>
                     <MetricCard
                       title="Conversion Rate"
                       width="200px"
@@ -131,7 +130,7 @@ const Dashboard = () => {
               {/* Second Row in Second Column (2 columns) */}
               <Grid item>
                 <Grid container spacing={3}>
-                  <Grid item xs={5.1}>
+                  <Grid item xs={5}>
                     <VisualizationCard
                       title="Sales Overview"
                       chartType="line"
@@ -139,7 +138,7 @@ const Dashboard = () => {
                       height="130px"
                     />
                   </Grid>
-                  <Grid item xs={5.1}>
+                  <Grid item xs={5}>
                     <VisualizationCard
                       title="User Distribution"
                       chartType="bar"
