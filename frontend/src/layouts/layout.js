@@ -3,7 +3,7 @@ import Sidebar from "../components/sidebar";
 import Header from "../components/header";
 import "../css/dashboard.css"; // Ensure this CSS file contains styles for dark mode and layout
 
-const Layout = ({ children, title }) => {
+const Layout = ({ children, title, activePage }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
@@ -58,7 +58,7 @@ const Layout = ({ children, title }) => {
   return (
     <div style={{ display: "flex" }}>
       {/* Sidebar */}
-      <Sidebar isMinimized={isMinimized} darkMode={darkMode} />
+      <Sidebar isMinimized={isMinimized} darkMode={darkMode} activePage={activePage} />
 
       {/* Main Content */}
       <div

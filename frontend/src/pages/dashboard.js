@@ -6,6 +6,7 @@ import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
 import { WebSocketContext } from "../App"; // Import WebSocket Context
+import Room from "../utils/roomManager"
 import Layout from "../layouts/layout"; // Import the Layout component
 
 const Dashboard = () => {
@@ -20,7 +21,7 @@ const Dashboard = () => {
 
     if (socket && !hasJoinedRoom) {
       // Join the "dashboard" room with authentication
-      socket.emit("join-room", { roomName: "dashboard", objId: objID });
+      Room.join(socket, "dashboard", objID);
 
       // Mark the room as joined
       hasJoinedRoom = true;
@@ -46,13 +47,16 @@ const Dashboard = () => {
     // Cleanup on unmount
     return () => {
       if (hasJoinedRoom) {
-        socket.emit("leave-room", "dashboard");
+        socket.emit("leave-room", "dashboard"); 
       }
+      socket.off("message");
+      socket.off("redirect");
+      socket.off("error");
     };
   }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
 
   return (
-    <Layout title="Dashboard">
+    <Layout title="Dashboard" activePage="dashboard">
       {/* Welcome Message */}
       <div style={{ marginTop: "30px", marginLeft: "20px" }}>
         <BlurText
