@@ -34,8 +34,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
         />
         <img 
           src={darkMode ? 
-            "icons\\notifications_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
-            "icons\\notifications_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
+            "\\icons\\notifications_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
+            "\\icons\\notifications_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
           } 
           alt="Notifications" />
         <img src={gender === "female" ? "/profile/female2.png" : "/profile/male_avatar.png"} alt="User" className="profile-pic" />
