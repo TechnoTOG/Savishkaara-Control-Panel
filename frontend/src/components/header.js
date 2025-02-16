@@ -12,8 +12,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
       <div className="navbar-left">
         <img 
           src={darkMode ? 
-            "\\icons\\menu_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
-            "\\icons\\menu_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
+            "/icons/menu_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
+            "/icons/menu_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
           } 
           alt="Menu" 
           className="hamburger-menu" 
@@ -25,8 +25,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
       <div className="navbar-profile">
         <img 
           src={darkMode ? 
-            "\\icons\\light_mode_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
-            "\\icons\\dark_mode_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
+            "/icons/light_mode_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
+            "/icons/dark_mode_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
           } 
           alt={darkMode ? "Dark Mode" : "Light Mode"} 
           onClick={toggleDarkMode}
@@ -34,8 +34,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
         />
         <img 
           src={darkMode ? 
-            "\\icons\\notifications_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
-            "\\icons\\notifications_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
+            "/icons/notifications_24dp_A2A4A6_FILL0_wght400_GRAD0_opsz24.svg" : 
+            "/icons/notifications_24dp_44464B_FILL0_wght400_GRAD0_opsz24.svg"
           } 
           alt="Notifications" />
         <img src={gender === "female" ? "/profile/female2.png" : "/profile/male_avatar.png"} alt="User" className="profile-pic" />
