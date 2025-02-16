@@ -1,57 +1,55 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
 import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
-import io from "socket.io-client";
-import Layout from "../layouts/layout";// Import the Layout component
+import { WebSocketContext } from "../App"; // Import WebSocket Context
+import Layout from "../layouts/layout"; // Import the Layout component
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const socket = useContext(WebSocketContext); // Access global WebSocket instance
   const name = Cookies.get("userName") || "Guest";
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null);
+  const [socketError, setSocketError] = useState(null); // State to track errors
 
-  // Initialize Socket.IO connection
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_API_URL || "http://localhost:5000", {
-      auth: {
-        userName: name,
-        objId: objID,
-      },
-    });
+    let hasJoinedRoom = false; // Local variable to track room join status
 
-    const joinRoom = () => {
-      const roomName = "dashboard";
-      socket.emit("join-room", roomName);
-    };
+    if (socket && !hasJoinedRoom) {
+      // Join the "dashboard" room with authentication
+      socket.emit("join-room", { roomName: "dashboard", objId: objID });
 
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-      joinRoom();
-    });
+      // Mark the room as joined
+      hasJoinedRoom = true;
 
-    socket.on("redirect", (data) => {
-      console.log("Redirecting to:", data.url);
-      navigate(data.url);
-    });
+      // Handle server messages
+      socket.on("message", (data) => {
+        console.log("Message received:", data);
+      });
 
-    socket.on("connect_error", (error) => {
-      console.error("Socket.IO connection error:", error.message);
-      setSocketError(error.message);
-      if (error.message.includes("Unauthorized")) {
-        navigate("/403");
-      }
-    });
+      // Handle redirection errors
+      socket.on("redirect", (data) => {
+        console.log("Redirecting to:", data.url);
+        navigate(data.url);
+      });
 
+      // Handle socket errors
+      socket.on("error", (error) => {
+        console.error("Socket error:", error.message);
+        setSocketError(error.message); // Update the error state
+      });
+    }
+
+    // Cleanup on unmount
     return () => {
-      const roomName = "dashboard";
-      socket.emit("leave-room", roomName);
-      socket.disconnect();
+      if (hasJoinedRoom) {
+        socket.emit("leave-room", "dashboard");
+      }
     };
-  }, [name, objID, navigate]);
+  }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
 
   return (
     <Layout title="Dashboard">
@@ -66,7 +64,6 @@ const Dashboard = () => {
           style={{ color: "#bec0bf" }}
         />
       </div>
-
       <div style={{ height: "10px" }}></div>
 
       {/* Display Server Message or Error */}

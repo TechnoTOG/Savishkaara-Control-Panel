@@ -1,33 +1,44 @@
-// src/context/SocketContext.js
-import React, { createContext, useContext, useEffect, useState } from "react";
+// utils/socketConnector.js
 import io from "socket.io-client";
 
-const SocketContext = createContext();
+// Function to initialize and return the WebSocket instance
+export const createSocketConnection = () => {
+  const socket = io(process.env.REACT_APP_API_URL || "http://localhost:5000", {
+    reconnection: true, // Enable automatic reconnection
+    reconnectionAttempts: 5, // Maximum number of reconnection attempts
+    reconnectionDelay: 1000, // Delay between reconnection attempts (in milliseconds)
+    timeout: 5000, // Timeout for initial connection attempt (in milliseconds)
+  });
 
-export const useSocket = () => {
-  return useContext(SocketContext);
-};
+  // Event listener for successful connection
+  socket.on("connect", () => {
+    console.log("WebSocket connected:", socket.id);
+  });
 
-export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+  // Event listener for disconnection
+  socket.on("disconnect", () => {
+    console.log("WebSocket disconnected");
+  });
 
-  useEffect(() => {
-    const newSocket = io(process.env.REACT_APP_API_URL || "http://localhost:5000");
+  // Event listener for connection errors
+  socket.on("connect_error", (error) => {
+    console.error("WebSocket connection error:", error.message);
+  });
 
-    newSocket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-    });
+  // Event listener for failed reconnection attempts
+  socket.on("reconnect_failed", () => {
+    console.error("WebSocket failed to reconnect after maximum attempts");
+  });
 
-    newSocket.on("connect_error", (error) => {
-      console.error("Socket.IO connection error:", error.message);
-    });
+  // Event listener for reconnection attempts
+  socket.on("reconnect_attempt", (attemptNumber) => {
+    console.log(`WebSocket attempting to reconnect (Attempt ${attemptNumber})...`);
+  });
 
-    setSocket(newSocket);
+  // Event listener for successful reconnection
+  socket.on("reconnect", (attemptNumber) => {
+    console.log(`WebSocket successfully reconnected on attempt ${attemptNumber}`);
+  });
 
-    return () => {
-      newSocket.disconnect(); // Disconnect only when the app unmounts
-    };
-  }, []);
-
-  return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
+  return socket;
 };
