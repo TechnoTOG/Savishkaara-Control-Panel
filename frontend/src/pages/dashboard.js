@@ -157,13 +157,10 @@ const Dashboard = () => {
                   chartType="pie"
                   width="500px"
                   height="180px"
-
-
                 />
               </Grid>
             </Grid>
           </Grid>
-
 
           {/* Third Column (1 row) */}
           <Grid item xs={10} md={4}>
