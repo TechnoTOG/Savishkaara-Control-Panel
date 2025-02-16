@@ -42,13 +42,12 @@ const Login = () => {
       console.log(loginData);
       if (response.ok) {
         const result = await response.json();
-
-        console.log(result.role);
   
         // Calculate the expiration time (6 hours from now)
         const expirationTime = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
 
         // Store user data in cookies with 6-hour expiration
+        Cookies.set("objId", result.objectID, { expires: expirationTime });
         Cookies.set("userName", result.name, { expires: expirationTime });
         Cookies.set("gender", result.gender, { expires: expirationTime });
         Cookies.set("dept", result.department, { expires: expirationTime });
