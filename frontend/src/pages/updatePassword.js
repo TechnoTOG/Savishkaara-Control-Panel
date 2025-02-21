@@ -23,6 +23,10 @@ const ChangePassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
   };
@@ -44,7 +48,7 @@ const ChangePassword = () => {
     }
 
     try {
-      const response = await fetch("/update-password", {
+      const response = await fetch(`${apiBaseURL}/update-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +56,9 @@ const ChangePassword = () => {
         body: JSON.stringify({
           password: passwordData.newPassword,
         }),
-      });
+      }).then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.error("Error:", error));
 
       if (response.ok) {
         const result = await response.json();

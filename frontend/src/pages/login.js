@@ -17,12 +17,13 @@ const Login = () => {
     username: "",
     password: "",
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate(); // Initialize the navigate function
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -31,18 +32,26 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
-      const response = await fetch("/login-auth", {
+      const response = await fetch(`${apiBaseURL}/login-auth`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(loginData),
+        credentials: "include", // Include cookies for authenticated requests
       });
-      console.log(loginData);
+
+      // Parse the response as JSON
+      const result = await response.json();
+
+      // Log the raw response and parsed data for debugging
+      console.log("Raw response:", response);
+      console.log("Parsed data:", result);
+
+      // Handle success or failure based on the response status
       if (response.ok) {
-        const result = await response.json();
-  
         // Calculate the expiration time (6 hours from now)
         const expirationTime = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
 
@@ -52,15 +61,14 @@ const Login = () => {
         Cookies.set("gender", result.gender, { expires: expirationTime });
         Cookies.set("dept", result.department, { expires: expirationTime });
         Cookies.set("role", result.role, { expires: expirationTime });
-  
+
         if (result.redirectToUpdatePassword) {
           navigate("/update-password"); // Redirect to update-password page if condition met
         } else {
           navigate("/"); // Redirect to dashboard after successful login
         }
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Login failed. Please try again.");
+        setError(result.error || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -98,7 +106,6 @@ const Login = () => {
           <Typography variant="h4" align="center" gutterBottom>
             Login
           </Typography>
-
           {error && (
             <Typography
               variant="body1"
@@ -109,7 +116,6 @@ const Login = () => {
               {error}
             </Typography>
           )}
-
           <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <TextField

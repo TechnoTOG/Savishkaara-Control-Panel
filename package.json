@@ -4,6 +4,7 @@
   },
   "scripts": {
   "start": "concurrently \"npm run server\" \"npm run client\"",
+  "test": "concurrently \"npm run server\" \"cd frontend && powershell -Command \\\"$env:DANGEROUSLY_DISABLE_HOST_CHECK='true'; npm start\\\"\"",
   "update": "concurrently \"npm run update-server\" \"npm run update-client\"",
   "server": "cd backend && npm run demo",
   "client": "cd frontend && npm start",
