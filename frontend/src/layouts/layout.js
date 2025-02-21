@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
-import "../css/dashboard.css"; // Ensure this CSS file contains styles for dark mode and layout
+import "../css/dashboard.css"; // Ensure dark mode styles are applied
 
 const Layout = ({ children, title }) => {
   const [isMinimized, setIsMinimized] = useState(false);
@@ -67,22 +67,22 @@ const Layout = ({ children, title }) => {
           transition: "margin-left 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease",
           marginLeft: isMinimized ? "80px" : "250px",
           minHeight: "100vh",
-          backgroundColor: "transparent",
+          backgroundColor: darkMode ? "#262729" : "#f0f1f6",
           color: darkMode ? "#ffffff" : "#000000",
-          willChange: "margin-left, color",
+          overflow: "hidden", // Prevents unwanted white background
         }}
       >
-        {/* Background Wrapper */}
+        {/* Background Wrapper - Ensures Full Dark Mode */}
         <div
           style={{
-            position: "absolute",
+            position: "fixed",
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
+            width: "100vw",
+            height: "100vh",
             backgroundColor: darkMode ? "#262729" : "#f0f1f6",
             transition: "background-color 0.3s ease",
-            zIndex: -1,
+            zIndex: -1, // Keeps it behind content
           }}
         />
 
@@ -95,7 +95,9 @@ const Layout = ({ children, title }) => {
         />
 
         {/* Page Content */}
-        {children}
+        <div className="content-container">
+          {children}
+        </div>
       </div>
     </div>
   );
