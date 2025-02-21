@@ -1,12 +1,6 @@
-const { io } = require("../server");
-const mongoose = require('mongoose');
-const mongoConnect = require('../db/mongodb'); // Ensure MongoDB connection
-
-// Define or retrieve the User model
-const User = mongoose.models.User || mongoose.model("User", new mongoose.Schema({}, { collection: "users" }));
-
+// roomupdater.js
+const User = require('../models/User'); // Import the User model
 module.exports = function (io) {
-    // Handle Socket.IO connections
     io.on("connection", (socket) => {
         console.log(`Socket connected: ${socket.id}`);
 
@@ -17,20 +11,18 @@ module.exports = function (io) {
                 if (!user) {
                     return socket.emit("error", { message: "Unauthorized: User not found" });
                 }
-
                 const ROOM_ACCESS = {
                     'super': ['dashboard', 'samridhi', 'server', 'eventso', 'eventsa', 'userso', 'usersa'],
                     'admin': ['dashboard', 'samridhi', 'vevents'],
                     'coor': ['dashboard', 'myevent']
                 };
-
                 const allowedRooms = ROOM_ACCESS[user.role];
                 if (allowedRooms && allowedRooms.includes(roomName)) {
                     socket.join(roomName);
                     socket.user = user; // Attach user object to the socket for later use
                     console.log({
-                        event: 'user_joined_room',
-                        userId: user._id.toString(),
+                        event   : 'user_joined_room',
+                        userId  : user._id.toString(),
                         userName: user.name,
                         socketId: socket.id,
                         roomName,

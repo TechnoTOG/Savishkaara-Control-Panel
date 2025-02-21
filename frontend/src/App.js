@@ -19,13 +19,24 @@ import ForbiddenPage from "./pages/forbidden"; // Import the 403 page component
 
 // Function to check authentication status
 const checkAuth = async () => {
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+    
   try {
-    const response = await fetch("/check-auth", {
+    const response = await fetch(`${apiBaseURL}/check-auth`, {
       credentials: "include", // Important to send cookies
     });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch authentication status");
+    }
+
     const data = await response.json();
+    console.log("Auth check response:", data); // Log for debugging
     return data.isAuthenticated;
   } catch (error) {
+    console.error("Authentication check failed:", error);
     return false;
   }
 };

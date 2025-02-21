@@ -4,11 +4,15 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { WebSocketContext } from "../App"; // Import WebSocket Context
+import Room from "../utils/roomManager"
 
-const Sidebar = ({ isMinimized, darkMode }) => {
+const Sidebar = ({ isMinimized, darkMode, activePage }) => {
   const [openEvents, setOpenEvents] = React.useState(false);
   const [openUsers, setOpenUsers] = React.useState(false);
+  const [leaveCount, setLeaveCount] = React.useState(0); // Persist leaveCount across renders
   const navigate = useNavigate(); // Initialize useNavigate
+  const socket = React.useContext(WebSocketContext); // Access WebSocket instance
 
   const handleEventsClick = () => setOpenEvents(!openEvents);
   const handleUsersClick = () => setOpenUsers(!openUsers);
@@ -25,9 +29,15 @@ const Sidebar = ({ isMinimized, darkMode }) => {
   // Get the allowed options for the current user role
   const allowedOptions = rolePermissions[userRole] || [];
 
-  // Navigation handlers
-  const navigateTo = (path) => {
-    navigate(path); // Navigate to the specified route
+  // Navigation handlers with room leave logic
+  const navigateTo = (path, newRoom) => {
+    if (socket && leaveCount < 1 && activePage !== newRoom) {
+      // Emit leave-room event for the current room
+      Room.leave(socket, activePage);
+      setLeaveCount((prevCount) => prevCount + 1); // Increment leaveCount
+    }
+    // Navigate to the specified route
+    navigate(path);
   };
 
   return (
@@ -60,7 +70,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Dashboard") && (
           <Tooltip title="Dashboard" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/")} // Navigate to the dashboard
+              onClick={() => navigateTo("/", "dashboard")} // Navigate to the dashboard
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -81,7 +91,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("vEvents") && (
           <Tooltip title="Events" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/events")} // Navigate to the events page
+              onClick={() => navigateTo("/events", "vevents")} // Navigate to the events page
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -122,13 +132,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
             <Collapse in={openEvents && !isMinimized} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 <ListItemButton
-                  onClick={() => navigateTo("/events/overview")} // Navigate to events overview
+                  onClick={() => navigateTo("/events/overview", "eventso")} // Navigate to events overview
                   sx={{ pl: 6, color: "#aaa" }}
                 >
                   <ListItemText primary="Overview" />
                 </ListItemButton>
                 <ListItemButton
-                  onClick={() => navigateTo("/events/add")} // Navigate to add event
+                  onClick={() => navigateTo("/events/add", "eventsa")} // Navigate to add event
                   sx={{ pl: 6, color: "#aaa" }}
                 >
                   <ListItemText primary="Add Event" />
@@ -142,7 +152,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Samridhi") && (
           <Tooltip title="Samridhi" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/samridhi")} // Navigate to samridhi
+              onClick={() => navigateTo("/samridhi", "samridhi")} // Navigate to samridhi
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -183,13 +193,13 @@ const Sidebar = ({ isMinimized, darkMode }) => {
             <Collapse in={openUsers && !isMinimized} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 <ListItemButton
-                  onClick={() => navigateTo("/users/overview")} // Navigate to users overview
+                  onClick={() => navigateTo("/users/overview", "userso")} // Navigate to users overview
                   sx={{ pl: 6, color: "#aaa" }}
                 >
                   <ListItemText primary="Overview" />
                 </ListItemButton>
                 <ListItemButton
-                  onClick={() => navigateTo("/users/add")} // Navigate to add user
+                  onClick={() => navigateTo("/users/add", "usersa")} // Navigate to add user
                   sx={{ pl: 6, color: "#aaa" }}
                 >
                   <ListItemText primary="Add User" />
@@ -203,7 +213,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("Server") && (
           <Tooltip title="Server" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/server")} // Navigate to server
+              onClick={() => navigateTo("/server", "server")} // Navigate to server
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -224,7 +234,7 @@ const Sidebar = ({ isMinimized, darkMode }) => {
         {allowedOptions.includes("My Event") && (
           <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/my-event")} // Navigate to my event
+              onClick={() => navigateTo("/my-event", "myevent")} // Navigate to my event
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",

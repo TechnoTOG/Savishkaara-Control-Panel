@@ -2,16 +2,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 16px; /* Reduced padding for a more compact look */
   background-color: #ffffff;
   color: #44464b;
   border-bottom: 1px solid #fff;
+  height: 45px; /* Reduced height */
 }
 
 .navbar-left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px; /* Reduced gap between hamburger menu and title */
 }
 
 .hamburger-menu {
@@ -28,7 +29,7 @@
 .navbar-profile {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* Reduced gap between icons and profile section */
 }
 
 .profile-pic {

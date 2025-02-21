@@ -7,6 +7,7 @@ const cors = require("cors"); // Import CORS middleware
 const https = require("https"); // Import HTTPS module
 const http = require("http"); // Import HTTP module
 const mongoConnect = require("./db/mongodb"); // Import MongoDB connection
+const path = require("path");
 
 // Initialize app
 const app = express();
@@ -15,42 +16,73 @@ const PORT = process.env.PORT || 5000;
 // Generate a secure secret for session signing
 const sessionSecret = crypto.randomBytes(64).toString("hex");
 
+// Force HTTPS redirect (Only if using Cloudflare Full mode)
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+});
+
 // Middleware for sessions
 app.use(
   session({
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
+    name: "pookie",
     cookie: {
       maxAge: 1000 * 60 * 60 * 6, // 6 hour expiration
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // Ensure cookies are only sent over HTTPS in production
       httpOnly: true,
     },
   })
 );
 
+// Import routes
 const AuthenticationRoutes = require("./routes/auth"); // Import authentication routes
-const RoomUpdaterRoutes = require("./routes/roomUpdater");
 const RealTimeRoutes = require("./routes/realTime");
 const VerificationRoutes = require("./routes/verify");
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Define allowed origins
+const allowedOrigins = [
+  "https://testsavi.amritaiedc.site",
+  "http://localhost:5000",
+];
 
+// Configure CORS dynamically
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g., mobile apps, Postman)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in the allowed list
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+        return callback(new Error(msg), false);
+      }
+
+      // Allow the request
+      return callback(null, true);
+    },
+    methods: ["GET", "POST"],
+    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
+  })
+);
+
+// Middleware
+app.use(express.json());
 app.use("/", AuthenticationRoutes);
-app.use("/", RoomUpdaterRoutes);
 app.use("/", RealTimeRoutes);
 app.use("/", VerificationRoutes);
 
 // Fetch public IP
 https.get("https://api.ipify.org", (res) => {
   let data = "";
-
   res.on("data", (chunk) => {
     data += chunk;
   });
-
   res.on("end", () => {
     console.log("Your public IP address is: " + data);
   });
@@ -61,23 +93,36 @@ https.get("https://api.ipify.org", (res) => {
 // MongoDB connection
 mongoConnect();
 
-// Server test route
-app.get('/', (req, res) => {
-  res.send('TechFest Admin Panel API is running...');
-});
-
 // Create HTTP server using Express
 const server = http.createServer(app);
 
-// Create Socket.io server
+// Configure Socket.io with dynamic CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === "production" ? "https://your-production-domain.com" : "http://localhost:3000", // Allow localhost:3000 in development,
-    methods: ["GET", "POST"]
-  }
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g., mobile apps, Postman)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in the allowed list
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+        return callback(new Error(msg), false);
+      }
+
+      // Allow the request
+      return callback(null, true);
+    },
+    methods: ["GET", "POST"],
+    credentials: true, // Enable credentials
+  },
 });
 
-RoomUpdaterRoutes(io);
+// Export the `io` object
+module.exports.io = io;
+
+// Initialize room updater
+const roomUpdater = require("./routes/roomUpdater");
+roomUpdater(io);
 
 // Start the server
 server.listen(PORT, () => {

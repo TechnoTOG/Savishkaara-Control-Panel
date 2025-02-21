@@ -1,28 +1,31 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Grid, Typography, useMediaQuery } from "@mui/material";
 import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App";
-import Layout from "../layouts/layout";
+import { WebSocketContext } from "../App"; // Import WebSocket Context
+import Room from "../utils/roomManager";
+import Layout from "../layouts/layout"; // Import the Layout component
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const socket = useContext(WebSocketContext);
   const name = Cookies.get("userName") || "Guest";
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null);
+  const [socketError, setSocketError] = useState(null); // State to track errors
 
-  // Media queries for responsiveness
-  const isMobile = useMediaQuery("(max-width:600px)"); // Small screen (xs)
-  const isTablet = useMediaQuery("(max-width:900px)"); // Medium screen (sm)
+  // Refs to access the sidebar and header dimensions
+  const sidebarRef = useRef(null);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     let hasJoinedRoom = false;
     if (socket && !hasJoinedRoom) {
-      socket.emit("join-room", { roomName: "dashboard", objId: objID });
+      // Join the "dashboard" room with authentication
+      Room.join(socket, "dashboard", objID);
+      // Mark the room as joined
       hasJoinedRoom = true;
       socket.on("message", (data) => console.log("Message received:", data));
       socket.on("redirect", (data) => navigate(data.url));
@@ -35,11 +38,50 @@ const Dashboard = () => {
       if (hasJoinedRoom) {
         socket.emit("leave-room", "dashboard");
       }
+      socket.off("message");
+      socket.off("redirect");
+      socket.off("error");
     };
-  }, [socket, objID, navigate]);
+  }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
+
+  // Calculate remaining screen space after sidebar and header
+  useEffect(() => {
+    const calculateRemainingSpace = () => {
+      const sidebarHeight = sidebarRef.current?.offsetHeight || 0;
+      const sidebarWidth = sidebarRef.current?.offsetWidth || 0;
+      const headerHeight = headerRef.current?.offsetHeight || 0;
+
+      const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
+
+      const remainingHeight = windowHeight - headerHeight;
+      const remainingWidth = windowWidth - sidebarWidth;
+
+      console.log("Remaining Screen Space:");
+      console.log(`Height: ${remainingHeight}px`);
+      console.log(`Width: ${remainingWidth}px`);
+    };
+
+    // Initial calculation
+    calculateRemainingSpace();
+
+    // Recalculate on window resize
+    window.addEventListener("resize", calculateRemainingSpace);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener("resize", calculateRemainingSpace);
+    };
+  }, []);
 
   return (
-    <Layout title="Dashboard" activePage="dashboard">
+    <Layout
+      title="Dashboard"
+      activePage="dashboard"
+      sidebarRef={sidebarRef} // Pass ref to Layout for sidebar
+      headerRef={headerRef} // Pass ref to Layout for header
+    >
+      {/* Welcome Message */}
       <div style={{ marginTop: "30px", marginLeft: "20px" }}>
         <BlurText text={`Welcome back, ${name}!`} delay={150} animateBy="words" direction="top" style={{ color: "#bec0bf" }} />
       </div>
@@ -58,8 +100,13 @@ const Dashboard = () => {
               <Grid item xs={12}>
                 <MetricCard title="Total Registration" height="245px" value={5000} />
               </Grid>
-              <Grid item xs={12}>
-                <MetricCard title="Active Users" height="245px" value={2456} />
+              <Grid item>
+                <MetricCard
+                  title="Active Users"
+                  height="200px"
+                  width="200px"
+                  value={2456}
+                />
               </Grid>
             </Grid>
           </Grid>
@@ -85,8 +132,13 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6}>
                     <VisualizationCard title="Revenue and Event Day by Day" chartType="line" height="130px" />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <VisualizationCard title="Alerts & Notifications" chartType="bar" height="130px" />
+                  <Grid item xs={5}>
+                    <VisualizationCard
+                      title="User Distribution"
+                      chartType="bar"
+                      width="240px"
+                      height="130px"
+                    />
                   </Grid>
                 </Grid>
               </Grid>
@@ -98,9 +150,15 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Third Column */}
-          <Grid item xs={12} md={4}>
-            <VisualizationCard title="Event Update" chartType="area" height="583px" />
+          {/* Third Column (1 row) */}
+          <Grid item xs={10} md={4}>
+            <VisualizationCard
+              title="Monthly Performance"
+              chartType="area"
+              width="250px"
+              height="500px"
+            // Set desired height here
+            />
           </Grid>
         </Grid>
       </div>
