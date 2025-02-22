@@ -17,12 +17,14 @@ const PORT = process.env.PORT || 5000;
 const sessionSecret = crypto.randomBytes(64).toString("hex");
 
 // Force HTTPS redirect (Only if using Cloudflare Full mode)
-app.use((req, res, next) => {
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect("https://" + req.headers.host + req.url);
-  }
-  next();
-});
+if (process.env.NODE_ENV === "production") {
+  app.use((req, res, next) => {
+    if (req.headers["x-forwarded-proto"] !== "https") {
+      return res.redirect("https://" + req.headers.host + req.url);
+    }
+    next();
+  });
+}
 
 // Middleware for sessions
 app.use(
@@ -47,7 +49,7 @@ const VerificationRoutes = require("./routes/verify");
 // Define allowed origins
 const allowedOrigins = [
   "https://testsavi.amritaiedc.site",
-  "http://localhost:5000",
+  "http://localhost:3000",
 ];
 
 // Configure CORS dynamically

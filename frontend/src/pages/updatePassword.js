@@ -35,37 +35,36 @@ const ChangePassword = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
+  
     // Validate that the passwords match and are at least 6 characters long
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       setError("New passwords do not match.");
       return;
     }
-
     if (passwordData.newPassword.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
-
+  
     try {
       const response = await fetch(`${apiBaseURL}/update-password`, {
         method: "POST",
+        credentials: "include", // Include cookies
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           password: passwordData.newPassword,
         }),
-      }).then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error:", error));
-
+      });
+  
+      // Check if the response is OK (status code 200-299)
       if (response.ok) {
-        const result = await response.json();
+        const result = await response.json(); // Parse the JSON body
         setSuccess(result.message || "Password updated successfully.");
         navigate("/");
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json(); // Parse the JSON body for error details
         setError(errorData.error || "Password update failed. Please try again.");
       }
     } catch (error) {
