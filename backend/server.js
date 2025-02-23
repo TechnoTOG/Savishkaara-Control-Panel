@@ -24,6 +24,13 @@ if (process.env.NODE_ENV === "production") {
     }
     next();
   });
+
+  app.use((req, res, next) => {
+    if (req.headers['X-Allowed-Origin'] !== 'testsavi.amritaiedc.site') {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    next();
+  });
 }
 
 // Middleware for sessions

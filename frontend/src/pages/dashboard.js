@@ -44,6 +44,9 @@ const Dashboard = () => {
     };
   }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
 
+  const isMobile = useMediaQuery("(max-width: 600px)"); // Mobile devices
+  const isTablet = useMediaQuery("(min-width: 601px) and (max-width: 1024px)"); // Tablets
+
   // Calculate remaining screen space after sidebar and header
   useEffect(() => {
     const calculateRemainingSpace = () => {
