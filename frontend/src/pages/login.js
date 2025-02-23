@@ -37,6 +37,7 @@ const Login = () => {
       const response = await fetch(`${apiBaseURL}/login-auth`, {
         method: "POST",
         headers: {
+          'X-Allowed-Origin': 'testsavi.amritaiedc.site',
           "Content-Type": "application/json",
         },
         body: JSON.stringify(loginData),

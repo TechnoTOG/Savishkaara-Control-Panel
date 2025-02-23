@@ -48,6 +48,7 @@ const ChangePassword = () => {
   
     try {
       const response = await fetch(`${apiBaseURL}/update-password`, {
+        headers: { 'X-Allowed-Origin': 'testsavi.amritaiedc.site' },
         method: "POST",
         credentials: "include", // Include cookies
         headers: {

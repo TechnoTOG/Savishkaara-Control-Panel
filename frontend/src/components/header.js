@@ -34,7 +34,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   const fetchNotifications = async () => {
     try {
       // Replace this with your actual API call
-      const response = await fetch(`${apiBaseURL}/notifications`)
+      const response = await fetch(`${apiBaseURL}/notifications`,{headers: {'X-Allowed-Origin': 'testsavi.amritaiedc.site'}})
         .then((response) => response.json())
         .then((data) => console.log(data))
         .catch((error) => console.error("Error:", error));
@@ -50,8 +50,10 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   const markAsRead = async () => {
     try {
       // Replace this with your actual API call
-      await fetch(`${apiBaseURL}/notifications/mark-as-read`, { method: "POST" })
-      .then((response) => response.json())
+      await fetch(`${apiBaseURL}/notifications/mark-as-read`, { 
+        headers:{'X-Allowed-Origin': 'testsavi.amritaiedc.site'}, 
+        method: "POST" 
+      }).then((response) => response.json())
       .then((data) => console.log(data))
       .catch((error) => console.error("Error:", error));
       setUnreadCount(0); // Reset unread count after marking as read

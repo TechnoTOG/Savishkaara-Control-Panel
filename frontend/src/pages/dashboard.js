@@ -45,6 +45,39 @@ const Dashboard = () => {
     };
   }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
 
+  const isMobile = useMediaQuery("(max-width: 600px)"); // Mobile devices
+  const isTablet = useMediaQuery("(min-width: 601px) and (max-width: 1024px)"); // Tablets
+
+  // Calculate remaining screen space after sidebar and header
+  useEffect(() => {
+    const calculateRemainingSpace = () => {
+      const sidebarHeight = sidebarRef.current?.offsetHeight || 0;
+      const sidebarWidth = sidebarRef.current?.offsetWidth || 0;
+      const headerHeight = headerRef.current?.offsetHeight || 0;
+
+      const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
+
+      const remainingHeight = windowHeight - headerHeight;
+      const remainingWidth = windowWidth - sidebarWidth;
+
+      console.log("Remaining Screen Space:");
+      console.log(`Height: ${remainingHeight}px`);
+      console.log(`Width: ${remainingWidth}px`);
+    };
+
+    // Initial calculation
+    calculateRemainingSpace();
+
+    // Recalculate on window resize
+    window.addEventListener("resize", calculateRemainingSpace);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener("resize", calculateRemainingSpace);
+    };
+  }, []);
+
   return (
     <Layout title="Dashboard" activePage="dashboard">
       <div style={{ marginTop: "30px", marginLeft: "20px" }}>

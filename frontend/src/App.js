@@ -25,6 +25,7 @@ const checkAuth = async () => {
     
   try {
     const response = await fetch(`${apiBaseURL}/check-auth`, {
+      headers: {'X-Allowed-Origin': 'testsavi.amritaiedc.site'},
       credentials: "include", // Important to send cookies
     });
 
