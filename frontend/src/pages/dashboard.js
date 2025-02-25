@@ -57,7 +57,7 @@ const Dashboard = () => {
         </Typography>
       )}
 
-      <div style={{ marginLeft: "20px", width: "97%" }}>
+      <div style={{ marginLeft: "20px", marginRight: "20px", width: "auto" }}>
         <Grid container spacing={3}>
           {/* First Column */}
           <Grid item xs={12} md={3}>
