@@ -4,8 +4,8 @@ export const createSocketConnection = () => {
   // Determine the API URL based on the environment
   const apiUrl =
     process.env.NODE_ENV === "production"
-      ? process.env.REACT_APP_PROD_API_URL || "wss://testapi.amritaiedc.site"
-      : process.env.REACT_APP_API_URL || "ws://localhost:5000";
+      ? process.env.REACT_APP_PROD_SOCKET_URL || "wss://testapi.amritaiedc.site"
+      : process.env.REACT_APP_SOCKET_URL || "ws://localhost:5000";
 
   console.log("API URL:", apiUrl);
 
