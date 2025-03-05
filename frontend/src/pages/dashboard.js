@@ -66,7 +66,7 @@ const Dashboard = () => {
                 <MetricCard title="Total Registration" height="35vh" value={5000} />
               </Grid>
               <Grid item>
-                <MetricCard title="Active Users" height="36vh" value={2456} />
+                <MetricCard title="Active Users" height="32vh" value={2456} />
               </Grid>
             </Grid>
           </Grid>
@@ -92,14 +92,14 @@ const Dashboard = () => {
               </Grid>
               {/* Top Events */}
               <Grid item xs={12}>
-                <VisualizationCard title="Top Events" chartType="pie" height="38vh" />
+                <VisualizationCard title="Top Events" chartType="pie" height="34vh" />
               </Grid>
             </Grid>
           </Grid>
 
           {/* Third Column */}
           <Grid item xs={12} md={4}>
-            <VisualizationCard title="Event Update" chartType="area" height="83vh" />
+            <VisualizationCard title="Event Update" chartType="area" height="81vh" />
           </Grid>
         </Grid>
       </div>
