@@ -1,3 +1,4 @@
+/* Base styles for the navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -69,6 +70,36 @@
   color: #8d8c8c;
 }
 
+/* Responsive design - Hide elements on small screens */
+@media (max-width: 768px) {
+  /* Hide dark mode toggle, notifications icon, and profile info */
+
+  .profile-info,
+  .navbar-title {
+    display: none;
+  }
+
+  /* Ensure the hamburger menu and profile icon remain visible */
+  .hamburger-menu,
+  .profile-pic {
+    display: block;
+  }
+
+  /* Adjust spacing for smaller screens */
+  .navbar {
+    padding: 8px 10px; /* Reduce padding further for mobile */
+  }
+
+  .navbar-left {
+    gap: 8px; /* Reduce gap between hamburger menu and title */
+  }
+
+  .navbar-profile {
+    gap: 8px; /* Reduce gap between profile icon and other elements */
+  }
+}
+
+/* Smooth transitions for dark mode and hover effects */
 * {
   transition: background-color 0.3s ease, color 0.3s ease;
 }

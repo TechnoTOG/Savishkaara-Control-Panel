@@ -33,11 +33,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   // Simulate fetching notifications from an API
   const fetchNotifications = async () => {
     try {
-      // Replace this with your actual API call
-      const response = await fetch(`${apiBaseURL}/notifications`,{headers: {'X-Allowed-Origin': 'testsavi.amritaiedc.site'}})
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error("Error:", error));
+      const response = await fetch(`${apiBaseURL}/notifications`, { headers: { 'X-Allowed-Origin': 'testsavi.amritaiedc.site' } });
       const data = await response.json();
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
@@ -49,13 +45,10 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   // Function to mark notifications as read
   const markAsRead = async () => {
     try {
-      // Replace this with your actual API call
       await fetch(`${apiBaseURL}/notifications/mark-as-read`, { 
-        headers:{'X-Allowed-Origin': 'testsavi.amritaiedc.site'}, 
+        headers: { 'X-Allowed-Origin': 'testsavi.amritaiedc.site' }, 
         method: "POST" 
-      }).then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error:", error));
+      });
       setUnreadCount(0); // Reset unread count after marking as read
     } catch (error) {
       console.error("Error marking notifications as read:", error);
@@ -64,9 +57,9 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
 
   // Handle opening the notifications menu
   const handleOpenNotifications = (event) => {
-    event.stopPropagation(); // Prevent event propagation
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
-    fetchNotifications(); // Fetch notifications when the menu opens
+    fetchNotifications();
   };
 
   // Handle closing the notifications menu
@@ -76,7 +69,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
 
   // Handle opening the profile menu
   const handleOpenProfileMenu = (event) => {
-    event.stopPropagation(); // Prevent event propagation
+    event.stopPropagation();
     setProfileMenuAnchorEl(event.currentTarget);
   };
 
@@ -87,20 +80,17 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
 
   // Function to handle logout
   const handleLogout = async () => {
-    // Clear cookies or session data
     Cookies.remove("userName");
     Cookies.remove("gender");
     Cookies.remove("dept");
-    // Call the logout API
-    await axios.post(`${apiBaseURL}/logout`, {}, { withCredentials: true }); // Include credentials for session-based auth
-
-    // Redirect to login page or home page
-    navigate("/login"); // Replace "/login" with your desired route
+    await axios.post(`${apiBaseURL}/logout`, {}, { withCredentials: true });
+    navigate("/login");
   };
 
   return (
     <div className="navbar">
       <div className="navbar-left">
+        {/* Hamburger Menu */}
         <IconButton onClick={toggleSidebar}>
           <img
             src={
@@ -115,8 +105,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
         <span className="navbar-title">{title}</span>
       </div>
       <div className="navbar-profile">
-        {/* Dark Mode Icon */}
-        <IconButton onClick={toggleDarkMode} sx={{ padding: "2px" }}>
+        {/* Dark Mode Icon - Hidden on small screens */}
+        <IconButton onClick={toggleDarkMode} sx={{ padding: "2px" }} className="dark-mode-icon">
           <img
             src={
               darkMode
@@ -128,8 +118,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
           />
         </IconButton>
 
-        {/* Notification Icon */}
-        <IconButton onClick={handleOpenNotifications} sx={{ padding: "2px" }}>
+        {/* Notification Icon - Hidden on small screens */}
+        <IconButton onClick={handleOpenNotifications} sx={{ padding: "2px" }} className="notification-icon">
           <Badge badgeContent={unreadCount} color="error">
             <img
               src={
@@ -264,6 +254,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
           </MenuItem>
         </Menu>
 
+        {/* Profile Info - Hidden on small screens */}
         <div className="profile-info">
           <span className="profile-name">{name ? name : "Guest"}</span>
           <span className="profile-role">{department}</span>
