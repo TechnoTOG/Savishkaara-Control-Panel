@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
-import MetricCard from "../components/metricCard";
+import { ArrowForward } from "@mui/icons-material"; // Import arrow icon
+import { Link } from "react-router-dom"; // Import Link for navigation
+import MetricCard from "../components/metricCard"; // Update this component or create a new one
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
@@ -17,48 +19,51 @@ const EventOverview = () => {
 
   // Manually added events (for now, since there's no backend)
   const [events, setEvents] = useState([
-    { name: "Hackathon 2025", participants: 120 },
-    { name: "Coding Contest", participants: 80 },
-    { name: "AI Workshop", participants: 60 },
-    { name: "Tech Conference", participants: 200 }
+    {
+      name: "Hackathon 2025",
+      venue: "Main Hall",
+      coordinator: "John Doe",
+    },
+    {
+      name: "Coding Contest",
+      venue: "Room 101",
+      coordinator: "Jane Smith",
+    },
+    {
+      name: "AI Workshop",
+      venue: "Room 202",
+      coordinator: "Alice Johnson",
+    },
+    {
+      name: "Tech Conference",
+      venue: "Auditorium",
+      coordinator: "Bob Brown",
+    },
   ]);
 
   useEffect(() => {
-    let hasJoinedRoom = false; // Local variable to track room join status
+    let isMounted = true; // Track whether component is mounted
 
-    if (socket && !hasJoinedRoom) {
+    if (socket && isMounted) {
       // Join the "eventso" room with authentication
       Room.join(socket, "eventso", objID);
 
-      // Mark the room as joined
-      hasJoinedRoom = true;
-
       // Handle server messages
-      socket.on("message", (data) => {
-        console.log("Message received:", data);
-      });
+      socket.on("message", (data) => console.log("Message received:", data));
 
-      // Handle redirection errors
-      socket.on("redirect", (data) => {
-        console.log("Redirecting to:", data.url);
-        navigate(data.url);
-      });
+      // Handle redirection
+      socket.on("redirect", (data) => navigate(data.url));
 
-      // Handle socket errors
-      socket.on("error", (error) => {
-        console.error("Socket error:", error.message);
-        setSocketError(error.message); // Update the error state
-      });
+      // Handle errors
+      socket.on("error", (error) => setSocketError(error.message));
     }
 
-    // Cleanup on unmount
     return () => {
-      if (hasJoinedRoom) {
-        socket.emit("leave-room", "eventso");
-      }
-      socket.off("message");
-      socket.off("redirect");
-      socket.off("error");
+      isMounted = false;
+      socket?.emit("leave-room", "eventso");
+      socket?.off("message");
+      socket?.off("redirect");
+      socket?.off("error");
     };
   }, [socket, objID, navigate]);
 
@@ -97,14 +102,23 @@ const EventOverview = () => {
           <BlurText text="Events" delay={150} animateBy="words" direction="top" style={{ color: "#bec0bf" }} />
         </div>
 
-        {/* Dynamic Event Cards (Manually added for now) */}
         <Grid container spacing={3} style={{ marginTop: "20px" }}>
-          {events.map((event, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <MetricCard title={event.name} value={event.participants} description="Participants" />
-            </Grid>
-          ))}
-        </Grid>
+  {events.map((event, index) => (
+    <Grid item xs={12} sm={6} md={3} key={index}>
+      <MetricCard
+        title={event.name}
+        value={`Venue: ${event.venue}`}
+        description={`Coordinator: ${event.coordinator}`}
+        additionalInfo={
+          <a href={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'blue', fontWeight: 'bold' }}>
+            View
+          </a>
+        }
+      />
+    </Grid>
+  ))}
+</Grid>
+
       </div>
     </Layout>
   );

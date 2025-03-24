@@ -5,45 +5,71 @@ import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App"; // Import WebSocket Context
-import Layout from "../layouts/layout"; // Import the Layout component
+import { WebSocketContext } from "../App";
+import Layout from "../layouts/layout";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const socket = useContext(WebSocketContext); // Access global WebSocket instance
+  const socket = useContext(WebSocketContext);
   const name = Cookies.get("userName") || "Guest";
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null); // State to track errors
+  const [socketError, setSocketError] = useState(null);
+
+  // Dummy data for registrations by date
+  const registrationData = {
+    labels: [
+      "Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", 
+      "Jan 6", "Jan 7", "Jan 8", "Jan 9", "Jan 10",
+      "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15"
+    ],
+    datasets: [
+      {
+        label: "Total Registrations",
+        data: [120, 190, 150, 220, 180, 250, 300, 280, 350, 400, 380, 420, 450, 500, 550],
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.1,
+        fill: false
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  };
 
   useEffect(() => {
-    let hasJoinedRoom = false; // Local variable to track room join status
+    let hasJoinedRoom = false;
     if (socket && !hasJoinedRoom) {
-      // Join the "dashboard" room with authentication
       socket.emit("join-room", { roomName: "dashboard", objId: objID });
-      // Mark the room as joined
       hasJoinedRoom = true;
-      // Handle server messages
       socket.on("message", (data) => {
         console.log("Message received:", data);
       });
-      // Handle redirection errors
       socket.on("redirect", (data) => {
         console.log("Redirecting to:", data.url);
         navigate(data.url);
       });
-      // Handle socket errors
       socket.on("error", (error) => {
         console.error("Socket error:", error.message);
-        setSocketError(error.message); // Update the error state
+        setSocketError(error.message);
       });
     }
-    // Cleanup on unmount
     return () => {
       if (hasJoinedRoom) {
         socket.emit("leave-room", "dashboard");
       }
     };
-  }, [socket, objID, navigate]); // Dependencies: socket, objID, navigate
+  }, [socket, objID, navigate]);
 
   return (
     <Layout title="Dashboard" activePage="dashboard">
@@ -63,7 +89,12 @@ const Dashboard = () => {
           <Grid item xs={12} md={3}>
             <Grid container spacing={3} direction="column">
               <Grid item>
-                <MetricCard title="Total Registration" height="35vh" value={5000} />
+                <MetricCard 
+                  title="Total Registration" 
+                  height="35vh" 
+                  value={550} // Updated to match the last data point
+                  trend="up" // Optional: add trend indicator
+                />
               </Grid>
               <Grid item>
                 <MetricCard title="Active Users" height="32vh" value={2456} />
@@ -74,25 +105,27 @@ const Dashboard = () => {
           {/* Second Column */}
           <Grid item xs={12} md={5}>
             <Grid container spacing={3}>
-              {/* Total Revenue */}
               <Grid item xs={12} sm={6}>
                 <MetricCard title="Total Revenue" height="15vh" value={150000} />
               </Grid>
-              {/* Total Participation */}
               <Grid item xs={12} sm={6}>
                 <MetricCard title="Total Participation" height="15vh" value={3000} />
               </Grid>
-              {/* Revenue and Event Day by Day */}
-              <Grid item xs={12} sm={6}>
-                <VisualizationCard title="Revenue and Event Day by Day" chartType="line" height="20vh" />
+              {/* Updated Registration Trend Card */}
+              <Grid item xs={12}>
+                <VisualizationCard 
+                  title="Registration Trend" 
+                  chartType="line" 
+                  height="30vh"
+                  data={registrationData}
+                  options={chartOptions}
+                />
               </Grid>
-              {/* Alerts & Notifications */}
               <Grid item xs={12} sm={6}>
                 <VisualizationCard title="Alerts & Notifications" chartType="bar" height="20vh" />
               </Grid>
-              {/* Top Events */}
-              <Grid item xs={12}>
-                <VisualizationCard title="Top Events" chartType="pie" height="34vh" />
+              <Grid item xs={12} sm={6}>
+                <VisualizationCard title="Top Events" chartType="pie" height="20vh" />
               </Grid>
             </Grid>
           </Grid>

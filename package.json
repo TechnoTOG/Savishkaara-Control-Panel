@@ -1,14 +1,15 @@
 {
   "dependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "recharts": "^2.15.1"
   },
   "scripts": {
-  "start": "concurrently \"npm run server\" \"npm run client\"",
-  "test": "concurrently \"cd backend && powershell -Command \\\"$env:NODE_ENV='production'; npm run demo\\\"\" \"cd frontend && npm run build && npx serve -s build\"\"",
-  "update": "concurrently \"npm run update-server\" \"npm run update-client\"",
-  "server": "cd backend && npm run demo",
-  "client": "cd frontend && npm start",
-  "update-client": "cd frontend && npm install",
-  "update-server": "cd backend && npm install"
-}
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "concurrently \"cd backend && powershell -Command \\\"$env:NODE_ENV='production'; npm run demo\\\"\" \"cd frontend && npm run build && npx serve -s build\"\"",
+    "update": "concurrently \"npm run update-server\" \"npm run update-client\"",
+    "server": "cd backend && npm run demo",
+    "client": "cd frontend && npm start",
+    "update-client": "cd frontend && npm install",
+    "update-server": "cd backend && npm install"
+  }
 }
