@@ -57,6 +57,7 @@ const VerificationRoutes = require("./routes/verify");
 const allowedOrigins = [
   "https://testsavi.amritaiedc.site",
   "http://localhost:3000",
+  "https://savicontrol.amritaiedc.site",
 ];
 
 // Configure CORS dynamically

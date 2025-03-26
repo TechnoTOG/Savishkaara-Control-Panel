@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "concurrently": "^9.1.2",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "update": "^0.4.2"
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
