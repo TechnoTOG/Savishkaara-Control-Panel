@@ -12,5 +12,8 @@
     "client": "cd frontend && npm start",
     "update-client": "cd frontend && npm install",
     "update-server": "cd backend && npm install"
+  },
+  "devDependencies": {
+    "eslint": "^9.23.0"
   }
 }

@@ -2,7 +2,7 @@ require("dotenv").config(); // Load environment variables
 const express = require("express"); // Import Express.js
 const session = require("express-session"); // Import Express Session
 const crypto = require("crypto"); // Import Crypto.js
-const { Server } = require("socket.io"); // Using the Server class from the socket.io module for realtime update
+const { Server } = require("socket.io"); // Socket.io for realtime updates
 const cors = require("cors"); // Import CORS middleware
 const https = require("https"); // Import HTTPS module
 const http = require("http"); // Import HTTP module
@@ -16,8 +16,9 @@ const PORT = process.env.PORT || 5000;
 // Generate a secure secret for session signing
 const sessionSecret = crypto.randomBytes(64).toString("hex");
 
-// Force HTTPS redirect (Only if using Cloudflare Full mode)
+// Only run these production checks if NODE_ENV is "production"
 if (process.env.NODE_ENV === "production") {
+  // Force HTTPS redirect
   app.use((req, res, next) => {
     if (req.headers["x-forwarded-proto"] !== "https") {
       return res.redirect("https://" + req.headers.host + req.url);
@@ -25,15 +26,16 @@ if (process.env.NODE_ENV === "production") {
     next();
   });
 
+  // Check for allowed origin header
   app.use((req, res, next) => {
     if (req.headers['X-Allowed-Origin'] !== 'testsavi.amritaiedc.site') {
-        return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ error: 'Forbidden' });
     }
     next();
   });
 }
 
-// Middleware for sessions
+// Session middleware
 app.use(
   session({
     secret: sessionSecret,
@@ -42,94 +44,79 @@ app.use(
     name: "pookie",
     cookie: {
       maxAge: 1000 * 60 * 60 * 6, // 6 hour expiration
-      secure: process.env.NODE_ENV === "production", // Ensure cookies are only sent over HTTPS in production
+      secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
       httpOnly: true,
     },
   })
 );
 
-// Import routes
-const AuthenticationRoutes = require("./routes/auth"); // Import authentication routes
-const EventRoutes = require("./routes/eventManager");
-const RealTimeRoutes = require("./routes/realTime");
-const VerificationRoutes = require("./routes/verify");
-
-// Define allowed origins
+// Configure CORS dynamically
 const allowedOrigins = [
   "https://testsavi.amritaiedc.site",
   "http://localhost:3000",
   "https://savicontrol.amritaiedc.site",
 ];
 
-// Configure CORS dynamically
 app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (e.g., mobile apps, Postman)
       if (!origin) return callback(null, true);
 
-      // Check if the origin is in the allowed list
+      // Check if the origin is allowed
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+        const msg = `The CORS policy for this site does not allow access from: ${origin}`;
         return callback(new Error(msg), false);
       }
-
-      // Allow the request
       return callback(null, true);
     },
     methods: ["GET", "POST"],
-    credentials: true, // Enable credentials (cookies, authorization headers, etc.)
+    credentials: true,
   })
 );
 
-// Middleware
+// Parse JSON bodies
 app.use(express.json());
+
+// Import and mount routes
+const AuthenticationRoutes = require("./routes/auth");
+const EventRoutes = require("./routes/eventManager");
+const UserAdd = require("./routes/addusers");
+const RealTimeRoutes = require("./routes/realTime");
+const VerificationRoutes = require("./routes/verify");
+
 app.use("/", AuthenticationRoutes);
 app.use("/", EventRoutes);
+app.use("/", UserAdd);
 app.use("/", RealTimeRoutes);
 app.use("/", VerificationRoutes);
 
-// Fetch public IP
+// Optional: Log public IP
 https.get("https://api.ipify.org", (res) => {
   let data = "";
-  res.on("data", (chunk) => {
-    data += chunk;
-  });
-  res.on("end", () => {
-    console.log("Your public IP address is: " + data);
-  });
-}).on("error", (e) => {
-  console.log("Error: " + e.message);
-});
+  res.on("data", (chunk) => { data += chunk; });
+  res.on("end", () => { console.log("Your public IP address is: " + data); });
+}).on("error", (e) => { console.log("Error: " + e.message); });
 
-// MongoDB connection
+// Connect to MongoDB
 mongoConnect();
 
-// Create HTTP server using Express
+// Create HTTP server and configure Socket.io
 const server = http.createServer(app);
-
-// Configure Socket.io with dynamic CORS
 const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
-      // Allow requests with no origin (e.g., mobile apps, Postman)
       if (!origin) return callback(null, true);
-
-      // Check if the origin is in the allowed list
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+        const msg = `The CORS policy for this site does not allow access from: ${origin}`;
         return callback(new Error(msg), false);
       }
-
-      // Allow the request
       return callback(null, true);
     },
     methods: ["GET", "POST"],
-    credentials: true, // Enable credentials
+    credentials: true,
   },
 });
-
-// Export the `io` object
 module.exports.io = io;
 
 // Initialize room updater
@@ -144,7 +131,7 @@ server.listen(PORT, () => {
  \\___ \\ / _\` \\ \\ / / / __| '_ \\| |/ / _\` |/ _\` | '__/ _\` |_____| |   / _ \\| '_ \\| __| '__/ _ \\| |____\\___ \\ / _ \\ '__\\ \\ / / _ \\ '__|
   ___) | (_| |\\ V /| \\__ \\ | | |   < (_| | (_| | | | (_| |_____| |__| (_) | | | | |_| | | (_) | |_____|__) |  __/ |   \\ V /  __/ |   
  |____/ \\__,_| \\_/ |_|___/_| |_|_|\\_\\__,_|\\__,_|_|  \\__,_|      \\____\\___/|_| |_|\\__|_|  \\___/|_|    |____/ \\___|_|    \\_/ \\___|_|   
-                                                                                                                                     `);
+  `);
   console.log("\nWelcome to Savishkaara-Control-Server\n");
   console.log(`Date:        `, new Date().toLocaleDateString());
   console.log(`Time:        `, new Date().toLocaleTimeString());
