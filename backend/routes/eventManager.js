@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+// Ensure the correct MongoDB connection (saavishkaara-aio database)
+const mongoConnect = require('../db/mongodb');
+
 // Import the Event and Event_reg models
 const Event = require('../models/events'); // Updated import name to match the model
 const Event_reg = require('../models/event_registration');

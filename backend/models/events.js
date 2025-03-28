@@ -14,5 +14,5 @@ const eventSchema = new mongoose.Schema({
   venue: { type: String, required: true }
 }, { collection: "events"});
 
-const Event = mongoose.model("Event", eventSchema);
-module.exports = Event;
+// Export the User model
+module.exports = mongoose.model('Event', eventSchema);

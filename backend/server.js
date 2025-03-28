@@ -50,9 +50,9 @@ app.use(
 
 // Import routes
 const AuthenticationRoutes = require("./routes/auth"); // Import authentication routes
+const EventRoutes = require("./routes/eventManager");
 const RealTimeRoutes = require("./routes/realTime");
 const VerificationRoutes = require("./routes/verify");
-const EventRoutes = require("./routes/event");
 
 // Define allowed origins
 const allowedOrigins = [
@@ -85,9 +85,9 @@ app.use(
 // Middleware
 app.use(express.json());
 app.use("/", AuthenticationRoutes);
+app.use("/", EventRoutes);
 app.use("/", RealTimeRoutes);
 app.use("/", VerificationRoutes);
-app.use("/", EventRoutes);
 
 // Fetch public IP
 https.get("https://api.ipify.org", (res) => {

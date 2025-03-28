@@ -35,6 +35,9 @@ const AddEvent = () => {
   const [facultyCoordinator1, setFacultyCoordinator1] = useState("");
   const [coordinator2, setCoordinator2] = useState("");
   const [facultyCoordinator2, setFacultyCoordinator2] = useState("");
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
   const coordinators = ["Coordinator 1", "Coordinator 2", "Coordinator 3"];
@@ -47,7 +50,8 @@ const AddEvent = () => {
     },
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate required fields
@@ -69,10 +73,34 @@ const AddEvent = () => {
       flinik: link,
       elink: excelLink,
     };
-    if (socket) {
-      socket.emit("add-event", { ...eventData, objId: objID });
+
+    console.log(eventData);
+
+    try {
+      // Send a POST request to /addEvent
+      const response = await fetch(`${apiBaseURL}/addEvent`, {
+      method: "POST",
+      headers: {
+        'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error(`Failed to add event: ${response.statusText}`);
     }
+
+    const result = await response.json();
+    console.log("Event added successfully:", result);
+
+    // Navigate to the events overview page
     navigate("/events-overview");
+    } catch (error) {
+      console.error("Error adding event:", error);
+      setSocketError(error.message || "An error occurred while adding the event.");
+    }
   };
 
   useEffect(() => {
