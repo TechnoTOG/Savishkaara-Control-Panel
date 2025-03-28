@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"; // Fixed import
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -12,13 +12,10 @@ import {
   InputLabel,
 } from "@mui/material";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App"; // Import WebSocket Context
-import Room from "../utils/roomManager";
 import Layout from "../layouts/layout"; // Import the Layout component
 
 const AddEvent = () => {
   const navigate = useNavigate();
-  const socket = useContext(WebSocketContext); // Access global WebSocket instance
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null); // State to track errors
 
@@ -30,69 +27,68 @@ const AddEvent = () => {
   const [fee, setFee] = useState("");
   const [link, setLink] = useState("");
   const [excelLink, setExcelLink] = useState("");
-  const [coordinator, setCoordinator] = useState("");
+  const [coordinator1, setCoordinator1] = useState("");
+  const [facultyCoordinator1, setFacultyCoordinator1] = useState("");
+  const [coordinator2, setCoordinator2] = useState("");
+  const [facultyCoordinator2, setFacultyCoordinator2] = useState("");
 
   const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
   const coordinators = ["Coordinator 1", "Coordinator 2", "Coordinator 3"];
 
-  const handleSubmit = (e) => {
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!eventName || !venue || !dateTime || !fee || !coordinator) {
+
+    // Validate required fields
+    if (!eventName || !venue || !dateTime || !fee || !coordinator1 || !facultyCoordinator1) {
       alert("Please fill all required fields.");
       return;
     }
+
+    // Prepare the event data
     const eventData = {
-      eventName,
+      name: eventName,
       venue: venue === "Others" ? otherVenue : venue,
-      dateTime,
-      fee,
-      link,
-      excelLink,
-      coordinator,
+      dateAndTime: dateTime,
+      fee: parseFloat(fee), // Convert fee to a number
+      coor1: coordinator1,
+      coor2: coordinator2,
+      facoor1: facultyCoordinator1,
+      facoor2: facultyCoordinator2,
+      flinik: link,
+      elink: excelLink,
     };
-    if (socket) {
-      socket.emit("add-event", { ...eventData, objId: objID });
-    }
-    navigate("/events-overview");
-  };
-  useEffect(() => {
-    let hasJoinedRoom = false; // Local variable to track room join status
 
-    if (socket && !hasJoinedRoom) {
-      // Join the "eventsa" room with authentication
-      Room.join(socket, "eventsa", objID);
-
-      // Mark the room as joined
-      hasJoinedRoom = true;
-
-      // Handle server messages
-      socket.on("message", (data) => {
-        console.log("Message received:", data);
+    try {
+      // Send a POST request to /addEvent
+      const response = await fetch(`${apiBaseURL}/addEvent`, {
+        method: "POST",
+        headers: {
+          'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
       });
 
-      // Handle redirection errors
-      socket.on("redirect", (data) => {
-        console.log("Redirecting to:", data.url);
-        navigate(data.url);
-      });
-
-      // Handle socket errors
-      socket.on("error", (error) => {
-        console.error("Socket error:", error.message);
-        setSocketError(error.message); // Update the error state
-      });
-    }
-
-    // Cleanup on unmount
-    return () => {
-      if (hasJoinedRoom) {
-        socket.emit("leave-room", "eventsa");
+      // Check if the request was successful
+      if (!response.ok) {
+        throw new Error(`Failed to add event: ${response.statusText}`);
       }
-      socket.off("message");
-      socket.off("redirect");
-      socket.off("error");
-    };
-  }, [socket, objID, navigate]);
+
+      const result = await response.json();
+      console.log("Event added successfully:", result);
+
+      // Navigate to the events overview page
+      navigate("/events-overview");
+    } catch (error) {
+      console.error("Error adding event:", error);
+      setSocketError(error.message || "An error occurred while adding the event.");
+    }
+  };
 
   return (
     <Layout title="Add Event" activePage="eventsa">
@@ -120,16 +116,25 @@ const AddEvent = () => {
               />
             </Grid>
 
+            {/* Venue Dropdown */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>Venue</InputLabel>
-                <Select value={venue} onChange={(e) => setVenue(e.target.value)} label="Venue">
+                <Select
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                  label="Venue"
+                >
                   {venues.map((v, index) => (
-                    <MenuItem key={index} value={v}>{v}</MenuItem>
+                    <MenuItem key={index} value={v}>
+                      {v}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Other Venue Field */}
             {venue === "Others" && (
               <Grid item xs={12} md={6}>
                 <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required />
@@ -161,16 +166,14 @@ const AddEvent = () => {
               />
             </Grid>
 
-           
-
-            {/* Coordinators Dropdown */}
+            {/* Coordinator 1 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>Coordinator 1</InputLabel>
                 <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
+                  value={coordinator1}
+                  onChange={(e) => setCoordinator1(e.target.value)}
+                  label="Coordinator 1"
                 >
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>
@@ -180,13 +183,15 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Faculty Coordinator 1 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>Faculty Coordinator 1</InputLabel>
                 <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
+                  value={facultyCoordinator1}
+                  onChange={(e) => setFacultyCoordinator1(e.target.value)}
+                  label="Faculty Coordinator 1"
                 >
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>
@@ -196,13 +201,15 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Coordinator 2 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth >
+              <FormControl fullWidth>
                 <InputLabel>Coordinator 2</InputLabel>
                 <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
+                  value={coordinator2}
+                  onChange={(e) => setCoordinator2(e.target.value)}
+                  label="Coordinator 2"
                 >
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>
@@ -212,13 +219,15 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Faculty Coordinator 2 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth >
-                <InputLabel> Faculty Coordinator 2</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel>Faculty Coordinator 2</InputLabel>
                 <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
+                  value={facultyCoordinator2}
+                  onChange={(e) => setFacultyCoordinator2(e.target.value)}
+                  label="Faculty Coordinator 2"
                 >
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>
@@ -228,8 +237,9 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
-             {/* Link */}
-             <Grid item xs={12} md={6}>
+
+            {/* Link */}
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Link"
@@ -250,7 +260,7 @@ const AddEvent = () => {
 
             {/* Submit Button */}
             <Grid item xs={12}>
-            <Box display="flex" justifyContent="center">
+              <Box display="flex" justifyContent="center">
                 <Button
                   type="submit"
                   variant="contained"
