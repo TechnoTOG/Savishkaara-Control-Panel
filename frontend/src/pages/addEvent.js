@@ -136,7 +136,7 @@ const AddEvent = () => {
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 1</InputLabel>
-                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
+                <Select value={coordinator1} onChange={(e) => setCoordinator1(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
@@ -147,8 +147,8 @@ const AddEvent = () => {
             {/* Faculty Coordinator 1 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}> Faculty Coordinator 1</InputLabel>
-                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 1</InputLabel>
+                <Select value={facultyCoordinator1} onChange={(e) => setFacultyCoordinator1(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
@@ -158,9 +158,9 @@ const AddEvent = () => {
 
             {/* Coordinator 2 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
+              <FormControl fullWidth>
                 <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 2</InputLabel>
-                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
+                <Select value={coordinator2} onChange={(e) => setCoordinator2(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
@@ -170,9 +170,9 @@ const AddEvent = () => {
 
             {/* Faculty Coordinator 2 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}> Faculty Coordinator 2</InputLabel>
-                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 2</InputLabel>
+                <Select value={facultyCoordinator2} onChange={(e) => setFacultyCoordinator2(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
@@ -180,10 +180,10 @@ const AddEvent = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Link" type="text" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
+              <TextField fullWidth label="Link" type="text" value={link} onChange={(e) => setLink(e.target.value)} sx={inputStyles} />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Excel Link" type="text" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
+              <TextField fullWidth label="Excel Link" type="text" value={excelLink} onChange={(e) => setExcelLink(e.target.value)} sx={inputStyles} />
             </Grid>
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center">
