@@ -7,9 +7,9 @@ const eventSchema = new mongoose.Schema({
   form_link: { type: String, required: true },
   excel_link: { type: String, required: true },
   coordinator1: { type: String, required: true },
-  coordinator2: { type: String, required: true },
+  coordinator2: { type: String },
   faculty_coor1: { type: String, required: true },
-  faculty_coor2: { type: String, required: true },
+  faculty_coor2: { type: String },
   status: { type: String, required: true },
   venue: { type: String, required: true }
 }, { collection: "events"});
