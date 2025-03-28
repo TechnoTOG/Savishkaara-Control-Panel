@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"; // Fixed import
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -11,18 +11,19 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App"; // Import WebSocket Context
+import { WebSocketContext } from "../App";
 import Room from "../utils/roomManager";
-import Layout from "../layouts/layout"; // Import the Layout component
+import Layout from "../layouts/layout";
 
 const AddEvent = () => {
   const navigate = useNavigate();
-  const socket = useContext(WebSocketContext); // Access global WebSocket instance
+  const socket = useContext(WebSocketContext);
+  const theme = useTheme(); // Get theme for light/dark mode
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null); // State to track errors
+  const [socketError, setSocketError] = useState(null);
 
-  // State for form fields
   const [eventName, setEventName] = useState("");
   const [venue, setVenue] = useState("");
   const [otherVenue, setOtherVenue] = useState("");
@@ -34,6 +35,14 @@ const AddEvent = () => {
 
   const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
   const coordinators = ["Coordinator 1", "Coordinator 2", "Coordinator 3"];
+
+  const inputStyles = {
+    backgroundColor: theme.palette.mode === "dark" ? "#222" : "#fff",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    "& label, & .MuiInputBase-input": {
+      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    },
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -55,39 +64,18 @@ const AddEvent = () => {
     }
     navigate("/events-overview");
   };
+
   useEffect(() => {
-    let hasJoinedRoom = false; // Local variable to track room join status
-
+    let hasJoinedRoom = false;
     if (socket && !hasJoinedRoom) {
-      // Join the "eventsa" room with authentication
       Room.join(socket, "eventsa", objID);
-
-      // Mark the room as joined
       hasJoinedRoom = true;
-
-      // Handle server messages
-      socket.on("message", (data) => {
-        console.log("Message received:", data);
-      });
-
-      // Handle redirection errors
-      socket.on("redirect", (data) => {
-        console.log("Redirecting to:", data.url);
-        navigate(data.url);
-      });
-
-      // Handle socket errors
-      socket.on("error", (error) => {
-        console.error("Socket error:", error.message);
-        setSocketError(error.message); // Update the error state
-      });
+      socket.on("message", (data) => console.log("Message received:", data));
+      socket.on("redirect", (data) => navigate(data.url));
+      socket.on("error", (error) => setSocketError(error.message));
     }
-
-    // Cleanup on unmount
     return () => {
-      if (hasJoinedRoom) {
-        socket.emit("leave-room", "eventsa");
-      }
+      if (hasJoinedRoom) socket.emit("leave-room", "eventsa");
       socket.off("message");
       socket.off("redirect");
       socket.off("error");
@@ -100,30 +88,20 @@ const AddEvent = () => {
         <Typography variant="h4" gutterBottom>
           Add New Event
         </Typography>
-
         {socketError && (
-          <Typography variant="body1" color="error" style={{ marginBottom: "20px" }}>
+          <Typography variant="body1" color="error" sx={{ marginBottom: "20px" }}>
             Error: {socketError}
           </Typography>
         )}
-
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
-            {/* Event Name */}
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Event Name"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                required
-              />
+              <TextField fullWidth label="Event Name" value={eventName} onChange={(e) => setEventName(e.target.value)} required sx={inputStyles} />
             </Grid>
-
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
-                <InputLabel>Venue</InputLabel>
-                <Select value={venue} onChange={(e) => setVenue(e.target.value)} label="Venue">
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Venue</InputLabel>
+                <Select value={venue} onChange={(e) => setVenue(e.target.value)} sx={inputStyles}>
                   {venues.map((v, index) => (
                     <MenuItem key={index} value={v}>{v}</MenuItem>
                   ))}
@@ -132,134 +110,64 @@ const AddEvent = () => {
             </Grid>
             {venue === "Others" && (
               <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required />
+                <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required sx={inputStyles} />
               </Grid>
             )}
-
-            {/* Date and Time */}
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Date and Time"
-                type="datetime-local"
-                value={dateTime}
-                onChange={(e) => setDateTime(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                required
-              />
+              <TextField fullWidth label="Date and Time" type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} InputLabelProps={{ shrink: true }} required sx={inputStyles} />
             </Grid>
-
-            {/* Fee */}
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Fee"
-                type="number"
-                value={fee}
-                onChange={(e) => setFee(e.target.value)}
-                required
-              />
+              <TextField fullWidth label="Fee" type="number" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
             </Grid>
-
-           
-
-            {/* Coordinators Dropdown */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
-                <InputLabel>Coordinator 1</InputLabel>
-                <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
-                >
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 1</InputLabel>
+                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>
-                      {coord}
-                    </MenuItem>
+                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
-                <InputLabel>Faculty Coordinator 1</InputLabel>
-                <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
-                >
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}> Faculty Coordinator 1</InputLabel>
+                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>
-                      {coord}
-                    </MenuItem>
+                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth >
-                <InputLabel>Coordinator 2</InputLabel>
-                <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
-                >
+              <FormControl fullWidth required>
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 2</InputLabel>
+                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>
-                      {coord}
-                    </MenuItem>
+                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth >
-                <InputLabel> Faculty Coordinator 2</InputLabel>
-                <Select
-                  value={coordinator}
-                  onChange={(e) => setCoordinator(e.target.value)}
-                  label="Coordinator"
-                >
+              <FormControl fullWidth required>
+                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}> Faculty Coordinator 2</InputLabel>
+                <Select value={coordinator} onChange={(e) => setCoordinator(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>
-                      {coord}
-                    </MenuItem>
+                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-             {/* Link */}
-             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Link"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-              />
-            </Grid>
-
-            {/* Excel Link */}
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Excel Link"
-                value={excelLink}
-                onChange={(e) => setExcelLink(e.target.value)}
-              />
+              <TextField fullWidth label="Link" type="text" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
             </Grid>
-
-            {/* Submit Button */}
+            <Grid item xs={12} md={6}>
+              <TextField fullWidth label="Excel Link" type="text" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
+            </Grid>
             <Grid item xs={12}>
-            <Box display="flex" justifyContent="center">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    padding: "10px 30px", // Increase padding to make the button bigger
-                    fontSize: "1.1rem", // Increase font size
-                  }}
-                >
+              <Box display="flex" justifyContent="center">
+                <Button type="submit" variant="contained" color="primary" sx={{ padding: "10px 30px", fontSize: "1.1rem" }}>
                   Add Event
                 </Button>
               </Box>

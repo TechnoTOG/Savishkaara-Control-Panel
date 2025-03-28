@@ -10,6 +10,12 @@ import Cookies from "js-cookie";
 import { WebSocketContext } from "../App"; // Import WebSocket Context
 import Room from "../utils/roomManager";
 import Layout from "../layouts/layout"; // Import the Layout component
+import { Box } from '@mui/material';
+import { FiberManualRecord } from "@mui/icons-material"; // Import the icon
+import { PersonOutline } from "@mui/icons-material"; // Import an icon
+
+
+
 
 const EventOverview = () => {
   const navigate = useNavigate();
@@ -79,45 +85,55 @@ const EventOverview = () => {
 
       <div style={{ marginLeft: "20px", marginRight: "20px", width: "auto" }}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={12}> {/* Ensure full width */}
-            <Grid container spacing={3} direction="row">
-              {/* Visualization Cards */}
-              <Grid item xs={12} sm={6} md={3}>
-                <VisualizationCard title="Revenue and Event Day by Day" chartType="line" height="22vh" />
+          {/* Left Side: Total Registration & Total Participation */}
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={3} direction="column">
+              {/* Total Registration */}
+              <Grid item>
+                <VisualizationCard
+                  title="Total Registration"
+                  height="22vh"
+                  icon={<PersonOutline />} // Pass the icon
+                  
+                />
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <VisualizationCard title="Revenue and Event Day by Day" chartType="line" height="22vh" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <VisualizationCard title="Revenue and Event Day by Day" chartType="line" height="22vh" />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <VisualizationCard title="Alerts & Notifications" chartType="bar" height="22vh" />
+
+              {/* Total Participation */}
+              <Grid item>
+                <VisualizationCard title="Total Participation" chartType="line" height="22vh" />
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Right Side: Revenue Card */}
+          <Grid item xs={12} md={4}>
+            <VisualizationCard title="Revenue" chartType="line" height="47vh" />
+
+          </Grid>
         </Grid>
+
+
 
         <div style={{ marginTop: "30px", marginLeft: "20px" }}>
           <BlurText text="Events" delay={150} animateBy="words" direction="top" style={{ color: "#bec0bf" }} />
         </div>
 
         <Grid container spacing={3} style={{ marginTop: "20px" }}>
-  {events.map((event, index) => (
-    <Grid item xs={12} sm={6} md={3} key={index}>
-      <MetricCard
-        title={event.name}
-        value={`Venue: ${event.venue}`}
-        description={`Coordinator: ${event.coordinator}`}
-        additionalInfo={
-          <a href={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'blue', fontWeight: 'bold' }}>
-            View
-          </a>
-        }
-      />
-    </Grid>
-  ))}
-</Grid>
+          {events.map((event, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <MetricCard
+                title={event.name}
+                value={`Venue: ${event.venue}`}
+                description={`Coordinator: ${event.coordinator}`}
+                additionalInfo={
+                  <a href={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'blue', fontWeight: 'bold' }}>
+                    View
+                  </a>
+                }
+              />
+            </Grid>
+          ))}
+        </Grid>
 
       </div>
     </Layout>
