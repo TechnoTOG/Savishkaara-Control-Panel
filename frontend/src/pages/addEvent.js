@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Grid,
   Typography,
@@ -10,6 +9,8 @@ import {
   Box,
   FormControl,
   InputLabel,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Cookies from "js-cookie";
@@ -18,7 +19,6 @@ import Room from "../utils/roomManager";
 import Layout from "../layouts/layout";
 
 const AddEvent = () => {
-  const navigate = useNavigate();
   const socket = useContext(WebSocketContext);
   const theme = useTheme(); // Get theme for light/dark mode
   const objID = Cookies.get("objId");
@@ -35,6 +35,8 @@ const AddEvent = () => {
   const [facultyCoordinator1, setFacultyCoordinator1] = useState("");
   const [coordinator2, setCoordinator2] = useState("");
   const [facultyCoordinator2, setFacultyCoordinator2] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -79,28 +81,49 @@ const AddEvent = () => {
     try {
       // Send a POST request to /addEvent
       const response = await fetch(`${apiBaseURL}/addEvent`, {
-      method: "POST",
-      headers: {
-        'X-Allowed-Origin': 'testsavi.amritaiedc.site',
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(eventData),
-    });
+        method: "POST",
+        headers: {
+          'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      });
 
-    // Check if the request was successful
-    if (!response.ok) {
-      throw new Error(`Failed to add event: ${response.statusText}`);
-    }
+      // Check if the request was successful
+      if (!response.ok) {
+        throw new Error(`Failed to add event: ${response.statusText}`);
+      }
 
-    const result = await response.json();
-    console.log("Event added successfully:", result);
+      const result = await response.json();
+      console.log("Event added successfully:", result);
 
-    // Navigate to the events overview page
-    navigate("/events-overview");
+      // Set success message
+      setSuccessMessage("Event added successfully!");
+
+      // Reset the form fields after 2 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+        resetFormFields();
+      }, 2000);
     } catch (error) {
       console.error("Error adding event:", error);
       setSocketError(error.message || "An error occurred while adding the event.");
     }
+  };
+
+  // Function to reset form fields
+  const resetFormFields = () => {
+    setEventName("");
+    setVenue("");
+    setOtherVenue("");
+    setDateTime("");
+    setFee("");
+    setLink("");
+    setExcelLink("");
+    setCoordinator1("");
+    setFacultyCoordinator1("");
+    setCoordinator2("");
+    setFacultyCoordinator2("");
   };
 
   useEffect(() => {
@@ -109,16 +132,14 @@ const AddEvent = () => {
       Room.join(socket, "eventsa", objID);
       hasJoinedRoom = true;
       socket.on("message", (data) => console.log("Message received:", data));
-      socket.on("redirect", (data) => navigate(data.url));
       socket.on("error", (error) => setSocketError(error.message));
     }
     return () => {
       if (hasJoinedRoom) socket.emit("leave-room", "eventsa");
       socket.off("message");
-      socket.off("redirect");
       socket.off("error");
     };
-  }, [socket, objID, navigate]);
+  }, [socket, objID]);
 
   return (
     <Layout title="Add Event" activePage="eventsa">
@@ -131,6 +152,24 @@ const AddEvent = () => {
             Error: {socketError}
           </Typography>
         )}
+        {/* Success Message */}
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={2000}
+          onClose={() => setSuccessMessage("")}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            severity="success"
+            sx={{
+              fontSize: "1.2rem", // Increase font size
+              padding: "16px", // Add padding for better visibility
+              width: "100%",
+            }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
