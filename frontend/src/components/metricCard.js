@@ -9,16 +9,16 @@ const MetricCard = ({ title, value, darkMode, height, width, description, additi
   return (
     <Card
       sx={{
-        backgroundColor: bgColor || (darkMode ? "#1b1c1e" : "#f7f7f7"), // Apply bgColor if provided
+        backgroundColor: bgColor || (darkMode ? "#1b1c1e" : "#f7f7f7"),
         borderRadius: 2,
         boxShadow: "0px 4px 8px rgba(32, 24, 24, 0.1)",
         padding: "20px",
         height: height,
         width: width,
-        transition: "all 0.3s ease",
+        transition: "all 0.3s ease-in-out",
         "&:hover": {
-          boxShadow: "0px 6px 12px rgba(17, 15, 15, 0.15)",
-          backgroundColor: bgColor ? bgColor : "#2f3134", // Apply hover effect
+          boxShadow: `0px 0px 15px ${bgColor ? bgColor : "#00e676"}`,
+          transform: "scale(1.05)",
         },
       }}
     >
@@ -27,14 +27,7 @@ const MetricCard = ({ title, value, darkMode, height, width, description, additi
           {title}
         </Typography>
 
-        <Typography
-          variant="h5"
-          sx={{
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#fff", // White text for better contrast
-          }}
-        >
+        <Typography variant="h5" sx={{ fontSize: "16px", fontWeight: "600", color: "#fff" }}>
           {isNumeric ? <CountUp end={Number(value)} duration={2} separator="," /> : value}
         </Typography>
 

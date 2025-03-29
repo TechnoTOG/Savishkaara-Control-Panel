@@ -17,7 +17,20 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const VisualizationCard = ({ title, data, options, height = "100%", width = "100%" }) => {
   return (
-    <Card sx={{ height, width }}>
+    <Card
+      sx={{
+        height,
+        width,
+        transition: "all 0.3s ease-in-out",
+        boxShadow: "0px 4px 8px rgba(32, 24, 24, 0.1)",
+        backgroundColor: "#ffffff", // Default white
+        "&:hover": {
+          boxShadow: "0px 8px 16px rgba(17, 15, 15, 0.2)",
+          transform: "scale(1.03)",
+          backgroundColor: "#f0f0f0", // Slightly darkened white
+        },
+      }}
+    >
       <CardContent>
         <Typography variant="h6" gutterBottom>
           {title}
