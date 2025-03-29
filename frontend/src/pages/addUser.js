@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -10,8 +10,8 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import Layout from "../layouts/layout"; // Import your Layout component
-//HELOO
+import Layout from "../layouts/layout";
+
 const AddUser = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -20,34 +20,53 @@ const AddUser = () => {
     role: "",
     dept: "",
     event: "",
-    mobile: "",
-    status: "active",
+    mobile: ""
   });
-
   const [message, setMessage] = useState("");
+  const [eventOptions, setEventOptions] = useState([]);
+
+  const apiBaseURL =
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+      : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+  // When the role is coordinator ("coor"), fetch available distinct events
+  useEffect(() => {
+    if (formData.role.trim().toLowerCase() === "coor" || formData.role.trim().toLowerCase() === "coordinator") {
+      fetch(`${apiBaseURL}/distinctEvents`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.events) {
+            setEventOptions(data.events);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching events:", error);
+        });
+    }
+  }, [formData.role, apiBaseURL]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const apiBaseURL = process.env.NODE_ENV === "production"
-  ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
-  : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch(`${apiBaseURL}/addUser`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Include if your backend uses sessions/cookies
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await response.json();
       if (response.ok) {
         setMessage("User added successfully!");
-        // Optionally clear the form or redirect
         setFormData({
           name: "",
           username: "",
@@ -55,11 +74,10 @@ const AddUser = () => {
           role: "",
           dept: "",
           event: "",
-          mobile: "",
-          status: "active",
+          mobile: ""
         });
       } else {
-        setMessage(`Error: ${data.message}`);
+        setMessage(`Error: ${data.error}`);
       }
     } catch (error) {
       console.error("Error adding user:", error);
@@ -138,28 +156,40 @@ const AddUser = () => {
                 </Select>
               </FormControl>
             </Grid>
-            {/* Department Field */}
-            <Grid item xs={12}>
-              <TextField
-                name="dept"
-                label="Department"
-                variant="outlined"
-                fullWidth
-                value={formData.dept}
-                onChange={handleChange}
-              />
-            </Grid>
-            {/* Event Field */}
-            <Grid item xs={12}>
-              <TextField
-                name="event"
-                label="Event"
-                variant="outlined"
-                fullWidth
-                value={formData.event}
-                onChange={handleChange}
-              />
-            </Grid>
+            {/* Conditional Field: Department or Event */}
+            {formData.role.trim().toLowerCase() === "coor" ||
+            formData.role.trim().toLowerCase() === "coordinator" ? (
+              <Grid item xs={12}>
+                <FormControl variant="outlined" fullWidth required>
+                  <InputLabel id="event-label">Event</InputLabel>
+                  <Select
+                    labelId="event-label"
+                    name="event"
+                    value={formData.event}
+                    onChange={handleChange}
+                    label="Event"
+                  >
+                    {eventOptions.map((ev, idx) => (
+                      <MenuItem key={idx} value={ev}>
+                        {ev}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            ) : (
+              <Grid item xs={12}>
+                <TextField
+                  name="dept"
+                  label="Department"
+                  variant="outlined"
+                  fullWidth
+                  value={formData.dept}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+            )}
             {/* Mobile Field */}
             <Grid item xs={12}>
               <TextField
@@ -169,23 +199,8 @@ const AddUser = () => {
                 fullWidth
                 value={formData.mobile}
                 onChange={handleChange}
+                required
               />
-            </Grid>
-            {/* Status Field */}
-            <Grid item xs={12}>
-              <FormControl variant="outlined" fullWidth required>
-                <InputLabel id="status-label">Status</InputLabel>
-                <Select
-                  labelId="status-label"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  label="Status"
-                >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
             </Grid>
             {/* Submit Button */}
             <Grid item xs={12}>
