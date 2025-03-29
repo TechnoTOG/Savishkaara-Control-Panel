@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
 import MetricCard from "../components/metricCard";
@@ -14,44 +14,41 @@ const Dashboard = () => {
   const name = Cookies.get("userName") || "Guest";
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null);
+  const [eventCount, setEventCount] = useState(0);
+  const hasJoinedRoom = useRef(false);
 
-  // Dummy data for registrations by date
-  const registrationData = {
-    labels: [
-      "Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", 
-      "Jan 6", "Jan 7", "Jan 8", "Jan 9", "Jan 10",
-      "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15"
-    ],
-    datasets: [
-      {
-        label: "Total Registrations",
-        data: [120, 190, 150, 220, 180, 250, 300, 280, 350, 400, 380, 420, 450, 500, 550],
-        borderColor: "rgb(75, 192, 192)",
-        tension: 0.1,
-        fill: false
-      }
-    ]
-  };
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true
-      }
+  const fetchCount = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/event-count`, {
+        method: "GET",
+        headers: {
+          "X-Allowed-Origin": "testsavi.amritaiedc.site",
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch event count");
+
+      const data = await response.json();
+      setEventCount(data.totalUsers || 0);
+    } catch (error) {
+      console.error("Error fetching event count:", error);
     }
   };
 
   useEffect(() => {
-    let hasJoinedRoom = false;
-    if (socket && !hasJoinedRoom) {
+    fetchCount();
+    const interval = setInterval(fetchCount, 10000); // Fetch count every 10 seconds
+
+    if (socket && !hasJoinedRoom.current) {
       socket.emit("join-room", { roomName: "dashboard", objId: objID });
-      hasJoinedRoom = true;
+      hasJoinedRoom.current = true;
+
       socket.on("message", (data) => {
         console.log("Message received:", data);
       });
@@ -64,76 +61,109 @@ const Dashboard = () => {
         setSocketError(error.message);
       });
     }
+
     return () => {
-      if (hasJoinedRoom) {
+      clearInterval(interval);
+      if (hasJoinedRoom.current) {
         socket.emit("leave-room", "dashboard");
+        hasJoinedRoom.current = false;
       }
     };
   }, [socket, objID, navigate]);
 
+  const registrationData = {
+    labels: ["January", "February", "March", "April", "May"],
+    datasets: [
+      {
+        label: "Registrations",
+        data: [10, 20, 30, 40, 50],
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+    scales: {
+      x: { // X-axis scale
+        beginAtZero: true,
+      },
+      y: { // Y-axis scale
+        beginAtZero: true,
+      },
+    },
+  };
+
   return (
     <Layout title="Dashboard" activePage="dashboard">
+      {/* Welcome Message */}
       <div style={{ marginTop: "30px", marginLeft: "20px" }}>
-        <BlurText text={`Welcome back, ${name}!`} delay={150} animateBy="words" direction="top" style={{ color: "#bec0bf" }} />
+        <BlurText
+          text={`Welcome back, ${name}!`}
+          delay={150}
+          animateBy="words"
+          direction="top"
+          style={{ color: "#bec0bf" }}
+        />
       </div>
 
+      {/* Error Handling */}
       {socketError && (
         <Typography variant="body1" color="error" style={{ marginLeft: "20px" }}>
           Error: {socketError}
         </Typography>
       )}
 
+      {/* Dashboard Grid */}
       <div style={{ marginLeft: "20px", marginRight: "20px", width: "auto" }}>
         <Grid container spacing={3}>
-          {/* First Column */}
-          <Grid item xs={12} md={3}>
-            <Grid container spacing={3} direction="column">
-              <Grid item>
-                <MetricCard 
-                  title="Total Registration" 
-                  height="35vh" 
-                  value={550} // Updated to match the last data point
-                  trend="up" // Optional: add trend indicator
-                />
-              </Grid>
-              <Grid item>
-                <MetricCard title="Active Users" height="32vh" value={2456} />
-              </Grid>
-            </Grid>
-          </Grid>
 
-          {/* Second Column */}
-          <Grid item xs={12} md={5}>
+          {/* 📌 Left Section: Metrics & Registration Trend */}
+          <Grid item xs={12} md={9}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <MetricCard title="Total Revenue" height="15vh" value={150000} />
+
+              <Grid item xs={12} md={4}>
+                <MetricCard title="Total Revenue" height="25vh" value={150000} bgColor="#04b976" />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <MetricCard title="Total Participation" height="15vh" value={3000} />
+
+              <Grid item xs={12} md={4}>
+                <MetricCard title="Total Registration" height="25vh" value={eventCount} trend="up" bgColor="#ff8c00" />
               </Grid>
-              {/* Updated Registration Trend Card */}
-              <Grid item xs={12}>
-                <VisualizationCard 
-                  title="Registration Trend" 
-                  chartType="line" 
-                  height="30vh"
+
+              <Grid item xs={12} md={4}>
+                <MetricCard title="Total Participation" height="25vh" value={3000} bgColor="#c71585" />
+              </Grid>
+
+              {/* 📊 Registration Trend */}
+              <Grid item xs={12} md={8}>
+                <VisualizationCard
+                  title="Registration Trend"
                   data={registrationData}
                   options={chartOptions}
+                  height="43vh"
+                  width="100%"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <VisualizationCard title="Alerts & Notifications" chartType="bar" height="20vh" />
+
+              <Grid item xs={12} md={4}>
+                <MetricCard title="Top Events" value={"Squid game (;"} height="38vh" bgColor={"#0000ff"} />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <VisualizationCard title="Top Events" chartType="pie" height="20vh" />
-              </Grid>
+
             </Grid>
           </Grid>
 
-          {/* Third Column */}
-          <Grid item xs={12} md={4}>
-            <VisualizationCard title="Event Update" chartType="area" height="81vh" />
+          {/* 📌 Right Section: Event Update (Increased Height) */}
+          <Grid item xs={12} md={3}>
+            <MetricCard title="Event Update" value={" "} height="72vh" bgColor={"#20b2aa"} />
           </Grid>
+
         </Grid>
       </div>
     </Layout>
