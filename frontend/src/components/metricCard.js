@@ -1,60 +1,63 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
-import { ArrowForward } from "@mui/icons-material"; // Import Arrow Icon
+import { ArrowForward } from "@mui/icons-material";
 import CountUp from "react-countup";
 
-const MetricCard = ({ title, value, darkMode, height, width, description, additionalInfo }) => {
+const MetricCard = ({ title, value, darkMode, height, width, description, additionalInfo, bgColor }) => {
   const isNumeric = !isNaN(Number(value));
 
   return (
     <Card
       sx={{
-        backgroundColor: darkMode ? "#1b1c1e" : "#f7f7f7",
+        backgroundColor: bgColor || (darkMode ? "#1b1c1e" : "#f7f7f7"), // Apply bgColor if provided
         borderRadius: 2,
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+        boxShadow: "0px 4px 8px rgba(32, 24, 24, 0.1)",
         padding: "20px",
         height: height,
         width: width,
         transition: "all 0.3s ease",
         "&:hover": {
-          boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
-          backgroundColor: "#2f3134",
+          boxShadow: "0px 6px 12px rgba(17, 15, 15, 0.15)",
+          backgroundColor: bgColor ? bgColor : "#2f3134", // Apply hover effect
         },
       }}
     >
       <CardContent>
-        {/* Event Name */}
-        <Typography variant="h6" sx={{ fontSize: "20px", fontWeight: "600", color: darkMode ? "#787878" : "#8d8c8c" }}>
+        <Typography variant="h6" sx={{ fontSize: "20px", fontWeight: "600", color: "#fff" }}>
           {title}
         </Typography>
 
-        {/* Venue or Numeric Value */}
-        <Typography variant="h5" sx={{ fontSize: "16px", fontWeight: "600", color: darkMode ? "#a9a9a9" : "#000" }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#fff", // White text for better contrast
+          }}
+        >
           {isNumeric ? <CountUp end={Number(value)} duration={2} separator="," /> : value}
         </Typography>
 
-        {/* Coordinator */}
         {description && (
-          <Typography variant="body2" sx={{ color: darkMode ? "#a9a9a9" : "#000", marginTop: "8px" }}>
+          <Typography variant="body2" sx={{ color: "#fff", marginTop: "8px" }}>
             {description}
           </Typography>
         )}
 
-        {/* Additional Info (View Link Aligned to Right with Bright Blue Color and Arrow) */}
         {additionalInfo && (
           <div style={{ marginTop: "10px", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
             <a
               href={`/events/${title.toLowerCase().replace(/\s+/g, "-")}`}
               style={{
                 textDecoration: "none",
-                color: "#007BFF", // Bright Blue Color
+                color: "#fff",
                 fontWeight: "bold",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               View
-              <ArrowForward sx={{ marginLeft: "5px", color: "#007BFF" }} /> {/* Bright Blue Arrow */}
+              <ArrowForward sx={{ marginLeft: "5px", color: "#fff" }} />
             </a>
           </div>
         )}
