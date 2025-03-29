@@ -1,7 +1,7 @@
 // addusers.js
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
+const bcrypt = require('bcryptjs'); // Using bcryptjs instead of bcrypt
 
 // Import the User model
 const User = require('../models/User');
@@ -17,8 +17,9 @@ router.post('/addUser', async (req, res) => {
       return res.status(400).json({ error: "Name, username, gender, role, and mobile are required." });
     }
     
-    // Generate an initial encrypted password using SHA-256 of the username
-    const encryptedPassword = crypto.createHash('sha256').update(username).digest('hex');
+    // Generate an initial encrypted password using bcrypt hash of the username
+    const saltRounds = 10;
+    const encryptedPassword = await bcrypt.hash(username, saltRounds);
     
     // Create a new user document. 
     // Convert mobile to a number, set status to 1 for "active" or 0 for "inactive"
