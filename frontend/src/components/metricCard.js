@@ -1,10 +1,23 @@
 import React from "react";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 import CountUp from "react-countup";
 
-const MetricCard = ({ title, value, darkMode, height, width, description, additionalInfo, bgColor }) => {
+const MetricCard = ({ 
+  title, 
+  value, 
+  darkMode, 
+  height, 
+  width, 
+  description, 
+  additionalInfo, 
+  bgColor, 
+  textColor,
+  action,
+  onClick
+}) => {
   const isNumeric = !isNaN(Number(value));
+  const defaultTextColor = textColor || "#fff";
 
   return (
     <Card
@@ -20,40 +33,54 @@ const MetricCard = ({ title, value, darkMode, height, width, description, additi
           boxShadow: `0px 0px 15px ${bgColor ? bgColor : "#00e676"}`,
           transform: "scale(1.05)",
         },
+        position: 'relative',
+        cursor: onClick ? 'pointer' : 'default'
       }}
+      onClick={onClick}
     >
-      <CardContent>
-        <Typography variant="h6" sx={{ fontSize: "20px", fontWeight: "600", color: "#fff" }}>
-          {title}
-        </Typography>
-
-        <Typography variant="h5" sx={{ fontSize: "16px", fontWeight: "600", color: "#fff" }}>
-          {isNumeric ? <CountUp end={Number(value)} duration={2} separator="," /> : value}
-        </Typography>
-
-        {description && (
-          <Typography variant="body2" sx={{ color: "#fff", marginTop: "8px" }}>
-            {description}
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ flexGrow: 1 }}> {/* This pushes the action to the bottom */}
+          <Typography variant="h6" sx={{ fontSize: "20px", fontWeight: "600", color: defaultTextColor }}>
+            {title}
           </Typography>
-        )}
 
-        {additionalInfo && (
-          <div style={{ marginTop: "10px", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <Typography variant="h5" sx={{ fontSize: "16px", fontWeight: "600", color: defaultTextColor }}>
+            {isNumeric ? <CountUp end={Number(value)} duration={2} separator="," /> : value}
+          </Typography>
+
+          {description && (
+            <Typography variant="body2" sx={{ color: defaultTextColor, marginTop: "8px" }}>
+              {description}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Centered Action Area */}
+        <Box sx={{ 
+          marginTop: "16px",
+          display: "flex",
+          justifyContent: "center", // Changed from 'flex-end' to 'center'
+          alignItems: "center",
+          width: '100%'
+        }}>
+          {action ? (
+            action
+          ) : additionalInfo ? (
             <a
               href={`/events/${title.toLowerCase().replace(/\s+/g, "-")}`}
               style={{
                 textDecoration: "none",
-                color: "#fff",
+                color: defaultTextColor,
                 fontWeight: "bold",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               View
-              <ArrowForward sx={{ marginLeft: "5px", color: "#fff" }} />
+              <ArrowForward sx={{ marginLeft: "5px", color: defaultTextColor }} />
             </a>
-          </div>
-        )}
+          ) : null}
+        </Box>
       </CardContent>
     </Card>
   );

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, Typography } from "@mui/material";
-import { ArrowForward } from "@mui/icons-material"; // Import arrow icon
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Grid, Typography, Button } from "@mui/material"; // Import Button from Material-UI
 import MetricCard from "../components/metricCard"; // Update this component or create a new one
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
@@ -10,43 +8,20 @@ import Cookies from "js-cookie";
 import { WebSocketContext } from "../App"; // Import WebSocket Context
 import Room from "../utils/roomManager";
 import Layout from "../layouts/layout"; // Import the Layout component
-import { Box } from '@mui/material';
-import { FiberManualRecord } from "@mui/icons-material"; // Import the icon
-import { PersonOutline } from "@mui/icons-material"; // Import an icon
-
-
-
+import { PersonOutline } from "@mui/icons-material";
 
 const EventOverview = () => {
   const navigate = useNavigate();
   const socket = useContext(WebSocketContext); // Access global WebSocket instance
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null); // State to track errors
+  const [events, setEvents] = useState([]); // State to store fetched events
 
-  // Manually added events (for now, since there's no backend)
-  const [events, setEvents] = useState([
-    {
-      name: "Hackathon 2025",
-      venue: "Main Hall",
-      coordinator: "John Doe",
-    },
-    {
-      name: "Coding Contest",
-      venue: "Room 101",
-      coordinator: "Jane Smith",
-    },
-    {
-      name: "AI Workshop",
-      venue: "Room 202",
-      coordinator: "Alice Johnson",
-    },
-    {
-      name: "Tech Conference",
-      venue: "Auditorium",
-      coordinator: "Bob Brown",
-    },
-  ]);
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+  // Fetch events from the backend
   useEffect(() => {
     let isMounted = true; // Track whether component is mounted
 
@@ -63,6 +38,33 @@ const EventOverview = () => {
       // Handle errors
       socket.on("error", (error) => setSocketError(error.message));
     }
+
+    // Fetch events from the backend API
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`${apiBaseURL}/events`, {
+          method: "GET",
+          headers: {
+            'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch events: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (isMounted) {
+          setEvents(data); // Update state with fetched events
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setSocketError(error.message || "An error occurred while fetching events.");
+      }
+    };
+
+    fetchEvents(); // Call the fetch function
 
     return () => {
       isMounted = false;
@@ -94,7 +96,6 @@ const EventOverview = () => {
                   title="Total Registration"
                   height="22vh"
                   icon={<PersonOutline />} // Pass the icon
-                  
                 />
               </Grid>
 
@@ -108,33 +109,51 @@ const EventOverview = () => {
           {/* Right Side: Revenue Card */}
           <Grid item xs={12} md={4}>
             <VisualizationCard title="Revenue" chartType="line" height="47vh" />
-
           </Grid>
         </Grid>
-
-
 
         <div style={{ marginTop: "30px", marginLeft: "20px" }}>
           <BlurText text="Events" delay={150} animateBy="words" direction="top" style={{ color: "#bec0bf" }} />
         </div>
 
         <Grid container spacing={3} style={{ marginTop: "20px" }}>
-          {events.map((event, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <MetricCard
-                title={event.name}
-                value={`Venue: ${event.venue}`}
-                description={`Coordinator: ${event.coordinator}`}
-                additionalInfo={
-                  <a href={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'blue', fontWeight: 'bold' }}>
-                    View
-                  </a>
-                }
-              />
-            </Grid>
-          ))}
-        </Grid>
-
+  {events.length > 0 ? (
+    events.map((event, index) => (
+      <Grid item xs={12} sm={6} md={3} key={index}>
+        <MetricCard
+          title={event.name}
+          value={`Venue: ${event.venue}`}
+          description={`Coordinator: ${event.coordinator1}`}
+          textColor="black"
+          action={
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#003366",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#00264d",
+                },
+                width: '100%',
+                mt: 2
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/events/${event._id}`);
+              }}
+            >
+              View
+            </Button>
+          }
+        />
+      </Grid>
+    ))
+  ) : (
+    <Typography variant="body1" style={{ marginLeft: "20px" }}>
+      No events available.
+    </Typography>
+  )}
+</Grid>
       </div>
     </Layout>
   );

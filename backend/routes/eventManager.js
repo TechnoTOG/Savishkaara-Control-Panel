@@ -68,4 +68,18 @@ router.post('/addEvent', async (req, res) => {
   }
 });
 
+// Route to fetch all events (with specific fields: name, venue, coordinator1, and _id)
+router.get('/events', async (req, res) => {
+  try {
+    // Fetch only the required fields: name, venue, coordinator1, and _id
+    const events = await Event.find({}, { name: 1, venue: 1, coordinator1: 1, _id: 1 });
+
+    // Respond with the list of events
+    res.status(200).json(events);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Failed to fetch events", details: error.message });
+  }
+});
+
 module.exports = router;
