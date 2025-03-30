@@ -83,7 +83,7 @@ const AddEvent = () => {
       const response = await fetch(`${apiBaseURL}/addEvent`, {
         method: "POST",
         headers: {
-          'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+          'X-Allowed-Origin': 'savishkaara.in',
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),

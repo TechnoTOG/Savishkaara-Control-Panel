@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === "production") {
 
   // Check for allowed origin header
   app.use((req, res, next) => {
-    if (req.headers['X-Allowed-Origin'] !== 'testsavi.amritaiedc.site') {
+    if (req.headers['X-Allowed-Origin'] !== 'savishkaara.in') {
       return res.status(403).json({ error: 'Forbidden' });
     }
     next();
@@ -52,9 +52,8 @@ app.use(
 
 // Configure CORS dynamically
 const allowedOrigins = [
-  "https://testsavi.amritaiedc.site",
   "http://localhost:3000",
-  "https://savicontrol.amritaiedc.site",
+  "https://savishkaara.in",
 ];
 
 app.use(

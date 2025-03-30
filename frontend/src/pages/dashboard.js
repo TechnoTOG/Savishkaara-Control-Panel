@@ -26,7 +26,7 @@ const Dashboard = () => {
       const response = await fetch(`${apiBaseURL}/event-count`, {
         method: "GET",
         headers: {
-          "X-Allowed-Origin": "testsavi.amritaiedc.site",
+          "X-Allowed-Origin": "savishkaara.in",
           "Content-Type": "application/json",
         },
         credentials: "include",

@@ -33,7 +33,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   // Simulate fetching notifications from an API
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`${apiBaseURL}/notifications`, { headers: { 'X-Allowed-Origin': 'testsavi.amritaiedc.site' } });
+      const response = await fetch(`${apiBaseURL}/notifications`, { headers: { 'X-Allowed-Origin': 'savishkaara.in' } });
       const data = await response.json();
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
@@ -46,7 +46,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode, title }) => {
   const markAsRead = async () => {
     try {
       await fetch(`${apiBaseURL}/notifications/mark-as-read`, { 
-        headers: { 'X-Allowed-Origin': 'testsavi.amritaiedc.site' }, 
+        headers: { 'X-Allowed-Origin': 'savishkaara.in' }, 
         method: "POST" 
       });
       setUnreadCount(0); // Reset unread count after marking as read

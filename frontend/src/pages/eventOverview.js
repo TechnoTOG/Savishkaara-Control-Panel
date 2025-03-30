@@ -45,7 +45,7 @@ const EventOverview = () => {
         const response = await fetch(`${apiBaseURL}/events`, {
           method: "GET",
           headers: {
-            'X-Allowed-Origin': 'testsavi.amritaiedc.site',
+            'X-Allowed-Origin': 'savishkaara.in',
             "Content-Type": "application/json",
           },
         });
