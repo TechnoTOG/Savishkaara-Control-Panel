@@ -147,21 +147,7 @@ const MyEvent = () => {
               {event.form_link}
             </a>
 
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#003366",
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: "#00264d",
-                },
-                width: '100%',
-                mt: 4
-              }}
-              onClick={() => navigate("/eventso")} // Navigate back to the events overview
-            >
-              Back to Events
-            </Button>
+           
           </CardContent>
         </Card>
       ) : (

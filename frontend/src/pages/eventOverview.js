@@ -130,7 +130,7 @@ const EventOverview = () => {
                 ) : (
                   <VisualizationCard
                     title="Total Registration"
-                    height="22vh"
+                    height="23vh"
                     icon={<PersonOutline />}
                     value={totalRegistrations.toLocaleString()}
                   />
@@ -148,7 +148,7 @@ const EventOverview = () => {
                 ) : (
                   <VisualizationCard
                     title="Total Participation"
-                    height="22vh"
+                    height="24vh"
                     value={verifiedRegistrations.toLocaleString()}
                   />
                 )}
@@ -157,64 +157,62 @@ const EventOverview = () => {
           </Grid>
 
           {/* Right Side: Revenue Card */}
-          <Grid item xs={12} md={5}>
-            {loading ? (
-              <Typography variant="body1">Loading...</Typography>
-            ) : socketError ? (
-              <Typography variant="body1" color="error">
-                Error: {socketError}
-              </Typography>
-            ) : revenueData.length > 0 ? (
-              <VisualizationCard
-                title="Revenue"
-                chartType="doughnut"
-                data={{
-                  labels: revenueData.map((item) => item.name), // Event names
-                  datasets: [
-                    {
-                      data: revenueData.map((item) => item.revenue), // Revenue values
-                      backgroundColor: [
-                        "#FF6384", // Red
-                        "#36A2EB", // Blue
-                        "#FFCE56", // Yellow
-                        "#4BC0C0", // Teal
-                        "#9966FF", // Purple
-                        "#FF9F40", // Orange
-                      ],
-                      hoverBackgroundColor: [
-                        "#FF6384", // Red
-                        "#36A2EB", // Blue
-                        "#FFCE56", // Yellow
-                        "#4BC0C0", // Teal
-                        "#9966FF", // Purple
-                        "#FF9F40", // Orange
-                      ],
-                    },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                    tooltip: {
-                      callbacks: {
-                        label: (tooltipItem) => {
-                          const label = revenueData[tooltipItem.dataIndex].name;
-                          const value = revenueData[tooltipItem.dataIndex].revenue;
-                          return `${label}: ₹${value}`;
-                        },
-                      },
-                    },
-                  },
-                }}
-                height="47vh"
-              />
-            ) : (
-              <Typography variant="body1">No revenue data available</Typography>
-            )}
-          </Grid>
+          <Grid item xs={12} md={6}>
+  {loading ? (
+    <Typography variant="body1">Loading...</Typography>
+  ) : socketError ? (
+    <Typography variant="body1" color="error">
+      Error: {socketError}
+    </Typography>
+  ) : revenueData.length > 0 ? (
+    <VisualizationCard
+      title="Revenue"
+      chartType="doughnut"
+      data={{
+        labels: revenueData.map((item) => item.name),
+        datasets: [
+          {
+            data: revenueData.map((item) => item.revenue),
+            backgroundColor: [
+              "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+            ],
+            hoverBackgroundColor: [
+              "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+            ],
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: true, // Keep ratio to avoid sudden disappearance
+        aspectRatio: 2, // Adjust to control width-height balance
+        cutout: "50%", // Reduce donut hole size (Chart.js v3+)
+        plugins: {
+          legend: {
+            position: "right", // Move legend to right side
+            labels: {
+              boxWidth: 10, // Reduce box size for better spacing
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                const label = revenueData[tooltipItem.dataIndex].name;
+                const value = revenueData[tooltipItem.dataIndex].revenue;
+                return `${label}: ₹${value}`;
+              },
+            },
+          },
+        },
+      }}
+      height="50vh" // Ensure the height stays stable
+    />
+  ) : (
+    <Typography variant="body1">No revenue data available</Typography>
+  )}
+</Grid>
+
+
         </Grid>
 
         <div style={{ marginTop: "30px", marginLeft: "20px" }}>

@@ -34,8 +34,8 @@ const VisualizationCard = ({ title, data, options, value, height = "100%", width
     >
       <CardContent>
         {/* Title */}
-        <Typography variant="h6" gutterBottom sx={{ textAlign: "center" }}>
-          {title}
+        <Typography variant="h6" gutterBottom sx={{ textAlign: "left", pl: 13 }}>
+        {title}
         </Typography>
 
         {/* Conditional Rendering */}

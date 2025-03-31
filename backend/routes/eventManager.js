@@ -138,52 +138,41 @@ router.get('/events-revenue', async (req, res) => {
   try {
     console.log("Starting /events-revenue route...");
 
-    // Step 1: Fetch all events
-    console.log("Fetching events from the database...");
-    const events = await Event.find({}, { name: 1, fee: 1 });
+    // Step 1: Log raw Event_reg data to verify its structure
+    const rawEventData = await Event_reg.find({});
+    console.log("Raw Event_reg data:", JSON.stringify(rawEventData, null, 2));
 
-    console.log("Events fetched:", events); // Log the fetched events
-
-    if (!events || events.length === 0) {
-      console.warn("No events found in the database.");
-      return res.status(200).json([]); // Return an empty array if no events
-    }
-
-    // Step 2: Aggregate registration counts grouped by event name
-    console.log("Aggregating registration counts...");
-    const registrationCounts = await Event_reg.aggregate([
+    // Step 2: Aggregate revenue grouped by event name
+    console.log("Aggregating revenue from ticket_details...");
+    const revenueData = await Event_reg.aggregate([
+      {
+        $match: {
+          "ticket_details.amount": { $exists: true, $ne: null }, // Filter out invalid amounts
+        },
+      },
       {
         $group: {
-          _id: "$ticket_details.event", // Access the nested `event` field
-          count: { $sum: 1 }, // Count the number of registrations
+          _id: "$ticket_details.event", // Group by the nested `event` field in ticket_details
+          revenue: {
+            $sum: { $toInt: "$ticket_details.amount" }, // Convert amount to integer before summing
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the `_id` field from the output
+          name: "$_id", // Rename `_id` to `name`
+          revenue: 1, // Include the calculated revenue
         },
       },
     ]);
 
-    console.log("Registration counts:", registrationCounts); // Log the aggregated counts
+    console.log("Revenue data after aggregation:", JSON.stringify(revenueData, null, 2));
 
-    // Step 3: Combine registration counts with event details to calculate revenue
-    console.log("Combining event details with registration counts to calculate revenue...");
-    const revenueData = events.map((event) => {
-      const registrationCount = registrationCounts.find(
-        (reg) => reg._id === event.name // Match by event name
-      );
-
-      console.log(`Processing event: ${event.name}`); // Log the current event being processed
-      console.log(`Found registration count for ${event.name}:`, registrationCount); // Log the matching registration count
-
-      const count = registrationCount ? registrationCount.count : 0;
-      const revenue = event.fee ? count * event.fee : 0; // Handle missing fee
-
-      console.log(`Calculated revenue for ${event.name}: ₹${revenue}`); // Log the calculated revenue
-
-      return {
-        name: event.name,
-        revenue,
-      };
-    });
-
-    console.log("Final revenue data:", revenueData); // Log the final revenue data
+    // Step 3: Validate the revenue data
+    if (!revenueData || revenueData.length === 0) {
+      console.warn("No revenue data found after aggregation.");
+    }
 
     // Step 4: Return the revenue data as a JSON response
     console.log("Returning revenue data to the client...");
