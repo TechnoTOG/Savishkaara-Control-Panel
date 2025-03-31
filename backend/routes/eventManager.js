@@ -124,4 +124,74 @@ router.get('/events/:eventId', async (req, res) => {
   }
 });
 
+/**
+ * GET /events-revenue
+ * Calculate and return the revenue generated for each event.
+ * 
+ * Response:
+ * [
+ *   { "name": "Nerd Script", "revenue": 200 },
+ *   { "name": "Coding", "revenue": 50 }
+ * ]
+ */
+router.get('/events-revenue', async (req, res) => {
+  try {
+    console.log("Starting /events-revenue route...");
+
+    // Step 1: Fetch all events
+    console.log("Fetching events from the database...");
+    const events = await Event.find({}, { name: 1, fee: 1 });
+
+    console.log("Events fetched:", events); // Log the fetched events
+
+    if (!events || events.length === 0) {
+      console.warn("No events found in the database.");
+      return res.status(200).json([]); // Return an empty array if no events
+    }
+
+    // Step 2: Aggregate registration counts grouped by event name
+    console.log("Aggregating registration counts...");
+    const registrationCounts = await Event_reg.aggregate([
+      {
+        $group: {
+          _id: "$ticket_details.event", // Access the nested `event` field
+          count: { $sum: 1 }, // Count the number of registrations
+        },
+      },
+    ]);
+
+    console.log("Registration counts:", registrationCounts); // Log the aggregated counts
+
+    // Step 3: Combine registration counts with event details to calculate revenue
+    console.log("Combining event details with registration counts to calculate revenue...");
+    const revenueData = events.map((event) => {
+      const registrationCount = registrationCounts.find(
+        (reg) => reg._id === event.name // Match by event name
+      );
+
+      console.log(`Processing event: ${event.name}`); // Log the current event being processed
+      console.log(`Found registration count for ${event.name}:`, registrationCount); // Log the matching registration count
+
+      const count = registrationCount ? registrationCount.count : 0;
+      const revenue = event.fee ? count * event.fee : 0; // Handle missing fee
+
+      console.log(`Calculated revenue for ${event.name}: ₹${revenue}`); // Log the calculated revenue
+
+      return {
+        name: event.name,
+        revenue,
+      };
+    });
+
+    console.log("Final revenue data:", revenueData); // Log the final revenue data
+
+    // Step 4: Return the revenue data as a JSON response
+    console.log("Returning revenue data to the client...");
+    res.status(200).json(revenueData);
+  } catch (error) {
+    console.error("Error fetching revenue data:", error);
+    res.status(500).json({ error: "Failed to fetch revenue data", details: error.message });
+  }
+});
+
 module.exports = router;

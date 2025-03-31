@@ -17,7 +17,8 @@ const EventOverview = () => {
   const [socketError, setSocketError] = useState(null);
   const [events, setEvents] = useState([]);
   const [totalRegistrations, setTotalRegistrations] = useState(0);
-  const [verifiedRegistrations, setVerifiedRegistrations] = useState(0); // New state for verified count
+  const [verifiedRegistrations, setVerifiedRegistrations] = useState(0);
+  const [revenueData, setRevenueData] = useState([]); // New state for revenue data
   const [loading, setLoading] = useState(true);
 
   const apiBaseURL = process.env.NODE_ENV === "production"
@@ -61,13 +62,28 @@ const EventOverview = () => {
           throw new Error(`Failed to fetch registration counts: ${registrationsResponse.statusText}`);
         }
 
+        // Fetch revenue data
+        const revenueResponse = await fetch(`${apiBaseURL}/events-revenue`, {
+          method: "GET",
+          headers: {
+            'X-Allowed-Origin': 'savishkaara.in',
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!revenueResponse.ok) {
+          throw new Error(`Failed to fetch revenue data: ${revenueResponse.statusText}`);
+        }
+
         const eventsData = await eventsResponse.json();
         const registrationsData = await registrationsResponse.json();
+        const revenueData = await revenueResponse.json();
 
         if (isMounted) {
           setEvents(eventsData);
-          setTotalRegistrations(registrationsData.totalRegistrations); // Total registrations
-          setVerifiedRegistrations(registrationsData.verifiedRegistrations); // Verified registrations
+          setTotalRegistrations(registrationsData.totalRegistrations);
+          setVerifiedRegistrations(registrationsData.verifiedRegistrations);
+          setRevenueData(revenueData); // Set revenue data
           setLoading(false);
         }
       } catch (error) {
@@ -116,7 +132,7 @@ const EventOverview = () => {
                     title="Total Registration"
                     height="22vh"
                     icon={<PersonOutline />}
-                    value={totalRegistrations.toLocaleString()} // Format the count with commas
+                    value={totalRegistrations.toLocaleString()}
                   />
                 )}
               </Grid>
@@ -133,7 +149,7 @@ const EventOverview = () => {
                   <VisualizationCard
                     title="Total Participation"
                     height="22vh"
-                    value={verifiedRegistrations.toLocaleString()} // Display verified count
+                    value={verifiedRegistrations.toLocaleString()}
                   />
                 )}
               </Grid>
@@ -141,8 +157,63 @@ const EventOverview = () => {
           </Grid>
 
           {/* Right Side: Revenue Card */}
-          <Grid item xs={12} md={4}>
-            <VisualizationCard title="Revenue" chartType="line" height="47vh" />
+          <Grid item xs={12} md={5}>
+            {loading ? (
+              <Typography variant="body1">Loading...</Typography>
+            ) : socketError ? (
+              <Typography variant="body1" color="error">
+                Error: {socketError}
+              </Typography>
+            ) : revenueData.length > 0 ? (
+              <VisualizationCard
+                title="Revenue"
+                chartType="doughnut"
+                data={{
+                  labels: revenueData.map((item) => item.name), // Event names
+                  datasets: [
+                    {
+                      data: revenueData.map((item) => item.revenue), // Revenue values
+                      backgroundColor: [
+                        "#FF6384", // Red
+                        "#36A2EB", // Blue
+                        "#FFCE56", // Yellow
+                        "#4BC0C0", // Teal
+                        "#9966FF", // Purple
+                        "#FF9F40", // Orange
+                      ],
+                      hoverBackgroundColor: [
+                        "#FF6384", // Red
+                        "#36A2EB", // Blue
+                        "#FFCE56", // Yellow
+                        "#4BC0C0", // Teal
+                        "#9966FF", // Purple
+                        "#FF9F40", // Orange
+                      ],
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: "top",
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (tooltipItem) => {
+                          const label = revenueData[tooltipItem.dataIndex].name;
+                          const value = revenueData[tooltipItem.dataIndex].revenue;
+                          return `${label}: ₹${value}`;
+                        },
+                      },
+                    },
+                  },
+                }}
+                height="47vh"
+              />
+            ) : (
+              <Typography variant="body1">No revenue data available</Typography>
+            )}
           </Grid>
         </Grid>
 
@@ -151,40 +222,40 @@ const EventOverview = () => {
         </div>
 
         <Grid container spacing={3} style={{ marginTop: "20px" }}>
-  {events.length > 0 ? (
-    events.map((event, index) => (
-      <Grid item xs={12} sm={6} md={3} key={index}>
-        <MetricCard
-          title={event.name}
-          value={`Venue: ${event.venue}`}
-          description={`Coordinator: ${event.coordinator1}`}
-          textColor="black"
-          action={
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#003366",
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: "#00264d",
-                },
-                width: '100%',
-                mt: 2
-              }}
-              onClick={() => navigate(`/my-event/${event._id}`)} // Pass the event's _id
-            >
-              View
-            </Button>
-          }
-        />
-      </Grid>
-    ))
-  ) : (
-    <Typography variant="body1" style={{ marginLeft: "20px" }}>
-      No events available.
-    </Typography>
-  )}
-</Grid>
+          {events.length > 0 ? (
+            events.map((event, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <MetricCard
+                  title={event.name}
+                  value={`Venue: ${event.venue}`}
+                  description={`Coordinator: ${event.coordinator1}`}
+                  textColor="black"
+                  action={
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#003366",
+                        color: "#FFFFFF",
+                        "&:hover": {
+                          backgroundColor: "#00264d",
+                        },
+                        width: '100%',
+                        mt: 2
+                      }}
+                      onClick={() => navigate(`/my-event/${event._id}`)}
+                    >
+                      View
+                    </Button>
+                  }
+                />
+              </Grid>
+            ))
+          ) : (
+            <Typography variant="body1" style={{ marginLeft: "20px" }}>
+              No events available.
+            </Typography>
+          )}
+        </Grid>
       </div>
     </Layout>
   );
