@@ -80,7 +80,7 @@ const UserOverview = () => {
     <Layout title="Users Overview" activePage="userso">
       <Box sx={{ padding: "20px", width: "100%", boxSizing: "border-box" }}>
         <Typography variant="h5" gutterBottom sx={{ color: "#171616" }}>
-          Users Overview
+          
         </Typography>
         <Grid container spacing={3}>
           {/* Total Users Metric */}
@@ -127,16 +127,60 @@ const UserOverview = () => {
                     <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>Role</TableCell>
                     <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>Event</TableCell>
                     <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>Mobile</TableCell>
+                    <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {userDetails.map((user) => (
                     <TableRow key={user.name}>
-                      <TableCell sx={{ color: "#fff" }}>{user.name}</TableCell>
-                      <TableCell sx={{ color: "#fff" }}>{user.role}</TableCell>
-                      <TableCell sx={{ color: "#fff" }}>{user.event_relation}</TableCell>
-                      <TableCell sx={{ color: "#fff" }}>{user.mobile}</TableCell>
-                    </TableRow>
+                    <TableCell sx={{ color: "#fff" }}>{user.name}</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>{user.role}</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>{user.event_relation}</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>{user.mobile}</TableCell>
+                    <TableCell>
+                      <button
+                        style={{
+                          padding: "5px 10px",
+                          backgroundColor: "#d32f2f",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          fontSize: "0.8rem",
+                          cursor: "pointer"
+                        }}
+                        onClick={async () => {
+                          const confirmReset = window.confirm(`Are you sure you want to reset status for ${user.name}?`);
+                          if (!confirmReset) return;
+                        
+                          try {
+                            const res = await fetch(`${apiBaseURL}/overview/reset-status/${user.mobile}`, {
+                              method: "POST",
+                              headers: {
+                                "X-Allowed-Origin": "savishkaara.in",
+                                "Content-Type": "application/json",
+                              },
+                              credentials: "include",
+                            });
+                        
+                            const data = await res.json();
+                            if (res.ok) {
+                              window.alert(data.message || "Status reset successfully");
+                            } else {
+                              window.alert(data.error || "Something went wrong");
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            window.alert("Failed to reset status");
+                          }
+                        }}
+                        
+                        
+                      >
+                        Reset
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                  
                   ))}
                 </TableBody>
               </Table>

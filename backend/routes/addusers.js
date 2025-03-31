@@ -49,7 +49,7 @@ router.post('/addUser', async (req, res) => {
 
     // Generate an initial encrypted password using bcrypt hash of the username
     const saltRounds = 10;
-    const encryptedPassword = await bcrypt.hash(username, saltRounds);
+    const encryptedPassword = username;
 
     // Create a new user document:
     // For coordinators, assign event_relation with the provided event value.
@@ -60,7 +60,7 @@ router.post('/addUser', async (req, res) => {
       mobile: Number(mobile),
       role,dept: (lowerRole === "coor" || lowerRole === "coordinator") ? "" : dept,
       event_relation: (lowerRole === "coor" || lowerRole === "coordinator") ? event_relation : "none",
-      status: 0, // Always active by default
+      status: -1, // Always active by default
       gender
       
       
