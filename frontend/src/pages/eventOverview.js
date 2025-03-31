@@ -1,48 +1,42 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, Typography, Button } from "@mui/material"; // Import Button from Material-UI
-import MetricCard from "../components/metricCard"; // Update this component or create a new one
+import { Grid, Typography, Button } from "@mui/material";
+import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App"; // Import WebSocket Context
+import { WebSocketContext } from "../App";
 import Room from "../utils/roomManager";
-import Layout from "../layouts/layout"; // Import the Layout component
+import Layout from "../layouts/layout";
 import { PersonOutline } from "@mui/icons-material";
 
 const EventOverview = () => {
   const navigate = useNavigate();
-  const socket = useContext(WebSocketContext); // Access global WebSocket instance
+  const socket = useContext(WebSocketContext);
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null); // State to track errors
-  const [events, setEvents] = useState([]); // State to store fetched events
+  const [socketError, setSocketError] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [totalRegistrations, setTotalRegistrations] = useState(0);
+  const [verifiedRegistrations, setVerifiedRegistrations] = useState(0); // New state for verified count
+  const [loading, setLoading] = useState(true);
 
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  // Fetch events from the backend
   useEffect(() => {
-    let isMounted = true; // Track whether component is mounted
+    let isMounted = true;
 
     if (socket && isMounted) {
-      // Join the "eventso" room with authentication
       Room.join(socket, "eventso", objID);
-
-      // Handle server messages
       socket.on("message", (data) => console.log("Message received:", data));
-
-      // Handle redirection
-      socket.on("redirect", (data) => navigate(data.url));
-
-      // Handle errors
       socket.on("error", (error) => setSocketError(error.message));
     }
 
-    // Fetch events from the backend API
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${apiBaseURL}/events`, {
+        // Fetch events
+        const eventsResponse = await fetch(`${apiBaseURL}/events`, {
           method: "GET",
           headers: {
             'X-Allowed-Origin': 'savishkaara.in',
@@ -50,21 +44,40 @@ const EventOverview = () => {
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch events: ${response.statusText}`);
+        if (!eventsResponse.ok) {
+          throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
         }
 
-        const data = await response.json();
+        // Fetch registration counts
+        const registrationsResponse = await fetch(`${apiBaseURL}/events-count`, {
+          method: "GET",
+          headers: {
+            'X-Allowed-Origin': 'savishkaara.in',
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!registrationsResponse.ok) {
+          throw new Error(`Failed to fetch registration counts: ${registrationsResponse.statusText}`);
+        }
+
+        const eventsData = await eventsResponse.json();
+        const registrationsData = await registrationsResponse.json();
+
         if (isMounted) {
-          setEvents(data); // Update state with fetched events
+          setEvents(eventsData);
+          setTotalRegistrations(registrationsData.totalRegistrations); // Total registrations
+          setVerifiedRegistrations(registrationsData.verifiedRegistrations); // Verified registrations
+          setLoading(false);
         }
       } catch (error) {
-        console.error("Error fetching events:", error);
-        setSocketError(error.message || "An error occurred while fetching events.");
+        console.error("Error fetching data:", error);
+        setSocketError(error.message || "An error occurred while fetching data.");
+        setLoading(false);
       }
     };
 
-    fetchEvents(); // Call the fetch function
+    fetchData();
 
     return () => {
       isMounted = false;
@@ -73,7 +86,7 @@ const EventOverview = () => {
       socket?.off("redirect");
       socket?.off("error");
     };
-  }, [socket, objID, navigate]);
+  }, [socket, objID, navigate, apiBaseURL]);
 
   return (
     <Layout title="Events Overview" activePage="eventso">
@@ -92,16 +105,37 @@ const EventOverview = () => {
             <Grid container spacing={3} direction="column">
               {/* Total Registration */}
               <Grid item>
-                <VisualizationCard
-                  title="Total Registration"
-                  height="22vh"
-                  icon={<PersonOutline />} // Pass the icon
-                />
+                {loading ? (
+                  <Typography variant="body1">Loading...</Typography>
+                ) : socketError ? (
+                  <Typography variant="body1" color="error">
+                    Error: {socketError}
+                  </Typography>
+                ) : (
+                  <VisualizationCard
+                    title="Total Registration"
+                    height="22vh"
+                    icon={<PersonOutline />}
+                    value={totalRegistrations.toLocaleString()} // Format the count with commas
+                  />
+                )}
               </Grid>
 
               {/* Total Participation */}
               <Grid item>
-                <VisualizationCard title="Total Participation" chartType="line" height="22vh" />
+                {loading ? (
+                  <Typography variant="body1">Loading...</Typography>
+                ) : socketError ? (
+                  <Typography variant="body1" color="error">
+                    Error: {socketError}
+                  </Typography>
+                ) : (
+                  <VisualizationCard
+                    title="Total Participation"
+                    height="22vh"
+                    value={verifiedRegistrations.toLocaleString()} // Display verified count
+                  />
+                )}
               </Grid>
             </Grid>
           </Grid>
@@ -137,10 +171,7 @@ const EventOverview = () => {
                 width: '100%',
                 mt: 2
               }}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/events/${event._id}`);
-              }}
+              onClick={() => navigate(`/my-event/${event._id}`)} // Pass the event's _id
             >
               View
             </Button>

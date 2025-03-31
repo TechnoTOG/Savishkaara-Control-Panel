@@ -9,20 +9,37 @@ const mongoConnect = require('../db/mongodb');
 const Event = require('../models/events'); // Updated import name to match the model
 const Event_reg = require('../models/event_registration');
 
-// Route to get the count of event registrations
+/**
+ * GET /events-count
+ * Fetch the total number of event registrations and the count of verified registrations.
+ * 
+ * Response:
+ * {
+ *   "totalRegistrations": Number,       // Total number of registrations
+ *   "verifiedRegistrations": Number    // Count of registrations where verified = true
+ * }
+ */
 router.get("/events-count", async (req, res) => {
   try {
-    const count = await Event_reg.countDocuments();
-    res.status(200).json({ count: count });
+    const totalRegistrations = await Event_reg.countDocuments();
+    const verifiedRegistrations = await Event_reg.countDocuments({ verified: true });
+
+    res.status(200).json({
+      totalRegistrations,
+      verifiedRegistrations,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error fetching registration counts:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching registration counts.",
+      details: error.message,
+    });
   }
 });
 
 // Route to add a new event
 router.post('/addEvent', async (req, res) => {
   try {
-    // Extract data from the request body
     const { 
       name, 
       venue, 
@@ -36,33 +53,27 @@ router.post('/addEvent', async (req, res) => {
       elink
     } = req.body;
 
-    // Validate required fields
     if (!name || !venue || !dateAndTime || !fee || !coor1 || !facoor1 || !flinik || !elink) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Create a new event document
     const newEvent = new Event({
-      name: name,
-      venue: venue,
-      date_time: new Date(dateAndTime), // Convert string to Date object
-      fee: fee,
+      name,
+      venue,
+      date_time: new Date(dateAndTime),
+      fee,
       coordinator1: coor1,
       coordinator2: coor2,
       faculty_coor1: facoor1,
       faculty_coor2: facoor2,
       form_link: flinik,
       excel_link: elink,
-      status: "upcoming"
+      status: "upcoming",
     });
 
-    // Save the event to the database
     const savedEvent = await newEvent.save();
-
-    // Respond with the saved event
     res.status(201).json({ message: "Event added successfully", event: savedEvent });
   } catch (error) {
-    // Handle errors
     console.error("Error adding event:", error);
     res.status(500).json({ error: "Failed to add event", details: error.message });
   }
@@ -71,14 +82,45 @@ router.post('/addEvent', async (req, res) => {
 // Route to fetch all events (with specific fields: name, venue, coordinator1, and _id)
 router.get('/events', async (req, res) => {
   try {
-    // Fetch only the required fields: name, venue, coordinator1, and _id
     const events = await Event.find({}, { name: 1, venue: 1, coordinator1: 1, _id: 1 });
-
-    // Respond with the list of events
     res.status(200).json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).json({ error: "Failed to fetch events", details: error.message });
+  }
+});
+
+/**
+ * GET /events/:eventId
+ * Fetch details of a specific event by its _id.
+ * 
+ * Parameters:
+ * - eventId: The unique ID of the event.
+ * 
+ * Response:
+ * - If the event is found, returns the event object.
+ * - If the event is not found, returns a 404 error.
+ */
+router.get('/events/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    // Validate if eventId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ error: "Invalid event ID" });
+    }
+
+    // Fetch the event by ID
+    const event = await Event.findById(eventId);
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error fetching event details:", error);
+    res.status(500).json({ error: "Failed to fetch event details", details: error.message });
   }
 });
 

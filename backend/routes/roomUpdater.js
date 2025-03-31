@@ -12,7 +12,7 @@ module.exports = function (io) {
                     return socket.emit("error", { message: "Unauthorized: User not found" });
                 }
                 const ROOM_ACCESS = {
-                    'super': ['dashboard', 'samridhi', 'server', 'eventso', 'eventsa', 'userso', 'usersa'],
+                    'super': ['dashboard', 'samridhi', 'server', 'eventso', 'eventsa', 'myevent', 'userso', 'usersa'],
                     'admin': ['dashboard', 'samridhi', 'vevents'],
                     'coor': ['dashboard', 'myevent']
                 };

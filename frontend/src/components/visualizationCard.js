@@ -15,7 +15,7 @@ import {
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const VisualizationCard = ({ title, data, options, height = "100%", width = "100%" }) => {
+const VisualizationCard = ({ title, data, options, value, height = "100%", width = "100%" }) => {
   return (
     <Card
       sx={{
@@ -32,13 +32,28 @@ const VisualizationCard = ({ title, data, options, height = "100%", width = "100
       }}
     >
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        {/* Title */}
+        <Typography variant="h6" gutterBottom sx={{ textAlign: "center" }}>
           {title}
         </Typography>
-        {data && options ? (
+
+        {/* Conditional Rendering */}
+        {value !== undefined ? (
+          // Display numeric value with smaller font size and center alignment
+          <Typography
+            variant="h5"
+            sx={{ textAlign: "center", marginTop: "16px", fontWeight: "bold" }}
+          >
+            {value}
+          </Typography>
+        ) : data && options ? (
+          // Display chart if data and options are provided
           <Bar data={data} options={options} />
         ) : (
-          <Typography variant="body2">No data available</Typography>
+          // Fallback message if neither value nor chart data is provided
+          <Typography variant="body2" sx={{ textAlign: "center", marginTop: "16px" }}>
+            No data available
+          </Typography>
         )}
       </CardContent>
     </Card>
@@ -48,8 +63,9 @@ const VisualizationCard = ({ title, data, options, height = "100%", width = "100
 // Define prop types for type checking
 VisualizationCard.propTypes = {
   title: PropTypes.string.isRequired,
-  data: PropTypes.object,
-  options: PropTypes.object,
+  data: PropTypes.object, // For charts
+  options: PropTypes.object, // For charts
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), // For numeric values
   height: PropTypes.string,
   width: PropTypes.string,
 };
