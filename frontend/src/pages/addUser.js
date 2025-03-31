@@ -36,7 +36,10 @@ const AddUser = () => {
     if (lowerRole === "coor" || lowerRole === "coordinator") {
       fetch(`${apiBaseURL}/distinctEvents`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Allowed-Origin": "savishkaara.in",
+        },
         credentials: "include",
       })
         .then((res) => res.json())
@@ -61,7 +64,10 @@ const AddUser = () => {
     try {
       const response = await fetch(`${apiBaseURL}/adduser`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Allowed-Origin": "savishkaara.in",
+        },
         credentials: "include",
         body: JSON.stringify(formData),
       });
