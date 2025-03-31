@@ -15,6 +15,8 @@ const Dashboard = () => {
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null);
   const [eventCount, setEventCount] = useState(0);
+  const [totalRegistrations, setTotalRegistrations] = useState(0); // Total registrations
+  const [verifiedRegistrations, setVerifiedRegistrations] = useState(0); // Total participation (verified)
   const hasJoinedRoom = useRef(false);
 
   const apiBaseURL = process.env.NODE_ENV === "production"
@@ -41,9 +43,35 @@ const Dashboard = () => {
     }
   };
 
+  const fetchRegistrationCount = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/events-count`, {
+        method: "GET",
+        headers: {
+          "X-Allowed-Origin": "savishkaara.in",
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch registration count");
+
+      const data = await response.json();
+      setTotalRegistrations(data.totalRegistrations || 0); // Set total registrations
+      setVerifiedRegistrations(data.verifiedRegistrations || 0); // Set verified registrations
+    } catch (error) {
+      console.error("Error fetching registration count:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCount();
-    const interval = setInterval(fetchCount, 10000); // Fetch count every 10 seconds
+    fetchRegistrationCount(); // Fetch registration count on component mount
+
+    const interval = setInterval(() => {
+      fetchCount();
+      fetchRegistrationCount(); // Fetch counts every 10 seconds
+    }, 10000);
 
     if (socket && !hasJoinedRoom.current) {
       socket.emit("join-room", { roomName: "dashboard", objId: objID });
@@ -79,9 +107,9 @@ const Dashboard = () => {
         data: [10, 20, 30, 40, 50],
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1
-      }
-    ]
+        borderWidth: 1,
+      },
+    ],
   };
 
   const chartOptions = {
@@ -92,10 +120,10 @@ const Dashboard = () => {
       },
     },
     scales: {
-      x: { // X-axis scale
+      x: {
         beginAtZero: true,
       },
-      y: { // Y-axis scale
+      y: {
         beginAtZero: true,
       },
     },
@@ -124,21 +152,31 @@ const Dashboard = () => {
       {/* Dashboard Grid */}
       <div style={{ marginLeft: "20px", marginRight: "20px", width: "auto" }}>
         <Grid container spacing={3}>
-
           {/* 📌 Left Section: Metrics & Registration Trend */}
           <Grid item xs={12} md={9}>
             <Grid container spacing={3}>
-
               <Grid item xs={12} md={4}>
                 <MetricCard title="Total Revenue" height="25vh" value={150000} bgColor="#04b976" />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <MetricCard title="Total Registration" height="25vh" value={eventCount} trend="up" bgColor="#ff8c00" />
+                <MetricCard
+                  title="Total Registration"
+                  height="25vh"
+                  value={totalRegistrations.toLocaleString()} // Display total registrations
+                  trend="up"
+                  bgColor="#ff8c00"
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <MetricCard title="Total Participation" height="25vh" value={3000} bgColor="#c71585" />
+                <MetricCard
+                  title="Total Participation"
+                  height="25vh"
+                  value={verifiedRegistrations.toLocaleString()} // Display verified registrations
+                  trend="down"
+                  bgColor="#c71585"
+                />
               </Grid>
 
               {/* 📊 Registration Trend */}
@@ -155,7 +193,6 @@ const Dashboard = () => {
               <Grid item xs={12} md={4}>
                 <MetricCard title="Top Events" value={"Squid game (;"} height="38vh" bgColor={"#0000ff"} />
               </Grid>
-
             </Grid>
           </Grid>
 
@@ -163,7 +200,6 @@ const Dashboard = () => {
           <Grid item xs={12} md={3}>
             <MetricCard title="Event Update" value={" "} height="72vh" bgColor={"#20b2aa"} />
           </Grid>
-
         </Grid>
       </div>
     </Layout>
