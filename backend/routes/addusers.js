@@ -21,14 +21,14 @@ router.get('/distinctEvents', async (req, res) => {
 
 // POST /api/users/addUser
 // Adds a new user based on role-specific form structure.
-// For coordinators, the frontend should send a field "event", which is stored in event_relation.
+// For coordinators, the frontend should send a field "event_relation", which is stored in event_relation.
 router.post('/addUser', async (req, res) => {
   try {
     // Extract common fields from the request body
     const { name, username, gender, role, mobile } = req.body;
-    // For super/admin, expect "dept"; for coordinator, expect "event"
-    const dept = req.body.dept;  // for super and admin
-    const event = req.body.event; // for coordinator
+    // For super/admin, expect "dept"; for coordinator, expect "event_relation"
+    const dept = req.body.dept;  
+    const event_relation = req.body.event_relation; 
 
     // Validate common required fields
     if (!name || !username || !gender || !role || !mobile) {
@@ -38,7 +38,7 @@ router.post('/addUser', async (req, res) => {
     // Role-specific validations:
     const lowerRole = role.trim().toLowerCase();
     if (lowerRole === "coor" || lowerRole === "coordinator") {
-      if (!event) {
+      if (!event_relation) {
         return res.status(400).json({ error: "Event is required for coordinator role." });
       }
     } else if (lowerRole === "super" || lowerRole === "admin") {
@@ -52,25 +52,31 @@ router.post('/addUser', async (req, res) => {
     const encryptedPassword = await bcrypt.hash(username, saltRounds);
 
     // Create a new user document:
-    // For coordinators, event_relation gets the provided event; for others, set event_relation to "none" and store department.
+    // For coordinators, assign event_relation with the provided event value.
     const newUser = new User({
       name,
       username,
       password: encryptedPassword,
       mobile: Number(mobile),
-      role,
-      status: 1, // Always active by default
-      gender,
-      dept: (lowerRole === "coor" || lowerRole === "coordinator") ? "" : dept,
-      event: (lowerRole === "coor" || lowerRole === "coordinator") ? event : "none"
+      role,dept: (lowerRole === "coor" || lowerRole === "coordinator") ? "" : dept,
+      event_relation: (lowerRole === "coor" || lowerRole === "coordinator") ? event_relation : "none",
+      status: 0, // Always active by default
+      gender
+      
+      
+
     });
 
     const savedUser = await newUser.save();
     res.status(201).json({ message: "User added successfully", user: savedUser });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "User already exists" });
+    }
     console.error("Error adding user:", error);
     res.status(500).json({ error: "Failed to add user", details: error.message });
   }
+  
 });
 
 module.exports = router;

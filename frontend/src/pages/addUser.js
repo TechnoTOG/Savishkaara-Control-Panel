@@ -19,7 +19,7 @@ const AddUser = () => {
     gender: "",
     role: "",
     dept: "",
-    event: "",
+    event_relation: "",
     mobile: ""
   });
   const [message, setMessage] = useState("");
@@ -32,7 +32,8 @@ const AddUser = () => {
 
   // When the role is coordinator ("coor"), fetch available distinct events
   useEffect(() => {
-    if (formData.role.trim().toLowerCase() === "coor" || formData.role.trim().toLowerCase() === "coordinator") {
+    const lowerRole = formData.role.trim().toLowerCase();
+    if (lowerRole === "coor" || lowerRole === "coordinator") {
       fetch(`${apiBaseURL}/distinctEvents`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +59,7 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${apiBaseURL}/addUser`, {
+      const response = await fetch(`${apiBaseURL}/adduser`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -73,7 +74,7 @@ const AddUser = () => {
           gender: "",
           role: "",
           dept: "",
-          event: "",
+          event_relation: "",
           mobile: ""
         });
       } else {
@@ -89,7 +90,7 @@ const AddUser = () => {
     <Layout title="Add User" activePage="usersa">
       <Paper style={{ margin: "20px auto", padding: "20px", maxWidth: "600px" }}>
         <Typography variant="h5" component="h2" gutterBottom>
-          Add User
+          Add New User
         </Typography>
         {message && (
           <Typography variant="body1" style={{ marginBottom: "10px" }}>
@@ -164,8 +165,8 @@ const AddUser = () => {
                   <InputLabel id="event-label">Event</InputLabel>
                   <Select
                     labelId="event-label"
-                    name="event"
-                    value={formData.event}
+                    name="event_relation"
+                    value={formData.event_relation}
                     onChange={handleChange}
                     label="Event"
                   >
