@@ -84,7 +84,10 @@ function App() {
           <Route path="/events/overview" element={<ProtectedRoute element={<EventOverview />} />} />
           <Route path="/events/add" element={<ProtectedRoute element={<AddEvent />} />} />
           <Route path="/events" element={<ProtectedRoute element={<Events />} />} />
-          <Route path="/my-event" element={<ProtectedRoute element={<MyEvent />} />} />
+          <Route
+            path="/my-event/:eventId" // Dynamic route for event details
+            element={<ProtectedRoute element={<MyEvent />} />}
+          />
           <Route path="/samridhi" element={<ProtectedRoute element={<Samridhi />} />} />
           <Route path="/users/overview" element={<ProtectedRoute element={<UserOverview />} />} />
           <Route path="/users/add" element={<ProtectedRoute element={<AddUser />} />} />
