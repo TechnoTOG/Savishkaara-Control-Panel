@@ -53,7 +53,7 @@ app.use(
 // Configure CORS dynamically
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://savishkaara.in",
+  "https://control.savishkaara.in",
 ];
 
 app.use(
