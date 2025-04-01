@@ -21,7 +21,8 @@ const Dashboard = () => {
 
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
-    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+    : process.env.REACT_APP_API_URL || "https://localhost:5000";
+    const [totalRevenue, setTotalRevenue] = useState(0);
 
   const fetchCount = async () => {
     try {
@@ -42,7 +43,27 @@ const Dashboard = () => {
       console.error("Error fetching event count:", error);
     }
   };
-
+  const fetchTotalRevenue = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/events-revenue`, {
+        method: "GET",
+        headers: {
+          "X-Allowed-Origin": "savishkaara.in",
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) throw new Error("Failed to fetch revenue data");
+  
+      const data = await response.json();
+  
+      const total = data.reduce((sum, item) => sum + item.revenue, 0); // Sum up all revenue
+      setTotalRevenue(total);
+    } catch (error) {
+      console.error("Error fetching total revenue:", error);
+    }
+  };
+  
   const fetchRegistrationCount = async () => {
     try {
       const response = await fetch(`${apiBaseURL}/events-count`, {
@@ -63,14 +84,16 @@ const Dashboard = () => {
       console.error("Error fetching registration count:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchCount();
     fetchRegistrationCount(); // Fetch registration count on component mount
+    fetchTotalRevenue();
 
     const interval = setInterval(() => {
       fetchCount();
       fetchRegistrationCount(); // Fetch counts every 10 seconds
+      fetchTotalRevenue();
     }, 10000);
 
     if (socket && !hasJoinedRoom.current) {
@@ -156,7 +179,13 @@ const Dashboard = () => {
           <Grid item xs={12} md={9}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <MetricCard title="Total Revenue" height="25vh" value={150000} bgColor="#04b976" />
+              <MetricCard
+  title="Total Revenue"
+  height="25vh"
+  value={`₹${totalRevenue.toLocaleString()}`}
+  bgColor="#04b976"
+/>
+
               </Grid>
 
               <Grid item xs={12} md={4}>
@@ -191,7 +220,7 @@ const Dashboard = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <MetricCard title="Top Events" value={"Squid game (;"} height="38vh" bgColor={"#0000ff"} />
+                <MetricCard title="Top Events" value={"Squid game ;)"} height="38vh" bgColor={"#0000ff"} />
               </Grid>
             </Grid>
           </Grid>
