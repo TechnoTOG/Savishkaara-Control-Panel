@@ -42,18 +42,19 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
   return (
     <Box
-      sx={{
-        width: isMinimized ? 80 : 250,
-        height: "100vh",
-        backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
-        color: "#fff",
-        paddingTop: "20px",
-        position: "fixed",
-        overflowX: "hidden",
-        borderRight: "1px solid #444",
-        transition: "width 0.6s ease, background-color 0.3s ease, color 0.3s ease",
-      }}
-    >
+  className="sidebar"
+  sx={{
+    width: isMinimized ? 80 : 250,
+    height: "100vh",
+    backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
+    color: "#fff",
+    paddingTop: "20px",
+    overflowX: "hidden",
+    borderRight: "1px solid #444",
+    transition: "width 0.6s ease",
+  }}
+> 
+
       <Box
         textAlign="center"
         mb={4}
