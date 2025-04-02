@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, Typography, List, ListItem, ListItemText } from "@mui/material"; // Import List components
+import { 
+  Grid, 
+  Typography, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Box  // Added Box here
+} from "@mui/material";
 import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
 import Cookies from "js-cookie";
 import { WebSocketContext } from "../App";
 import Layout from "../layouts/layout";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -107,7 +115,6 @@ const Dashboard = () => {
     }
   };
 
-  // New function to fetch top events
   const fetchTopEvents = async () => {
     try {
       const response = await fetch(`${apiBaseURL}/top-events`, {
@@ -121,7 +128,6 @@ const Dashboard = () => {
       if (!response.ok) throw new Error("Failed to fetch top events data");
 
       const data = await response.json();
-      console.log("Fetched Top Events:", data); // Debugging: Log the fetched data
       setTopEvents(data); // Update top events state
     } catch (error) {
       console.error("Error fetching top events data:", error);
@@ -264,43 +270,140 @@ const Dashboard = () => {
                   title="Registration Trend (by Event)"
                   data={registrationData}
                   options={chartOptions}
-                  height="43vh"
+                  height="47vh"
                   width="100%"
                 />
               </Grid>
 
               {/* 🏆 Top Events */}
               <Grid item xs={12} md={4}>
-                <MetricCard
-                  title="Top Events"
-                  height="38vh"
-                  bgColor={"#0000ff"}
-                >
-                  {/* Debugging: Log the topEvents data */}
-                  {console.log("Rendering Top Events:", topEvents)}
-                  {/* Display top events as a list */}
-                  <List dense sx={{ maxHeight: "30vh", overflowY: "auto" }}> {/* Ensure scrolling if content overflows */}
-                    {topEvents.length > 0 ? (
-                      topEvents.map((event, index) => (
-                        <ListItem key={index}>
-                          <ListItemText
-                            primary={`${index + 1}. ${event.event}`}
-                            secondary={`Registrations: ${event.count}`}
-                          />
-                        </ListItem>
-                      ))
-                    ) : (
-                      <Typography variant="body1">No data available</Typography>
-                    )}
-                  </List>
-                </MetricCard>
-              </Grid>
+  <MetricCard 
+    title="Top Events" 
+    height="41vh" // Let content determine height
+    bgColor={"#1a237e"}
+    sx={{
+      position: 'relative',
+      '&:before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: 'linear-gradient(90deg, #ff8a00, #e52e71)',
+      }
+    }}
+  >
+    <List 
+      dense 
+      sx={{
+        padding: '4px 0', // Reduced top/bottom padding
+        '& .MuiListItem-root': {
+          margin: '2px 8px', // Reduced spacing
+          transition: 'all 0.2s ease',
+          borderRadius: '6px',
+          '&:hover': {
+            transform: 'translateX(4px)',
+            background: 'linear-gradient(90deg, rgba(255,138,0,0.2), rgba(229,46,113,0.2))',
+          }
+        }
+      }}
+    >
+      {topEvents.length > 0 ? (
+        topEvents.map((event, index) => (
+          <ListItem 
+            key={index}
+            disablePadding
+            sx={{
+              position: 'relative',
+              '&:before': index < 5 ? {
+                content: '""',
+                position: 'absolute',
+                left: '-6px', // Moved closer
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '3px', // Thinner
+                height: '50%', // Shorter
+                background: [
+                  '#ffd700', // 1st
+                  '#c0c0c0', // 2nd
+                  '#cd7f32', // 3rd
+                  '#a0a0a0', // 4th
+                  '#808080'   // 5th
+                ][index],
+                borderRadius: '3px',
+                opacity: index > 2 ? 0.7 : 1
+              } : null
+            }}
+          >
+            <ListItemText 
+              primary={
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  padding: '7px 12px', // Tighter padding
+                }}>
+                  <span style={{
+                    marginRight: '15px', // Reduced spacing
+                    fontSize: '1.1rem', // Slightly smaller
+                    color: [
+                      '#ffd700', '#c0c0c0', '#cd7f32', 
+                      '#a0a0a0', '#808080'
+                    ][index],
+                  }}>
+                    {[
+                      '🥇', '🥈', '🥉', '🏅', '🎖️'
+                    ][index]}
+                  </span>
+                  <span style={{ 
+                    fontWeight: 500, // Slightly lighter
+                    fontSize: '0.9rem', // Smaller
+                    color: '#fff',
+                    lineHeight: '1.2'
+                  }}>
+                    {event.event}
+                  </span>
+                </div>
+              } 
+              sx={{
+                '& .MuiTypography-root': {
+                  margin: 0
+                }
+              }}
+            />
+          </ListItem>
+        ))
+      ) : (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '12px',
+          textAlign: 'center'
+        }}>
+          <EventNoteIcon sx={{ 
+            fontSize: '2.5rem', 
+            color: 'rgba(255,255,255,0.3)', 
+            mb: 1.5 
+          }} />
+          <Typography variant="body1" sx={{ 
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '0.9rem'
+          }}>
+            No events data available
+          </Typography>
+        </Box>
+      )}
+    </List>
+  </MetricCard>
+</Grid>
             </Grid>
           </Grid>
 
           {/* 📌 Right Section: Event Update (Increased Height) */}
           <Grid item xs={12} md={3}>
-            <MetricCard title="Event Update" value={" "} height="72vh" bgColor={"#20b2aa"} />
+            <MetricCard title="Event Update" value={" "} height="75vh" bgColor={"#20b2aa"} />
           </Grid>
         </Grid>
       </div>

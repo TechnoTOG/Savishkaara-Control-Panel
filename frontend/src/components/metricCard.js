@@ -16,6 +16,7 @@ const MetricCard = ({
   textColor,
   action,
   onClick,
+  children, // Explicitly handle children
 }) => {
   const isNumeric = !isNaN(Number(value));
   const defaultTextColor = textColor || "#fff";
@@ -36,7 +37,8 @@ const MetricCard = ({
         borderRadius: 2,
         boxShadow: "0px 4px 8px rgba(32, 24, 24, 0.1)",
         padding: "20px",
-        height: height,
+        minHeight: height, // Use minHeight instead of height
+        maxHeight: height, // Optional: Cap the maximum height
         width: width,
         transition: "all 0.3s ease-in-out",
         "&:hover": {
@@ -47,11 +49,19 @@ const MetricCard = ({
         },
         position: "relative",
         cursor: onClick ? "pointer" : "default",
+        overflow: "visible", // Remove scrollbar by setting overflow to visible
       }}
       onClick={onClick}
     >
-      <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Box sx={{ flexGrow: 1 }}> {/* This pushes the action to the bottom */}
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          padding: "10px", // Reduce padding to free up space
+        }}
+      >
+        <Box sx={{ flexGrow: 1 }}>
           <Typography
             variant="h6"
             sx={{ fontSize: "20px", fontWeight: "600", color: defaultTextColor }}
@@ -59,6 +69,7 @@ const MetricCard = ({
             {title}
           </Typography>
 
+          {/* Render numeric or non-numeric value */}
           <Typography
             variant="h5"
             sx={{ fontSize: "16px", fontWeight: "600", color: defaultTextColor }}
@@ -80,12 +91,25 @@ const MetricCard = ({
           )}
         </Box>
 
-        {/* Centered Action Area */}
+        {/* Render children (e.g., List component) */}
+        {children && (
+          <Box
+            sx={{
+              marginTop: "16px",
+              maxHeight: "calc(100% - 100px)", // Ensure children don't overflow
+              overflow: "visible", // Remove scrollbar by setting overflow to visible
+            }}
+          >
+            {children}
+          </Box>
+        )}
+
+        {/* Action Area */}
         <Box
           sx={{
             marginTop: "16px",
             display: "flex",
-            justifyContent: "center", // Changed from 'flex-end' to 'center'
+            justifyContent: "center",
             alignItems: "center",
             width: "100%",
           }}
