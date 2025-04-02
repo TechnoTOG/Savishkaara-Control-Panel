@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, Typography } from "@mui/material";
+import { Grid, Typography, List, ListItem, ListItemText } from "@mui/material"; // Import List components
 import MetricCard from "../components/metricCard";
 import VisualizationCard from "../components/visualizationCard";
 import BlurText from "../components/blurText";
@@ -17,12 +17,14 @@ const Dashboard = () => {
   const [eventCount, setEventCount] = useState(0);
   const [totalRegistrations, setTotalRegistrations] = useState(0); // Total registrations
   const [verifiedRegistrations, setVerifiedRegistrations] = useState(0); // Total participation (verified)
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [registrationTrend, setRegistrationTrend] = useState([]); // State for registration trend data
+  const [topEvents, setTopEvents] = useState([]); // New state for top events data
   const hasJoinedRoom = useRef(false);
 
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
-    : process.env.REACT_APP_API_URL || "https://localhost:5000";
-    const [totalRevenue, setTotalRevenue] = useState(0);
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const fetchCount = async () => {
     try {
@@ -43,6 +45,7 @@ const Dashboard = () => {
       console.error("Error fetching event count:", error);
     }
   };
+
   const fetchTotalRevenue = async () => {
     try {
       const response = await fetch(`${apiBaseURL}/events-revenue`, {
@@ -52,18 +55,18 @@ const Dashboard = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (!response.ok) throw new Error("Failed to fetch revenue data");
-  
+
       const data = await response.json();
-  
+
       const total = data.reduce((sum, item) => sum + item.revenue, 0); // Sum up all revenue
       setTotalRevenue(total);
     } catch (error) {
       console.error("Error fetching total revenue:", error);
     }
   };
-  
+
   const fetchRegistrationCount = async () => {
     try {
       const response = await fetch(`${apiBaseURL}/events-count`, {
@@ -84,16 +87,60 @@ const Dashboard = () => {
       console.error("Error fetching registration count:", error);
     }
   };
-  
+
+  const fetchRegistrationTrend = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/registration-trend`, {
+        method: "GET",
+        headers: {
+          "X-Allowed-Origin": "savishkaara.in",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch registration trend data");
+
+      const data = await response.json();
+      setRegistrationTrend(data); // Update registration trend state
+    } catch (error) {
+      console.error("Error fetching registration trend data:", error);
+    }
+  };
+
+  // New function to fetch top events
+  const fetchTopEvents = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/top-events`, {
+        method: "GET",
+        headers: {
+          "X-Allowed-Origin": "savishkaara.in",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch top events data");
+
+      const data = await response.json();
+      console.log("Fetched Top Events:", data); // Debugging: Log the fetched data
+      setTopEvents(data); // Update top events state
+    } catch (error) {
+      console.error("Error fetching top events data:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCount();
     fetchRegistrationCount(); // Fetch registration count on component mount
     fetchTotalRevenue();
+    fetchRegistrationTrend(); // Fetch registration trend data
+    fetchTopEvents(); // Fetch top events data
 
     const interval = setInterval(() => {
       fetchCount();
       fetchRegistrationCount(); // Fetch counts every 10 seconds
       fetchTotalRevenue();
+      fetchRegistrationTrend(); // Fetch registration trend data
+      fetchTopEvents(); // Fetch top events data
     }, 10000);
 
     if (socket && !hasJoinedRoom.current) {
@@ -122,15 +169,19 @@ const Dashboard = () => {
     };
   }, [socket, objID, navigate]);
 
+  // Prepare data for the Registration Trend chart
   const registrationData = {
-    labels: ["January", "February", "March", "April", "May"],
+    labels: registrationTrend.map((item) => item.event), // Event names
     datasets: [
       {
         label: "Registrations",
-        data: [10, 20, 30, 40, 50],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
+        data: registrationTrend.map((item) => item.count), // Counts
+        backgroundColor: [
+          "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+        ],
+        hoverBackgroundColor: [
+          "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+        ],
       },
     ],
   };
@@ -139,7 +190,7 @@ const Dashboard = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top",
+        display: false, // Hide the legend
       },
     },
     scales: {
@@ -179,13 +230,12 @@ const Dashboard = () => {
           <Grid item xs={12} md={9}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-              <MetricCard
-  title="Total Revenue"
-  height="25vh"
-  value={`₹${totalRevenue.toLocaleString()}`}
-  bgColor="#04b976"
-/>
-
+                <MetricCard
+                  title="Total Revenue"
+                  height="25vh"
+                  value={`₹${totalRevenue.toLocaleString()}`}
+                  bgColor="#04b976"
+                />
               </Grid>
 
               <Grid item xs={12} md={4}>
@@ -211,7 +261,7 @@ const Dashboard = () => {
               {/* 📊 Registration Trend */}
               <Grid item xs={12} md={8}>
                 <VisualizationCard
-                  title="Registration Trend"
+                  title="Registration Trend (by Event)"
                   data={registrationData}
                   options={chartOptions}
                   height="43vh"
@@ -219,8 +269,31 @@ const Dashboard = () => {
                 />
               </Grid>
 
+              {/* 🏆 Top Events */}
               <Grid item xs={12} md={4}>
-                <MetricCard title="Top Events" value={"Squid game ;)"} height="38vh" bgColor={"#0000ff"} />
+                <MetricCard
+                  title="Top Events"
+                  height="38vh"
+                  bgColor={"#0000ff"}
+                >
+                  {/* Debugging: Log the topEvents data */}
+                  {console.log("Rendering Top Events:", topEvents)}
+                  {/* Display top events as a list */}
+                  <List dense sx={{ maxHeight: "30vh", overflowY: "auto" }}> {/* Ensure scrolling if content overflows */}
+                    {topEvents.length > 0 ? (
+                      topEvents.map((event, index) => (
+                        <ListItem key={index}>
+                          <ListItemText
+                            primary={`${index + 1}. ${event.event}`}
+                            secondary={`Registrations: ${event.count}`}
+                          />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <Typography variant="body1">No data available</Typography>
+                    )}
+                  </List>
+                </MetricCard>
               </Grid>
             </Grid>
           </Grid>

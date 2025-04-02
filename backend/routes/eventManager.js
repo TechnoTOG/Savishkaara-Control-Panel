@@ -138,12 +138,7 @@ router.get('/events-revenue', async (req, res) => {
   try {
     console.log("Starting /events-revenue route...");
 
-    // Step 1: Log raw Event_reg data to verify its structure
-    const rawEventData = await Event_reg.find({});
-    console.log("Raw Event_reg data:", JSON.stringify(rawEventData, null, 2));
-
-    // Step 2: Aggregate revenue grouped by event name
-    console.log("Aggregating revenue from ticket_details...");
+    // Step 1: Aggregate revenue grouped by event name
     const revenueData = await Event_reg.aggregate([
       {
         $match: {
@@ -169,13 +164,12 @@ router.get('/events-revenue', async (req, res) => {
 
     console.log("Revenue data after aggregation:", JSON.stringify(revenueData, null, 2));
 
-    // Step 3: Validate the revenue data
+    // Step 2: Validate the revenue data
     if (!revenueData || revenueData.length === 0) {
       console.warn("No revenue data found after aggregation.");
     }
 
-    // Step 4: Return the revenue data as a JSON response
-    console.log("Returning revenue data to the client...");
+    // Step 3: Return the revenue data as a JSON response
     res.status(200).json(revenueData);
   } catch (error) {
     console.error("Error fetching revenue data:", error);
@@ -183,4 +177,117 @@ router.get('/events-revenue', async (req, res) => {
   }
 });
 
+/**
+ * GET /registration-trend
+ * Fetch the number of registrations grouped by event.
+ * 
+ * Response:
+ * [
+ *   { "event": "SAVISHKAARA2K25", "count": 50 },
+ *   { "event": "Nerd Script", "count": 30 },
+ *   ...
+ * ]
+ */
+router.get('/registration-trend', async (req, res) => {
+  try {
+    console.log("Starting /registration-trend route...");
+
+    // Aggregate registrations grouped by event
+    const trendData = await Event_reg.aggregate([
+      {
+        $match: {
+          "ticket_details.event": { $exists: true }, // Ensure the event field exists
+        },
+      },
+      {
+        $group: {
+          _id: "$ticket_details.event", // Group by the nested `event` field in ticket_details
+          count: { $sum: 1 }, // Count registrations for each event
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the `_id` field
+          event: "$_id", // Rename `_id` to `event`
+          count: 1,
+        },
+      },
+      {
+        $sort: { count: -1 }, // Sort by registration count in descending order
+      },
+    ]);
+
+    console.log("Registration trend data:", JSON.stringify(trendData, null, 2));
+
+    // Validate the trend data
+    if (!trendData || trendData.length === 0) {
+      console.warn("No registration trend data found.");
+    }
+
+    // Return the trend data as a JSON response
+    res.status(200).json(trendData);
+  } catch (error) {
+    console.error("Error fetching registration trend data:", error);
+    res.status(500).json({ error: "Failed to fetch registration trend data", details: error.message });
+  }
+});
+
+/**
+ * GET /top-events
+ * Fetch the top 5 events with the highest number of registrations.
+ * 
+ * Response:
+ * [
+ *   { "event": "SAVISHKAARA2K25", "count": 50 },
+ *   { "event": "Nerd Script", "count": 30 },
+ *   { "event": "Coding Challenge", "count": 20 },
+ *   ...
+ * ]
+ */
+router.get('/top-events', async (req, res) => {
+  try {
+    console.log("Starting /top-events route...");
+
+    // Aggregate registrations grouped by event and sort by count in descending order
+    const topEvents = await Event_reg.aggregate([
+      {
+        $match: {
+          "ticket_details.event": { $exists: true }, // Ensure the event field exists
+        },
+      },
+      {
+        $group: {
+          _id: "$ticket_details.event", // Group by the nested `event` field in ticket_details
+          count: { $sum: 1 }, // Count registrations for each event
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the `_id` field
+          event: "$_id", // Rename `_id` to `event`
+          count: 1,
+        },
+      },
+      {
+        $sort: { count: -1 }, // Sort by registration count in descending order
+      },
+      {
+        $limit: 5, // Limit to the top 5 events
+      },
+    ]);
+
+    console.log("Top events data:", JSON.stringify(topEvents, null, 2));
+
+    // Validate the trend data
+    if (!topEvents || topEvents.length === 0) {
+      console.warn("No top events data found.");
+    }
+
+    // Return the top events data as a JSON response
+    res.status(200).json(topEvents);
+  } catch (error) {
+    console.error("Error fetching top events data:", error);
+    res.status(500).json({ error: "Failed to fetch top events data", details: error.message });
+  }
+});
 module.exports = router;
