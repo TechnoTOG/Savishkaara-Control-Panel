@@ -78,7 +78,35 @@ router.post('/addEvent', async (req, res) => {
     res.status(500).json({ error: "Failed to add event", details: error.message });
   }
 });
+router.get("/events/by-name/:name", async (req, res) => {
+  try {
+    const event = await Event.findOne({ name: req.params.name });
+    if (!event) return res.status(404).json({ error: "Event not found" });
+    res.status(200).json(event);
+  } catch (err) {
+    console.error("Error fetching event by name:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
+
+router.get("/events/by-coordinator/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    const event = await Event.findOne({
+      $or: [
+        { coordinator1: { $regex: new RegExp("^" + username + "$", "i") } },
+        { coordinator2: { $regex: new RegExp("^" + username + "$", "i") } },
+      ],
+    });
+
+    if (!event) return res.status(404).json({ error: "Event not found for this coordinator" });
+    res.status(200).json(event);
+  } catch (err) {
+    console.error("Error fetching event by coordinator:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 // Route to fetch all events (with specific fields: name, venue, coordinator1, and _id)
 router.get('/events', async (req, res) => {
   try {
@@ -89,7 +117,30 @@ router.get('/events', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch events", details: error.message });
   }
 });
+router.post("/events/update-status-by-name", async (req, res) => {
+  try {
+    const { name, status } = req.body;
 
+    if (!name || !status) {
+      return res.status(400).json({ error: "Name and status are required" });
+    }
+
+    const updatedEvent = await Event.findOneAndUpdate(
+      { name: name },
+      { status: status },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.status(200).json(updatedEvent);
+  } catch (err) {
+    console.error("Error updating status:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 /**
  * GET /events/:eventId
  * Fetch details of a specific event by its _id.

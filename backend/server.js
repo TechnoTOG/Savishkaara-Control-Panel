@@ -119,7 +119,7 @@ const io = new Server(server, {
       }
       return callback(null, true);
     },
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST","PATCH"],
     credentials: true,
   },
 });

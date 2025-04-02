@@ -1,160 +1,258 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Typography, Button, Card, CardContent } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Box,
+  Divider,
+  Chip,
+} from "@mui/material";
+import {
+  Place,
+  AccessTime,
+  MonetizationOn,
+  Group,
+  School,
+  Link as LinkIcon,
+  Event as EventIcon,
+} from "@mui/icons-material";
 import Cookies from "js-cookie";
-import { WebSocketContext } from "../App"; // Import WebSocket Context
+import { WebSocketContext } from "../App";
 import Room from "../utils/roomManager";
 import Layout from "../layouts/layout";
 
 const MyEvent = () => {
   const navigate = useNavigate();
-  const socket = useContext(WebSocketContext); // Access global WebSocket instance
+  const socket = useContext(WebSocketContext);
   const objID = Cookies.get("objId");
-  const [socketError, setSocketError] = useState(null); // State to track errors
-  const [event, setEvent] = useState(null); // State to store event details
-  const [loading, setLoading] = useState(true); // State to track loading status
-  const [error, setError] = useState(null); // State to track fetch errors
+  const { eventId } = useParams();
 
-  const { eventId } = useParams(); // Extract the event ID from the URL
+  const [event, setEvent] = useState(null);
+  const [status, setStatus] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [socketError, setSocketError] = useState(null);
+  const [error, setError] = useState(null);
 
-  const apiBaseURL = process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
-    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const apiBaseURL =
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+      : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   useEffect(() => {
-    let hasJoinedRoom = false; // Local variable to track room join status
+    let hasJoinedRoom = false;
 
     if (socket && !hasJoinedRoom) {
-      // Join the "myevent" room with authentication
       Room.join(socket, "myevent", objID);
-
-      // Mark the room as joined
       hasJoinedRoom = true;
 
-      // Handle server messages
-      socket.on("message", (data) => {
-        console.log("Message received:", data);
-      });
-
-      // Handle redirection errors
-      socket.on("redirect", (data) => {
-        console.log("Redirecting to:", data.url);
-        navigate(data.url);
-      });
-
-      // Handle socket errors
-      socket.on("error", (error) => {
-        console.error("Socket error:", error.message);
-        setSocketError(error.message); // Update the error state
-      });
+      socket.on("message", (data) => console.log("Message received:", data));
+      socket.on("redirect", (data) => navigate(data.url));
+      socket.on("error", (error) => setSocketError(error.message));
     }
 
-    // Fetch event details when the component mounts
     const fetchEventDetails = async () => {
       try {
-        const response = await fetch(`${apiBaseURL}/events/${eventId}`, {
+        const idResponse = await fetch(`${apiBaseURL}/events/${eventId}`, {
           method: "GET",
           headers: {
-            'X-Allowed-Origin': 'savishkaara.in',
+            "X-Allowed-Origin": "savishkaara.in",
             "Content-Type": "application/json",
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch event details: ${response.statusText}`);
+        if (idResponse.ok) {
+          const data = await idResponse.json();
+          setEvent(data);
+          setStatus(data.status || "");
+          setLoading(false);
+          return;
+        } else {
+          console.warn(`Fetch by eventId failed with status: ${idResponse.status}`);
         }
 
-        const eventData = await response.json();
-        setEvent(eventData);
+        const userName = Cookies.get("userName");
+        if (!userName) throw new Error("User name not found in cookies.");
+
+        const nameResponse = await fetch(
+          `${apiBaseURL}/events/by-coordinator/${encodeURIComponent(userName)}`,
+          {
+            method: "GET",
+            headers: {
+              "X-Allowed-Origin": "savishkaara.in",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!nameResponse.ok) {
+          throw new Error(`Fallback fetch failed: ${nameResponse.statusText}`);
+        }
+
+        const fallbackData = await nameResponse.json();
+        setEvent(fallbackData);
+        setStatus(fallbackData.status || "");
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        setError(error.message || "An error occurred while fetching event details.");
+      } catch (err) {
+        console.error("Error fetching event details:", err);
+        setError(err.message || "An error occurred while fetching event details.");
         setLoading(false);
       }
     };
 
     fetchEventDetails();
 
-    // Cleanup on unmount
     return () => {
-      if (hasJoinedRoom) {
-        socket.emit("leave-room", "myevent");
-      }
+      if (hasJoinedRoom) socket.emit("leave-room", "myevent");
       socket.off("message");
       socket.off("redirect");
       socket.off("error");
     };
   }, [socket, objID, navigate, eventId, apiBaseURL]);
 
+  const handleStatusUpdate = async () => {
+    if (!event?.name) return alert("Event name is missing");
+
+    try {
+      setIsUpdating(true);
+      const response = await fetch(`${apiBaseURL}/events/update-status-by-name`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Allowed-Origin": "savishkaara.in",
+        },
+        body: JSON.stringify({ name: event.name, status }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update event status");
+
+      const updated = await response.json();
+      setEvent(updated);
+      alert("Status updated successfully!");
+    } catch (err) {
+      alert(err.message || "Error updating event status");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "upcoming":
+        return "info";
+      case "ongoing":
+        return "success";
+      case "completed":
+        return "warning";
+      default:
+        return "default";
+    }
+  };
+
   return (
     <Layout title="My Event" activePage="myevent">
-      <div style={{ marginTop: "60px", marginLeft: "20px" }}></div>
+      <Box mt={8} mx={3}>
+        {socketError && (
+          <Typography variant="body1" color="error" mb={2}>
+            Socket Error: {socketError}
+          </Typography>
+        )}
 
-      {socketError && (
-        <Typography variant="body1" color="error" style={{ marginLeft: "20px" }}>
-          Socket Error: {socketError}
-        </Typography>
-      )}
+        {error && (
+          <Typography variant="body1" color="error" mb={2}>
+            Error: {error}
+          </Typography>
+        )}
 
-      {error && (
-        <Typography variant="body1" color="error" style={{ marginLeft: "20px" }}>
-          Error: {error}
-        </Typography>
-      )}
+        {loading ? (
+          <Typography variant="body1">Loading...</Typography>
+        ) : event ? (
+          <Card elevation={4} sx={{ maxWidth: "800px", margin: "auto", p: 2 }}>
+            <CardContent>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h4" fontWeight="bold">
+                  <EventIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                  {event.name}
+                </Typography>
 
-      {loading ? (
-        <Typography variant="body1" style={{ marginLeft: "20px" }}>
-          Loading...
-        </Typography>
-      ) : event ? (
-        <Card sx={{ width: "80%", margin: "auto", mt: 4 }}>
-          <CardContent>
-            <Typography variant="h4" gutterBottom>
-              {event.name}
-            </Typography>
-            <Typography variant="h6">Venue:</Typography>
-            <Typography variant="body1">{event.venue}</Typography>
+                <Chip label={status.toUpperCase()} color={getStatusColor(status)} />
+              </Box>
 
-            <Typography variant="h6" style={{ marginTop: "16px" }}>
-              Date and Time:
-            </Typography>
-            <Typography variant="body1">{new Date(event.date_time).toLocaleString()}</Typography>
+              <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6" style={{ marginTop: "16px" }}>
-              Fee:
-            </Typography>
-            <Typography variant="body1">{event.fee}</Typography>
+              <Box mb={2}>
+                <Typography variant="subtitle1" gutterBottom>
+                  <Place sx={{ mr: 1, verticalAlign: "middle" }} />
+                  Venue: {event.venue}
+                </Typography>
 
-            <Typography variant="h6" style={{ marginTop: "16px" }}>
-              Coordinators:
-            </Typography>
-            <Typography variant="body1">
-              {event.coordinator1}, {event.coordinator2}
-            </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  <AccessTime sx={{ mr: 1, verticalAlign: "middle" }} />
+                  Date & Time: {new Date(event.date_time).toLocaleString()}
+                </Typography>
 
-            <Typography variant="h6" style={{ marginTop: "16px" }}>
-              Faculty Coordinators:
-            </Typography>
-            <Typography variant="body1">
-              {event.faculty_coor1}, {event.faculty_coor2}
-            </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} />
+                  Fee: ₹{event.fee}
+                </Typography>
 
-            <Typography variant="h6" style={{ marginTop: "16px" }}>
-              Registration Form Link:
-            </Typography>
-            <a href={event.form_link} target="_blank" rel="noopener noreferrer">
-              {event.form_link}
-            </a>
+                <Typography variant="subtitle1" gutterBottom>
+                  <Group sx={{ mr: 1, verticalAlign: "middle" }} />
+                  Coordinators: {event.coordinator1}, {event.coordinator2}
+                </Typography>
 
-           
-          </CardContent>
-        </Card>
-      ) : (
-        <Typography variant="body1" style={{ marginLeft: "20px" }}>
-          Event not found.
-        </Typography>
-      )}
+                <Typography variant="subtitle1" gutterBottom>
+                  <School sx={{ mr: 1, verticalAlign: "middle" }} />
+                  Faculty: {event.faculty_coor1}, {event.faculty_coor2}
+                </Typography>
+
+                <Typography variant="subtitle1" gutterBottom>
+                  <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                  <a href={event.form_link} target="_blank" rel="noopener noreferrer">
+                    Registration Link
+                  </a>
+                </Typography>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6">Update Event Status:</Typography>
+
+              <Box display="flex" alignItems="center" mt={1}>
+                <FormControl sx={{ minWidth: 200 }}>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={status}
+                    label="Status"
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <MenuItem value="upcoming">Upcoming</MenuItem>
+                    <MenuItem value="ongoing">Ongoing</MenuItem>
+                    <MenuItem value="completed">Completed</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <Button
+                  variant="contained"
+                  onClick={handleStatusUpdate}
+                  disabled={isUpdating}
+                  sx={{ ml: 2 }}
+                >
+                  {isUpdating ? "Updating..." : "Save Status"}
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        ) : (
+          <Typography variant="body1">Event not found.</Typography>
+        )}
+      </Box>
     </Layout>
   );
 };
