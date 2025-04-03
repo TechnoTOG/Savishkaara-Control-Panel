@@ -23,7 +23,6 @@ const AddEvent = () => {
   const theme = useTheme(); // Get theme for light/dark mode
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null);
-
   const [eventName, setEventName] = useState("");
   const [venue, setVenue] = useState("");
   const [otherVenue, setOtherVenue] = useState("");
@@ -42,7 +41,22 @@ const AddEvent = () => {
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
+
+  // Define separate arrays for coordinators and faculty coordinators
   const coordinators = ["Coordinator 1", "Coordinator 2", "Coordinator 3"];
+  const facultyCoordinators = [
+    "Remya Nair T",
+    "Savitha Gopal",
+    "Leena V",
+    "Soumya Krishnan",
+    "Honeymol O",
+    "Sreelakshmi S",
+    "Anisha G S",
+    "Deepa G",
+    "Aiswarya Vijayakumar",
+    "Resija P R",
+    "Dr. Dhanaya R"
+  ];
 
   const inputStyles = {
     backgroundColor: theme.palette.mode === "dark" ? "#222" : "#fff",
@@ -55,13 +69,11 @@ const AddEvent = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     // Validate required fields
     if (!eventName || !venue || !dateTime || !fee || !coordinator1 || !facultyCoordinator1) {
       alert("Please fill all required fields.");
       return;
     }
-
     // Prepare the event data
     const eventData = {
       name: eventName,
@@ -75,9 +87,7 @@ const AddEvent = () => {
       flinik: link,
       elink: excelLink,
     };
-
     console.log(eventData);
-
     try {
       // Send a POST request to /addEvent
       const response = await fetch(`${apiBaseURL}/addEvent`, {
@@ -88,18 +98,14 @@ const AddEvent = () => {
         },
         body: JSON.stringify(eventData),
       });
-
       // Check if the request was successful
       if (!response.ok) {
         throw new Error(`Failed to add event: ${response.statusText}`);
       }
-
       const result = await response.json();
       console.log("Event added successfully:", result);
-
       // Set success message
       setSuccessMessage("Event added successfully!");
-
       // Reset the form fields after 2 seconds
       setTimeout(() => {
         setSuccessMessage("");
@@ -187,7 +193,6 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
-
             {/* Other Venue Field */}
             {venue === "Others" && (
               <Grid item xs={12} md={6}>
@@ -210,19 +215,17 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
-
             {/* Faculty Coordinator 1 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 1</InputLabel>
                 <Select value={facultyCoordinator1} onChange={(e) => setFacultyCoordinator1(e.target.value)} sx={inputStyles}>
-                  {coordinators.map((coord, index) => (
+                  {facultyCoordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-
             {/* Coordinator 2 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
@@ -234,13 +237,12 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
-
             {/* Faculty Coordinator 2 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
                 <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 2</InputLabel>
                 <Select value={facultyCoordinator2} onChange={(e) => setFacultyCoordinator2(e.target.value)} sx={inputStyles}>
-                  {coordinators.map((coord, index) => (
+                  {facultyCoordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
                   ))}
                 </Select>
