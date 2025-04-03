@@ -202,9 +202,21 @@ const Dashboard = () => {
     scales: {
       x: {
         beginAtZero: true,
+        grid: {
+          display: false, // Hide x-axis grid lines (but keep the axis line)
+        },
+        ticks: {
+          color: '#808080' // Optional: set tick color to match your theme
+        }
       },
       y: {
         beginAtZero: true,
+        grid: {
+          display: false, // Hide y-axis grid lines (but keep the axis line)
+        },
+        ticks: {
+          color: '#808080' // Optional: set tick color to match your theme
+        }
       },
     },
   };
