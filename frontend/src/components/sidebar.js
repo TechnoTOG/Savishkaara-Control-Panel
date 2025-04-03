@@ -233,16 +233,13 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
         {/* Render My Event if allowed */}
         {allowedOptions.includes("My Event") && (
-          <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
-            <ListItemButton
-              onClick={() => navigateTo("/my-event", "myevent")} // Navigate to my event
-              sx={{
-                color: "#fff",
-                justifyContent: isMinimized ? "left" : "flex-start",
-                "&:hover": {
-                  backgroundColor: darkMode ? "#333" : "#222a57",
-                },
-              }}
+  <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
+    <ListItemButton
+      onClick={() => {
+        const objId = Cookies.get("objId");
+        navigateTo(`/my-event/${objId}`, "myevent");
+      }}
+
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
                 <img src="/icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
