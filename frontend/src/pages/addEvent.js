@@ -30,6 +30,7 @@ const AddEvent = () => {
   const [fee, setFee] = useState("");
   const [link, setLink] = useState("");
   const [excelLink, setExcelLink] = useState("");
+  
   const [coordinator1, setCoordinator1] = useState("");
   const [facultyCoordinator1, setFacultyCoordinator1] = useState("");
   const [coordinator2, setCoordinator2] = useState("");
@@ -43,7 +44,8 @@ const AddEvent = () => {
   const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
 
   // Define separate arrays for coordinators and faculty coordinators
-  const coordinators = ["Coordinator 1", "Coordinator 2", "Coordinator 3"];
+  const [coordinators, setCoordinators] = useState([]);
+
   const facultyCoordinators = [
     "Remya Nair T",
     "Savitha Gopal",
@@ -59,10 +61,10 @@ const AddEvent = () => {
   ];
 
   const inputStyles = {
-    backgroundColor: theme.palette.mode === "dark" ? "#222" : "#fff",
+    backgroundColor: theme.palette.mode === "dark" ? "#222" : "#c7c3c3",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",
     "& label, & .MuiInputBase-input": {
-      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+      color: theme.palette.mode === "dark" ? "#c7c3c3" : "#000",
     },
   };
 
@@ -131,8 +133,28 @@ const AddEvent = () => {
     setCoordinator2("");
     setFacultyCoordinator2("");
   };
+  useEffect(() => {
+    const fetchCoordinators = async () => {
+      try {
+        const response = await fetch(`${apiBaseURL}/coordinators`);
+        const data = await response.json();
+        if (response.ok) {
+          setCoordinators(data.coordinators || []);
+        } else {
+          console.error("Error fetching coordinators:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching coordinators:", error);
+      }
+    };
+  
+    fetchCoordinators();
+  }, [apiBaseURL]);
+  
 
   useEffect(() => {
+
+    
     let hasJoinedRoom = false;
     if (socket && !hasJoinedRoom) {
       Room.join(socket, "eventsa", objID);
@@ -146,19 +168,39 @@ const AddEvent = () => {
       socket.off("error");
     };
   }, [socket, objID]);
-
+  
   return (
     <Layout title="Add Event" activePage="eventsa">
-      <Box sx={{ marginTop: "60px", marginLeft: "20px", marginRight: "20px" }}>
-        <Typography variant="h4" gutterBottom>
-          Add New Event
+      <Box
+        sx={{
+          marginTop: "60px",
+          marginX: "auto",
+          maxWidth: "900px",
+          backgroundColor: theme.palette.mode === "dark" ? "#1e1e1e" : "#f9f9f9",
+          padding: "30px",
+          borderRadius: "16px",
+          boxShadow: theme.palette.mode === "dark" ? "0 0 20px #000" : "0 0 20px #ccc",
+        }}
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          align="center"
+          sx={{
+            fontWeight: 600,
+            color: theme.palette.mode === "dark" ? "#ffd700" : "#333",
+            marginBottom: "25px",
+          }}
+        >
+           Add New Event
         </Typography>
+  
         {socketError && (
           <Typography variant="body1" color="error" sx={{ marginBottom: "20px" }}>
             Error: {socketError}
           </Typography>
         )}
-        {/* Success Message */}
+  
         <Snackbar
           open={!!successMessage}
           autoHideDuration={2000}
@@ -168,16 +210,18 @@ const AddEvent = () => {
           <Alert
             severity="success"
             sx={{
-              fontSize: "1.2rem", // Increase font size
-              padding: "16px", // Add padding for better visibility
+              fontSize: "1.2rem",
+              padding: "16px",
               width: "100%",
             }}
           >
             {successMessage}
           </Alert>
         </Snackbar>
+  
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
+            {/* Event Name & Venue */}
             <Grid item xs={12} md={6}>
               <TextField fullWidth label="Event Name" value={eventName} onChange={(e) => setEventName(e.target.value)} required sx={inputStyles} />
             </Grid>
@@ -186,39 +230,56 @@ const AddEvent = () => {
                 <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Venue</InputLabel>
                 <Select value={venue} onChange={(e) => setVenue(e.target.value)} sx={inputStyles}>
                   {venues.map((v, index) => (
-                    <MenuItem key={index} value={v}>
-                      {v}
+                    <MenuItem key={index} value={v}>{v}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+  
+            {venue === "Others" && (
+              <Grid item xs={12}>
+                <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required sx={inputStyles} />
+              </Grid>
+            )}
+  
+            {/* Date, Fee */}
+            <Grid item xs={12} md={6}>
+              <TextField fullWidth label="Date and Time" type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} InputLabelProps={{ shrink: true }} required sx={inputStyles} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField fullWidth label="Fee (₹)" type="number" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
+            </Grid>
+  
+            {/* Coordinators */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Coordinator 1</InputLabel>
+                <Select value={coordinator1} onChange={(e) => setCoordinator1(e.target.value)} sx={inputStyles}>
+                  {coordinators.map((coord, index) => (
+                    <MenuItem key={index} value={coord.username}>
+                      {coord.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-            {/* Other Venue Field */}
-            {venue === "Others" && (
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required sx={inputStyles} />
-              </Grid>
-            )}
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Date and Time" type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} InputLabelProps={{ shrink: true }} required sx={inputStyles} />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Fee" type="number" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 1</InputLabel>
-                <Select value={coordinator1} onChange={(e) => setCoordinator1(e.target.value)} sx={inputStyles}>
+              <FormControl fullWidth>
+                <InputLabel>Coordinator 2</InputLabel>
+                <Select value={coordinator2} onChange={(e) => setCoordinator2(e.target.value)} sx={inputStyles}>
                   {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
+                    <MenuItem key={index} value={coord.username}>
+                      {coord.name}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-            {/* Faculty Coordinator 1 */}
+  
+            {/* Faculty Coordinators */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 1</InputLabel>
+                <InputLabel>Faculty Coordinator 1</InputLabel>
                 <Select value={facultyCoordinator1} onChange={(e) => setFacultyCoordinator1(e.target.value)} sx={inputStyles}>
                   {facultyCoordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
@@ -226,21 +287,9 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
-            {/* Coordinator 2 */}
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Coordinator 2</InputLabel>
-                <Select value={coordinator2} onChange={(e) => setCoordinator2(e.target.value)} sx={inputStyles}>
-                  {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            {/* Faculty Coordinator 2 */}
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}>Faculty Coordinator 2</InputLabel>
+                <InputLabel>Faculty Coordinator 2</InputLabel>
                 <Select value={facultyCoordinator2} onChange={(e) => setFacultyCoordinator2(e.target.value)} sx={inputStyles}>
                   {facultyCoordinators.map((coord, index) => (
                     <MenuItem key={index} value={coord}>{coord}</MenuItem>
@@ -248,16 +297,36 @@ const AddEvent = () => {
                 </Select>
               </FormControl>
             </Grid>
+  
+            {/* Links */}
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Link" type="text" value={link} onChange={(e) => setLink(e.target.value)} sx={inputStyles} />
+              <TextField fullWidth label="Registration Link" type="text" value={link} onChange={(e) => setLink(e.target.value)} sx={inputStyles} />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField fullWidth label="Excel Link" type="text" value={excelLink} onChange={(e) => setExcelLink(e.target.value)} sx={inputStyles} />
             </Grid>
+  
+            {/* Submit */}
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center">
-                <Button type="submit" variant="contained" color="primary" sx={{ padding: "10px 30px", fontSize: "1.1rem" }}>
-                  Add Event
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    padding: "12px 40px",
+                    fontSize: "1.2rem",
+                    borderRadius: "30px",
+                    textTransform: "none",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                    transition: "all 0.3s ease-in-out",
+                    "&:hover": {
+                      backgroundColor: "#1976d2",
+                      transform: "scale(1.03)",
+                    },
+                  }}
+                >
+                  Add Event 
                 </Button>
               </Box>
             </Grid>
@@ -266,6 +335,7 @@ const AddEvent = () => {
       </Box>
     </Layout>
   );
+  
 };
 
 export default AddEvent;

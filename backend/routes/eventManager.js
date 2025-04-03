@@ -90,6 +90,7 @@ router.get("/events/by-name/:name", async (req, res) => {
 });
 
 
+
 router.get("/events/by-coordinator/:username", async (req, res) => {
   try {
     const username = req.params.username;

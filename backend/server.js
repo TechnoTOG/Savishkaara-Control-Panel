@@ -80,9 +80,10 @@ app.use(express.json());
 // Import and mount routes
 const AuthenticationRoutes = require("./routes/auth");
 const EventRoutes = require("./routes/eventManager");
-
+const userRoutes = require('./routes/users');
 const UserAdd = require("./routes/addusers");
 const userOverviewRoutes = require('./routes/userOVERVIEW');
+
 const RealTimeRoutes = require("./routes/realTime");
 const VerificationRoutes = require("./routes/verify");
 
@@ -91,9 +92,11 @@ const VerificationRoutes = require("./routes/verify");
 
 app.use("/", AuthenticationRoutes);
 app.use("/", EventRoutes);
-
+app.use('/', userRoutes);
 app.use("/", UserAdd);
 app.use('/', userOverviewRoutes);
+
+
 app.use("/", RealTimeRoutes);
 app.use("/", VerificationRoutes);
 
