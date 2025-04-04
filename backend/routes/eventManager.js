@@ -188,7 +188,7 @@ router.get('/events/:eventId', async (req, res) => {
  */
 router.get('/events-revenue', async (req, res) => {
   try {
-    console.log("Starting /events-revenue route...");
+    // console.log("Starting /events-revenue route...");
 
     // Step 1: Aggregate revenue grouped by event name
     const revenueData = await Event_reg.aggregate([
@@ -214,7 +214,7 @@ router.get('/events-revenue', async (req, res) => {
       },
     ]);
 
-    console.log("Revenue data after aggregation:", JSON.stringify(revenueData, null, 2));
+    // console.log("Revenue data after aggregation:", JSON.stringify(revenueData, null, 2));
 
     // Step 2: Validate the revenue data
     if (!revenueData || revenueData.length === 0) {
@@ -276,7 +276,7 @@ router.get('/events-revenue', async (req, res) => {
 
 router.get('/registration-trend', async (req, res) => {
   try {
-    console.log("Starting /registration-trend route...");
+    // console.log("Starting /registration-trend route...");
 
     // Aggregate registrations grouped by event
     const trendData = await Event_reg.aggregate([
@@ -303,7 +303,7 @@ router.get('/registration-trend', async (req, res) => {
       },
     ]);
 
-    console.log("Registration trend data:", JSON.stringify(trendData, null, 2));
+    // console.log("Registration trend data:", JSON.stringify(trendData, null, 2));
 
     // Validate the trend data
     if (!trendData || trendData.length === 0) {
@@ -332,7 +332,7 @@ router.get('/registration-trend', async (req, res) => {
  */
 router.get('/top-events', async (req, res) => {
   try {
-    console.log("Starting /top-events route...");
+    // console.log("Starting /top-events route...");
 
     // Aggregate registrations grouped by event and sort by count in descending order
     const topEvents = await Event_reg.aggregate([
@@ -362,7 +362,7 @@ router.get('/top-events', async (req, res) => {
       },
     ]);
 
-    console.log("Top events data:", JSON.stringify(topEvents, null, 2));
+    // console.log("Top events data:", JSON.stringify(topEvents, null, 2));
 
     // Validate the trend data
     if (!topEvents || topEvents.length === 0) {
@@ -382,12 +382,12 @@ router.get('/top-events', async (req, res) => {
  */
 router.get('/ongoing-events', async (req, res) => {
   try {
-    console.log("Starting /ongoing-events route...");
+    // console.log("Starting /ongoing-events route...");
     const ongoingEvents = await Event.find(
       { status: "ongoing" },
       { name: 1, venue: 1,  _id: 0 }
     );
-    console.log("Ongoing events data:", JSON.stringify(ongoingEvents, null, 2));
+    // console.log("Ongoing events data:", JSON.stringify(ongoingEvents, null, 2));
     if (!ongoingEvents || ongoingEvents.length === 0) {
       console.warn("No ongoing events found.");
     }

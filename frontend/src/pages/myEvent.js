@@ -62,7 +62,7 @@ const MyEvent = () => {
       Room.join(socket, "myevent", objID);
       hasJoinedRoom = true;
 
-      socket.on("message", (data) => console.log("Message received:", data));
+      socket.on("message", (data) => console.log("Message:", data));
       socket.on("redirect", (data) => navigate(data.url));
       socket.on("error", (error) => setSocketError(error.message));
     }

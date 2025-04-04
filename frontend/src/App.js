@@ -36,7 +36,6 @@ const checkAuth = async () => {
     }
 
     const data = await response.json();
-    console.log("Auth check response:", data); // Log for debugging
     return data.isAuthenticated;
   } catch (error) {
     console.error("Authentication check failed:", error);

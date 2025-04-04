@@ -169,10 +169,9 @@ const Dashboard = () => {
       socket.emit("join-room", { roomName: "dashboard", objId: objID });
       hasJoinedRoom.current = true;
       socket.on("message", (data) => {
-        console.log("Message received:", data);
+        console.log("Message:", data);
       });
       socket.on("redirect", (data) => {
-        console.log("Redirecting to:", data.url);
         navigate(data.url);
       });
       socket.on("error", (error) => {

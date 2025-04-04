@@ -7,8 +7,6 @@ export const createSocketConnection = () => {
       ? process.env.REACT_APP_PROD_SOCKET_URL || "wss://testapi.amritaiedc.site"
       : process.env.REACT_APP_SOCKET_URL || "ws://localhost:5000";
 
-  console.log("API URL:", apiUrl);
-
   const socket = io(apiUrl, {
     reconnection: true,
     reconnectionAttempts: 5,
@@ -18,11 +16,11 @@ export const createSocketConnection = () => {
   });
 
   socket.on("connect", () => {
-    console.log("WebSocket connected:", socket.id);
+    console.log("Device connected");
   });
 
   socket.on("disconnect", () => {
-    console.log("WebSocket disconnected");
+    console.log("Device disconnected");
   });
 
   socket.on("connect_error", (error) => {
@@ -34,11 +32,11 @@ export const createSocketConnection = () => {
   });
 
   socket.on("reconnect_attempt", (attemptNumber) => {
-    console.log(`WebSocket attempting to reconnect (Attempt ${attemptNumber})...`);
+    console.log(`Device attempting to reconnect (Attempt ${attemptNumber})...`);
   });
 
   socket.on("reconnect", (attemptNumber) => {
-    console.log(`WebSocket successfully reconnected on attempt ${attemptNumber}`);
+    console.log(`Device successfully reconnected on attempt ${attemptNumber}`);
   });
 
   return socket;
