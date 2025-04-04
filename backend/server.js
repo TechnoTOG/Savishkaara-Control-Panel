@@ -8,6 +8,9 @@ const https = require("https"); // Import HTTPS module
 const http = require("http"); // Import HTTP module
 const mongoConnect = require("./db/mongodb"); // Import MongoDB connection
 const path = require("path");
+const os = require('os');
+const pidusage = require('pidusage');
+const si = require('systeminformation'); // For system-wide metrics
 
 // Initialize app
 const app = express();
@@ -15,6 +18,31 @@ const PORT = process.env.PORT || 5000;
 
 // Generate a secure secret for session signing
 const sessionSecret = crypto.randomBytes(64).toString("hex");
+
+// Track server start time
+const SERVER_START_TIME = Date.now();
+let serverStatus = 'online'; // "normal": all pages accessible, "restricted": only allowed pages, "offline": no pages (except API) available
+
+function restrictAccess(req, res, next) {
+  // Always allow API endpoints
+  if (req.originalUrl.startsWith('/api/')) return next();
+
+  // If server is offline, render the offline page for all non-API routes.
+  if (serverStatus === 'offline') {
+    return res.render('offline'); // Create an offline.ejs view.
+  }
+
+  // If server is restricted, allow only certain pages.
+  if (serverStatus === 'restricted') {
+    const isAllowed = allowedPathsRestricted.some(prefix =>
+      req.originalUrl.startsWith(prefix)
+    );
+    if (!isAllowed) {
+      return res.render('notAllowed'); // Create a notAllowed.ejs view.
+    }
+  }
+  next();
+}
 
 // Only run these production checks if NODE_ENV is "production"
 if (process.env.NODE_ENV === "production") {
@@ -74,6 +102,9 @@ app.use(
   })
 );
 
+// Apply the restricted access middleware (apply before routes)
+app.use(restrictAccess);
+
 // Parse JSON bodies
 app.use(express.json());
 
@@ -99,6 +130,81 @@ app.use('/', userOverviewRoutes);
 
 app.use("/", RealTimeRoutes);
 app.use("/", VerificationRoutes);
+
+// API endpoint to update server status (e.g., normal, restricted, offline)
+app.post('/update-server-status', (req, res) => {
+  // Trim status to remove extra whitespace if any.
+  serverStatus = req.body.status.trim();
+  console.log('Server status updated to: ', serverStatus);
+  res.sendStatus(200);
+});
+
+// API endpoint to fetch current server status (mode)
+app.get('/status', async (req, res) => {
+  try {
+    // Calculate uptime
+    const uptimeMs = Date.now() - SERVER_START_TIME;
+    const uptimeStr = formatUptime(uptimeMs);
+
+    // Get process-specific metrics (CPU and memory usage)
+    const processStats = await pidusage(process.pid);
+
+    // Get system-wide CPU usage
+    const cpuData = await si.currentLoad();
+
+    // Get memory usage
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const usedMemory = totalMemory - freeMemory;
+
+    // Prepare response data
+    const data = {
+      system_metrics: {
+        cpu_usage_percent: cpuData.currentLoad.toFixed(2),
+        process: {
+          cpu_usage_percent: processStats.cpu.toFixed(2),
+          memory_usage_mb: (processStats.memory / (1024 ** 2)).toFixed(2)
+        },
+        memory: {
+          total_gb: (totalMemory / (1024 ** 3)).toFixed(2),
+          used_gb: (usedMemory / (1024 ** 3)).toFixed(2),
+          usage_percent: ((usedMemory / totalMemory) * 100).toFixed(2)
+        },
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        uptime: uptimeStr
+      },
+    };
+
+    const response = {
+      data: data,
+      valid: true,
+      message: "Server is running",
+      mode: serverStatus
+    };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching server status:", error);
+    res.status(500).json({
+      valid: false,
+      message: "Failed to fetch server status",
+      error: error.message
+    });
+  }
+});
+
+// API endpoint to fetch the current mode
+app.get('/mode', (req, res) => {
+  res.status(200).json({ mode: serverStatus });
+});
+
+// Helper function to format uptime as HH:MM:SS
+function formatUptime(uptimeMs) {
+  const totalSeconds = Math.floor(uptimeMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
 
 // Optional: Log public IP
 https.get("https://api.ipify.org", (res) => {
