@@ -218,6 +218,12 @@ const MyEvent = () => {
                     Registration Link
                   </a>
                 </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                  <a href={event.excel_link} target="_blank" rel="noopener noreferrer">
+                    Excel Link
+                  </a>
+                </Typography>
               </Box>
 
               <Divider sx={{ my: 3 }} />
