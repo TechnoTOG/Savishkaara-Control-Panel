@@ -318,74 +318,77 @@ const AddEvent = () => {
             </Grid>
   
             {/* Dynamic Coordinators */}
-            {coordinators.map((coord, index) => (
-              <Grid item xs={12} key={coord.id}>
-                <Box display="flex" alignItems="center" gap={2}>
-                  <FormControl fullWidth required={index === 0}>
-                    <InputLabel>{`Coordinator ${index + 1}`}</InputLabel>
-                    <Select 
-                      value={coord.value} 
-                      onChange={(e) => updateCoordinator(coord.id, e.target.value)}
-                      sx={inputStyles}
-                    >
-                      {availableCoordinators.map((availCoord, idx) => (
-                        <MenuItem key={idx} value={availCoord.username}>
-                          {availCoord.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {index === coordinators.length - 1 ? (
-                    <IconButton onClick={addCoordinator} color="primary">
-                      <AddIcon />
-                    </IconButton>
-                  ) : (
-                    <IconButton 
-                      onClick={() => removeCoordinator(coord.id)} 
-                      color="error"
-                      disabled={coordinators.length <= 1}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              </Grid>
-            ))}
+
   
-            {/* Dynamic Faculty Coordinators */}
-            {facultyCoordinators.map((facCoord, index) => (
-              <Grid item xs={12} key={facCoord.id}>
-                <Box display="flex" alignItems="center" gap={2}>
-                  <FormControl fullWidth required={index === 0}>
-                    <InputLabel>{`Faculty Coordinator ${index + 1}`}</InputLabel>
-                    <Select 
-                      value={facCoord.value} 
-                      onChange={(e) => updateFacultyCoordinator(facCoord.id, e.target.value)}
-                      sx={inputStyles}
-                    >
-                      {availableCoordinators.map((coord, idx) => (
-                        <MenuItem key={idx} value={coord.username}>
-                          {coord.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {index === facultyCoordinators.length - 1 ? (
-                    <IconButton onClick={addFacultyCoordinator} color="primary">
-                      <AddIcon />
-                    </IconButton>
-                  ) : (
-                    <IconButton 
-                      onClick={() => removeFacultyCoordinator(facCoord.id)} 
-                      color="error"
-                      disabled={facultyCoordinators.length <= 1}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              </Grid>
-            ))}
+           {/* Dynamic Coordinators */}
+{coordinators.map((coord, index) => (
+  <Grid item xs={12} key={coord.id}>
+    <Box display="flex" alignItems="center" gap={2}>
+      <FormControl fullWidth required={index === 0}>
+        <InputLabel>{`Coordinator ${index + 1}`}</InputLabel>
+        <Select 
+          value={coord.value} 
+          onChange={(e) => updateCoordinator(coord.id, e.target.value)}
+          sx={inputStyles}
+        >
+          {availableCoordinators.map((user, idx) => (
+            <MenuItem key={idx} value={user.name}> {/* Send the name */}
+              {user.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {index === coordinators.length - 1 ? (
+        <IconButton onClick={addCoordinator} color="primary">
+          <AddIcon />
+        </IconButton>
+      ) : (
+        <IconButton 
+          onClick={() => removeCoordinator(coord.id)} 
+          color="error"
+          disabled={coordinators.length <= 1}
+        >
+          <RemoveIcon />
+        </IconButton>
+      )}
+    </Box>
+  </Grid>
+))}
+
+{/* Dynamic Faculty Coordinators */}
+{facultyCoordinators.map((facCoord, index) => (
+  <Grid item xs={12} key={facCoord.id}>
+    <Box display="flex" alignItems="center" gap={2}>
+      <FormControl fullWidth required={index === 0}>
+        <InputLabel>{`Faculty Coordinator ${index + 1}`}</InputLabel>
+        <Select 
+          value={facCoord.value} 
+          onChange={(e) => updateFacultyCoordinator(facCoord.id, e.target.value)}
+          sx={inputStyles}
+        >
+          {availableCoordinators.map((user, idx) => (
+            <MenuItem key={idx} value={user.name}> {/* Send the name */}
+              {user.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {index === facultyCoordinators.length - 1 ? (
+        <IconButton onClick={addFacultyCoordinator} color="primary">
+          <AddIcon />
+        </IconButton>
+      ) : (
+        <IconButton 
+          onClick={() => removeFacultyCoordinator(facCoord.id)} 
+          color="error"
+          disabled={facultyCoordinators.length <= 1}
+        >
+          <RemoveIcon />
+        </IconButton>
+      )}
+    </Box>
+  </Grid>
+))}
   
   
             {/* Links */}

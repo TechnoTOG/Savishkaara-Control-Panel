@@ -56,8 +56,8 @@ router.post('/addEvent', async (req, res) => {
       venue,
       date_time: new Date(dateAndTime),
       fee,
-      coordinators,
-      faculty_coordinators: facultyCoordinators,
+      coordinators, // Array of names
+      faculty_coordinators: facultyCoordinators, // Array of names
       form_link: registrationLink,
       excel_link: excelLink,
       status: "upcoming",
