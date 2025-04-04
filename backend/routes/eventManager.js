@@ -240,6 +240,40 @@ router.get('/events-revenue', async (req, res) => {
  *   ...
  * ]
  */
+  router.post("/events/update-details-by-name", async (req, res) => {
+  try {
+    const { name, venue, date_time, fee, coordinator1, coordinator2, faculty_coor1, faculty_coor2, form_link } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Event name is required" });
+    }
+
+    const updatedEvent = await Event.findOneAndUpdate(
+      { name },
+      {
+        venue,
+        date_time,
+        fee,
+        coordinator1,
+        coordinator2,
+        faculty_coor1,
+        faculty_coor2,
+        form_link,
+      },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
+  } catch (err) {
+    console.error("Error updating event details:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get('/registration-trend', async (req, res) => {
   try {
     console.log("Starting /registration-trend route...");

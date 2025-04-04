@@ -12,6 +12,12 @@ import {
   Box,
   Divider,
   Chip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import {
   Place,
@@ -39,6 +45,9 @@ const MyEvent = () => {
   const [loading, setLoading] = useState(true);
   const [socketError, setSocketError] = useState(null);
   const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const apiBaseURL =
     process.env.NODE_ENV === "production"
@@ -71,10 +80,18 @@ const MyEvent = () => {
           const data = await idResponse.json();
           setEvent(data);
           setStatus(data.status || "");
+          setFormData({
+            venue: data.venue,
+            date_time: new Date(data.date_time).toISOString().slice(0, 16),
+            fee: data.fee,
+            coordinator1: data.coordinator1,
+            coordinator2: data.coordinator2,
+            faculty_coor1: data.faculty_coor1,
+            faculty_coor2: data.faculty_coor2,
+            form_link: data.form_link,
+          });
           setLoading(false);
           return;
-        } else {
-          console.warn(`Fetch by eventId failed with status: ${idResponse.status}`);
         }
 
         const userName = Cookies.get("userName");
@@ -96,9 +113,20 @@ const MyEvent = () => {
         }
 
         const fallbackData = await nameResponse.json();
-        setEvent(fallbackData);
-        setStatus(fallbackData.status || "");
-        setLoading(false);
+setEvent(fallbackData);
+setStatus(fallbackData.status || "");
+setFormData({
+  venue: fallbackData.venue,
+  date_time: new Date(fallbackData.date_time).toISOString().slice(0, 16),
+  fee: fallbackData.fee,
+  coordinator1: fallbackData.coordinator1,
+  coordinator2: fallbackData.coordinator2,
+  faculty_coor1: fallbackData.faculty_coor1,
+  faculty_coor2: fallbackData.faculty_coor2,
+  form_link: fallbackData.form_link,
+});
+setLoading(false);
+
       } catch (err) {
         console.error("Error fetching event details:", err);
         setError(err.message || "An error occurred while fetching event details.");
@@ -134,11 +162,37 @@ const MyEvent = () => {
 
       const updated = await response.json();
       setEvent(updated);
-      alert("Status updated successfully!");
+      setConfirmationOpen(true);
     } catch (err) {
       alert(err.message || "Error updating event status");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleFormChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDetailsUpdate = async () => {
+    try {
+      const response = await fetch(`${apiBaseURL}/events/update-details-by-name`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Allowed-Origin": "savishkaara.in",
+        },
+        body: JSON.stringify({ name: event.name, ...formData }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update event details");
+
+      const updated = await response.json();
+      setEvent(updated.event);
+      setEditMode(false);
+      setConfirmationOpen(true);
+    } catch (err) {
+      alert(err.message || "Error updating event details");
     }
   };
 
@@ -180,48 +234,42 @@ const MyEvent = () => {
                   <EventIcon sx={{ mr: 1, verticalAlign: "middle" }} />
                   {event.name}
                 </Typography>
-
-                <Chip label={status.toUpperCase()} color={getStatusColor(status)} />
+                <Box>
+                  <Chip label={status.toUpperCase()} color={getStatusColor(status)} />
+                  <Button variant="outlined" onClick={() => setEditMode(!editMode)} sx={{ ml: 2 }}>
+                    {editMode ? "Cancel Edit" : "Edit Event"}
+                  </Button>
+                </Box>
               </Box>
 
               <Divider sx={{ my: 2 }} />
 
               <Box mb={2}>
-                <Typography variant="subtitle1" gutterBottom>
-                  <Place sx={{ mr: 1, verticalAlign: "middle" }} />
-                  Venue: {event.venue}
+                <Typography variant="subtitle1">
+                  <Place sx={{ mr: 1, verticalAlign: "middle" }} /> Venue: {event.venue}
                 </Typography>
-
-                <Typography variant="subtitle1" gutterBottom>
-                  <AccessTime sx={{ mr: 1, verticalAlign: "middle" }} />
-                  Date & Time: {new Date(event.date_time).toLocaleString()}
+                <Typography variant="subtitle1">
+                  <AccessTime sx={{ mr: 1, verticalAlign: "middle" }} /> Date & Time: {new Date(event.date_time).toLocaleString()}
                 </Typography>
-
-                <Typography variant="subtitle1" gutterBottom>
-                  <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} />
-                  Fee: ₹{event.fee}
+                <Typography variant="subtitle1">
+                  <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} /> Fee: ₹{event.fee}
                 </Typography>
-
-                <Typography variant="subtitle1" gutterBottom>
-                  <Group sx={{ mr: 1, verticalAlign: "middle" }} />
-                  Coordinators: {event.coordinator1}, {event.coordinator2}
+                <Typography variant="subtitle1">
+                  <Group sx={{ mr: 1, verticalAlign: "middle" }} /> Coordinator 1: {event.coordinator1}
                 </Typography>
-
-                <Typography variant="subtitle1" gutterBottom>
-                  <School sx={{ mr: 1, verticalAlign: "middle" }} />
-                  Faculty: {event.faculty_coor1}, {event.faculty_coor2}
+                <Typography variant="subtitle1">
+                  <Group sx={{ mr: 1, verticalAlign: "middle" }} /> Coordinator 2: {event.coordinator2}
                 </Typography>
-
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant="subtitle1">
+                  <School sx={{ mr: 1, verticalAlign: "middle" }} /> Faculty 1: {event.faculty_coor1}
+                </Typography>
+                <Typography variant="subtitle1">
+                  <School sx={{ mr: 1, verticalAlign: "middle" }} /> Faculty 2: {event.faculty_coor2}
+                </Typography>
+                <Typography variant="subtitle1">
                   <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
                   <a href={event.form_link} target="_blank" rel="noopener noreferrer">
                     Registration Link
-                  </a>
-                </Typography>
-                <Typography variant="subtitle1" gutterBottom>
-                  <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-                  <a href={event.excel_link} target="_blank" rel="noopener noreferrer">
-                    Excel Link
                   </a>
                 </Typography>
               </Box>
@@ -229,7 +277,6 @@ const MyEvent = () => {
               <Divider sx={{ my: 3 }} />
 
               <Typography variant="h6">Update Event Status:</Typography>
-
               <Box display="flex" alignItems="center" mt={1}>
                 <FormControl sx={{ minWidth: 200 }}>
                   <InputLabel>Status</InputLabel>
@@ -243,7 +290,6 @@ const MyEvent = () => {
                     <MenuItem value="completed">Completed</MenuItem>
                   </Select>
                 </FormControl>
-
                 <Button
                   variant="contained"
                   onClick={handleStatusUpdate}
@@ -253,12 +299,38 @@ const MyEvent = () => {
                   {isUpdating ? "Updating..." : "Save Status"}
                 </Button>
               </Box>
+
+              {editMode && (
+                <Box mt={3}>
+                  <TextField fullWidth name="venue" label="Venue" value={formData.venue} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="date_time" type="datetime-local" label="Date & Time" value={formData.date_time} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="fee" label="Fee" type="number" value={formData.fee} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="coordinator1" label="Coordinator 1" value={formData.coordinator1} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="coordinator2" label="Coordinator 2" value={formData.coordinator2} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="faculty_coor1" label="Faculty Coordinator 1" value={formData.faculty_coor1} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="faculty_coor2" label="Faculty Coordinator 2" value={formData.faculty_coor2} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <TextField fullWidth name="form_link" label="Registration Link" value={formData.form_link} onChange={handleFormChange} sx={{ mb: 2 }} />
+                  <Button variant="contained" onClick={handleDetailsUpdate}>
+                    Save Changes
+                  </Button>
+                </Box>
+              )}
             </CardContent>
           </Card>
         ) : (
           <Typography variant="body1">Event not found.</Typography>
         )}
       </Box>
+
+      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
+        <DialogTitle>Update Successful</DialogTitle>
+        <DialogContent>
+          <DialogContentText>The event details have been successfully updated.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmationOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Layout>
   );
 };
