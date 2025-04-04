@@ -30,7 +30,7 @@ const EventOverview = () => {
 
     if (socket && isMounted) {
       Room.join(socket, "eventso", objID);
-      socket.on("message", (data) => console.log("Message received:", data));
+      socket.on("message", (data) => console.log("Message:", data));
       socket.on("error", (error) => setSocketError(error.message));
     }
 

@@ -9,7 +9,6 @@ const Room = {
      */
     join: (socket, roomName, objId) => {
       if (socket) {
-        console.log(`Joining room: ${roomName}`);
         socket.emit("join-room", { roomName, objId });
       }
     },
@@ -21,7 +20,6 @@ const Room = {
      */
     leave: (socket, roomName) => {
       if (socket) {
-        console.log(`Leaving room: ${roomName}`);
         socket.emit("leave-room", roomName);
       }
     },

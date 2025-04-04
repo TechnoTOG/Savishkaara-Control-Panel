@@ -47,10 +47,6 @@ const Login = () => {
       // Parse the response as JSON
       const result = await response.json();
 
-      // Log the raw response and parsed data for debugging
-      console.log("Raw response:", response);
-      console.log("Parsed data:", result);
-
       // Handle success or failure based on the response status
       if (response.ok) {
         // Calculate the expiration time (6 hours from now)

@@ -89,7 +89,6 @@ const AddEvent = () => {
       flinik: link,
       elink: excelLink,
     };
-    console.log(eventData);
     try {
       // Send a POST request to /addEvent
       const response = await fetch(`${apiBaseURL}/addEvent`, {
@@ -105,7 +104,6 @@ const AddEvent = () => {
         throw new Error(`Failed to add event: ${response.statusText}`);
       }
       const result = await response.json();
-      console.log("Event added successfully:", result);
       // Set success message
       setSuccessMessage("Event added successfully!");
       // Reset the form fields after 2 seconds
@@ -159,7 +157,7 @@ const AddEvent = () => {
     if (socket && !hasJoinedRoom) {
       Room.join(socket, "eventsa", objID);
       hasJoinedRoom = true;
-      socket.on("message", (data) => console.log("Message received:", data));
+      socket.on("message", (data) => console.log("Message:", data));
       socket.on("error", (error) => setSocketError(error.message));
     }
     return () => {

@@ -25,12 +25,11 @@ const Server = () => {
   
         // Handle server messages
         socket.on("message", (data) => {
-          console.log("Message received:", data);
+          console.log("Message:", data);
         });
   
         // Handle redirection errors
         socket.on("redirect", (data) => {
-          console.log("Redirecting to:", data.url);
           navigate(data.url);
         });
   
