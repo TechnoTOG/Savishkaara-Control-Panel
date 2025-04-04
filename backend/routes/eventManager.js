@@ -342,4 +342,25 @@ router.get('/top-events', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch top events data", details: error.message });
   }
 });
+/**
+ * GET /ongoing-events
+ * Fetch all events with status = "ongoing".
+ */
+router.get('/ongoing-events', async (req, res) => {
+  try {
+    console.log("Starting /ongoing-events route...");
+    const ongoingEvents = await Event.find(
+      { status: "ongoing" },
+      { name: 1, venue: 1,  _id: 0 }
+    );
+    console.log("Ongoing events data:", JSON.stringify(ongoingEvents, null, 2));
+    if (!ongoingEvents || ongoingEvents.length === 0) {
+      console.warn("No ongoing events found.");
+    }
+    res.status(200).json(ongoingEvents);
+  } catch (error) {
+    console.error("Error fetching ongoing events data:", error);
+    res.status(500).json({ error: "Failed to fetch ongoing events data", details: error.message });
+  }
+});
 module.exports = router;
