@@ -13,8 +13,8 @@ module.exports = function (io) {
                 }
                 const ROOM_ACCESS = {
                     'super': ['dashboard', 'samridhi', 'server', 'eventso', 'eventsa', 'myevent', 'userso', 'usersa'],
-                    'admin': ['dashboard', 'samridhi', 'vevents'],
-                    'coor': ['dashboard', 'myevent']
+                    'admin': ['dashboard', 'samridhi', 'eventso','myevent'],
+                    'coor': ['myevent']
                 };
                 const allowedRooms = ROOM_ACCESS[user.role];
                 if (allowedRooms && allowedRooms.includes(roomName)) {

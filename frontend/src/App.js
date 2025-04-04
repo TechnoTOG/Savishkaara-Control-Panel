@@ -17,6 +17,8 @@ import AddUser from "./pages/addUser";
 import Server from "./pages/server";
 import ForbiddenPage from "./pages/forbidden"; // Import the 403 page component
 
+
+
 // Function to check authentication status
 const checkAuth = async () => {
   const apiBaseURL = process.env.NODE_ENV === "production"

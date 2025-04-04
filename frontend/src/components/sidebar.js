@@ -23,7 +23,7 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
   const rolePermissions = {
     super: ["Dashboard", "Events", "Samridhi", "Users", "Server"],
     admin: ["Dashboard", "vEvents", "Samridhi"],
-    coor: ["Dashboard", "My Event"],
+    coor: ["My Event"],
   };
 
   // Get the allowed options for the current user role
@@ -149,7 +149,7 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
           </>
         )}
 
-        {/* Render Samridhi if allowed */}
+        {/* Render Samridhi if allowed
         {allowedOptions.includes("Samridhi") && (
           <Tooltip title="Samridhi" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
@@ -168,7 +168,7 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
               {!isMinimized && <ListItemText primary="Samridhi" />}
             </ListItemButton>
           </Tooltip>
-        )}
+        )} */}
 
         {/* Render Users if allowed */}
         {allowedOptions.includes("Users") && (

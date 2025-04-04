@@ -64,10 +64,18 @@ const Login = () => {
         Cookies.set("role", result.role, { expires: expirationTime });
 
         if (result.redirectToUpdatePassword) {
-          navigate("/update-password"); // Redirect to update-password page if condition met
+          navigate("/update-password");
         } else {
-          navigate("/"); // Redirect to dashboard after successful login
+          const role = result.role?.toLowerCase();
+          
+          if (role === "coor" || role === "coordinator") {
+            navigate("/my-event/" + result.objectID); // assuming you're using dynamic route
+          } else {
+            navigate("/dashboard");
+          }
         }
+        
+        
       } else {
         setError(result.error || "Login failed. Please try again.");
       }
