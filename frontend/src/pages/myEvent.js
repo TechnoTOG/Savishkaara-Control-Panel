@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from "@mui/material";
 import {
   Place,
@@ -27,6 +28,8 @@ import {
   School,
   Link as LinkIcon,
   Event as EventIcon,
+  Add as AddIcon,
+  Remove as RemoveIcon,
 } from "@mui/icons-material";
 import Cookies from "js-cookie";
 import { WebSocketContext } from "../App";
@@ -47,7 +50,15 @@ const MyEvent = () => {
   const [socketError, setSocketError] = useState(null);
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    venue: "",
+    date_time: "",
+    fee: "",
+    coordinators: [""],
+    faculty_coordinators: [""],
+    form_link: "",
+    excel_link: ""
+  });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const apiBaseURL =
@@ -86,11 +97,10 @@ const MyEvent = () => {
             venue: data.venue,
             date_time: new Date(data.date_time).toISOString().slice(0, 16),
             fee: data.fee,
-            coordinator1: data.coordinator1,
-            coordinator2: data.coordinator2,
-            faculty_coor1: data.faculty_coor1,
-            faculty_coor2: data.faculty_coor2,
+            coordinators: data.coordinators || [""],
+            faculty_coordinators: data.faculty_coordinators || [""],
             form_link: data.form_link,
+            excel_link: data.excel_link || ""
           });
           setLoading(false);
           return;
@@ -125,11 +135,10 @@ const MyEvent = () => {
               venue: fallbackData[0].venue,
               date_time: new Date(fallbackData[0].date_time).toISOString().slice(0, 16),
               fee: fallbackData[0].fee,
-              coordinator1: fallbackData[0].coordinator1,
-              coordinator2: fallbackData[0].coordinator2,
-              faculty_coor1: fallbackData[0].faculty_coor1,
-              faculty_coor2: fallbackData[0].faculty_coor2,
+              coordinators: fallbackData[0].coordinators || [""],
+              faculty_coordinators: fallbackData[0].faculty_coordinators || [""],
               form_link: fallbackData[0].form_link,
+              excel_link: fallbackData[0].excel_link || ""
             });
           }
         } else {
@@ -140,11 +149,10 @@ const MyEvent = () => {
             venue: fallbackData.venue,
             date_time: new Date(fallbackData.date_time).toISOString().slice(0, 16),
             fee: fallbackData.fee,
-            coordinator1: fallbackData.coordinator1,
-            coordinator2: fallbackData.coordinator2,
-            faculty_coor1: fallbackData.faculty_coor1,
-            faculty_coor2: fallbackData.faculty_coor2,
+            coordinators: fallbackData.coordinators || [""],
+            faculty_coordinators: fallbackData.faculty_coordinators || [""],
             form_link: fallbackData.form_link,
+            excel_link: fallbackData.excel_link || ""
           });
         }
         setLoading(false);
@@ -183,7 +191,6 @@ const MyEvent = () => {
       if (!response.ok) throw new Error("Failed to update event status");
 
       const updated = await response.json();
-      // Update the specific event in the events array
       setEvents(events.map(ev => 
         ev._id === selectedEvent._id ? { ...ev, status: updated.status } : ev
       ));
@@ -200,6 +207,46 @@ const MyEvent = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleCoordinatorChange = (index, value) => {
+    const updatedCoordinators = [...formData.coordinators];
+    updatedCoordinators[index] = value;
+    setFormData({ ...formData, coordinators: updatedCoordinators });
+  };
+
+  const handleFacultyCoordinatorChange = (index, value) => {
+    const updatedFacultyCoordinators = [...formData.faculty_coordinators];
+    updatedFacultyCoordinators[index] = value;
+    setFormData({ ...formData, faculty_coordinators: updatedFacultyCoordinators });
+  };
+
+  const addCoordinator = () => {
+    setFormData({
+      ...formData,
+      coordinators: [...formData.coordinators, ""]
+    });
+  };
+
+  const removeCoordinator = (index) => {
+    if (formData.coordinators.length <= 1) return;
+    const updatedCoordinators = [...formData.coordinators];
+    updatedCoordinators.splice(index, 1);
+    setFormData({ ...formData, coordinators: updatedCoordinators });
+  };
+
+  const addFacultyCoordinator = () => {
+    setFormData({
+      ...formData,
+      faculty_coordinators: [...formData.faculty_coordinators, ""]
+    });
+  };
+
+  const removeFacultyCoordinator = (index) => {
+    if (formData.faculty_coordinators.length <= 1) return;
+    const updatedFacultyCoordinators = [...formData.faculty_coordinators];
+    updatedFacultyCoordinators.splice(index, 1);
+    setFormData({ ...formData, faculty_coordinators: updatedFacultyCoordinators });
+  };
+
   const handleDetailsUpdate = async () => {
     try {
       const response = await fetch(`${apiBaseURL}/events/update-details-by-name`, {
@@ -208,13 +255,21 @@ const MyEvent = () => {
           "Content-Type": "application/json",
           "X-Allowed-Origin": "savishkaara.in",
         },
-        body: JSON.stringify({ name: selectedEvent.name, ...formData }),
+        body: JSON.stringify({ 
+          name: selectedEvent.name, 
+          venue: formData.venue,
+          date_time: formData.date_time,
+          fee: formData.fee,
+          coordinators: formData.coordinators.filter(c => c.trim() !== ""),
+          faculty_coordinators: formData.faculty_coordinators.filter(f => f.trim() !== ""),
+          form_link: formData.form_link,
+          excel_link: formData.excel_link
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to update event details");
 
       const updated = await response.json();
-      // Update the specific event in the events array
       setEvents(events.map(ev => 
         ev._id === selectedEvent._id ? updated.event : ev
       ));
@@ -247,11 +302,10 @@ const MyEvent = () => {
       venue: selected.venue,
       date_time: new Date(selected.date_time).toISOString().slice(0, 16),
       fee: selected.fee,
-      coordinator1: selected.coordinator1,
-      coordinator2: selected.coordinator2,
-      faculty_coor1: selected.faculty_coor1,
-      faculty_coor2: selected.faculty_coor2,
+      coordinators: selected.coordinators || [""],
+      faculty_coordinators: selected.faculty_coordinators || [""],
       form_link: selected.form_link,
+      excel_link: selected.excel_link || ""
     });
     setEditMode(false);
   };
@@ -310,43 +364,147 @@ const MyEvent = () => {
 
                 <Divider sx={{ my: 2 }} />
 
-                <Box mb={2}>
-                  <Typography variant="subtitle1">
-                    <Place sx={{ mr: 1, verticalAlign: "middle" }} /> Venue: {selectedEvent.venue}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <AccessTime sx={{ mr: 1, verticalAlign: "middle" }} /> Date & Time: {new Date(selectedEvent.date_time).toLocaleString()}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} /> Fee: ₹{selectedEvent.fee}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <Group sx={{ mr: 1, verticalAlign: "middle" }} /> Coordinator 1: {selectedEvent.coordinator1}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <Group sx={{ mr: 1, verticalAlign: "middle" }} /> Coordinator 2: {selectedEvent.coordinator2}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <School sx={{ mr: 1, verticalAlign: "middle" }} /> Faculty 1: {selectedEvent.faculty_coor1}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <School sx={{ mr: 1, verticalAlign: "middle" }} /> Faculty 2: {selectedEvent.faculty_coor2}
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-                    <a href={selectedEvent.form_link} target="_blank" rel="noopener noreferrer">
-                      Registration Link
-                    </a>
-                  </Typography>
-                  {selectedEvent.excel_link && (
+                {!editMode ? (
+                  <Box mb={2}>
+                    <Typography variant="subtitle1">
+                      <Place sx={{ mr: 1, verticalAlign: "middle" }} /> Venue: {selectedEvent.venue}
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      <AccessTime sx={{ mr: 1, verticalAlign: "middle" }} /> Date & Time: {new Date(selectedEvent.date_time).toLocaleString()}
+                    </Typography>
+                    <Typography variant="subtitle1">
+                      <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} /> Fee: ₹{selectedEvent.fee}
+                    </Typography>
+                    
+                    {selectedEvent.coordinators?.map((coord, index) => (
+                      <Typography key={index} variant="subtitle1">
+                        <Group sx={{ mr: 1, verticalAlign: "middle" }} /> 
+                        Coordinator {index + 1}: {coord}
+                      </Typography>
+                    ))}
+                    
+                    {selectedEvent.faculty_coordinators?.map((faculty, index) => (
+                      <Typography key={index} variant="subtitle1">
+                        <School sx={{ mr: 1, verticalAlign: "middle" }} /> 
+                        Faculty Coordinator {index + 1}: {faculty}
+                      </Typography>
+                    ))}
+                    
                     <Typography variant="subtitle1">
                       <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-                      <a href={selectedEvent.excel_link} target="_blank" rel="noopener noreferrer">
-                        Excel Link
+                      <a href={selectedEvent.form_link} target="_blank" rel="noopener noreferrer">
+                        Registration Link
                       </a>
                     </Typography>
-                  )}
-                </Box>
+                    {selectedEvent.excel_link && (
+                      <Typography variant="subtitle1">
+                        <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                        <a href={selectedEvent.excel_link} target="_blank" rel="noopener noreferrer">
+                          Excel Link
+                        </a>
+                      </Typography>
+                    )}
+                  </Box>
+                ) : (
+                  <Box mt={3}>
+                    <TextField 
+                      fullWidth 
+                      name="venue" 
+                      label="Venue" 
+                      value={formData.venue} 
+                      onChange={handleFormChange} 
+                      sx={{ mb: 2 }} 
+                    />
+                    <TextField 
+                      fullWidth 
+                      name="date_time" 
+                      type="datetime-local" 
+                      label="Date & Time" 
+                      value={formData.date_time} 
+                      onChange={handleFormChange} 
+                      sx={{ mb: 2 }} 
+                    />
+                    <TextField 
+                      fullWidth 
+                      name="fee" 
+                      label="Fee" 
+                      type="number" 
+                      value={formData.fee} 
+                      onChange={handleFormChange} 
+                      sx={{ mb: 2 }} 
+                    />
+                    
+                    {formData.coordinators.map((coordinator, index) => (
+                      <Box key={index} display="flex" alignItems="center" mb={2}>
+                        <TextField
+                          fullWidth
+                          label={`Coordinator ${index + 1}`}
+                          value={coordinator}
+                          onChange={(e) => handleCoordinatorChange(index, e.target.value)}
+                        />
+                        {index === formData.coordinators.length - 1 ? (
+                          <IconButton onClick={addCoordinator} color="primary" sx={{ ml: 1 }}>
+                            <AddIcon />
+                          </IconButton>
+                        ) : (
+                          <IconButton 
+                            onClick={() => removeCoordinator(index)} 
+                            color="error"
+                            sx={{ ml: 1 }}
+                            disabled={formData.coordinators.length <= 1}
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ))}
+                    
+                    {formData.faculty_coordinators.map((faculty, index) => (
+                      <Box key={index} display="flex" alignItems="center" mb={2}>
+                        <TextField
+                          fullWidth
+                          label={`Faculty Coordinator ${index + 1}`}
+                          value={faculty}
+                          onChange={(e) => handleFacultyCoordinatorChange(index, e.target.value)}
+                        />
+                        {index === formData.faculty_coordinators.length - 1 ? (
+                          <IconButton onClick={addFacultyCoordinator} color="primary" sx={{ ml: 1 }}>
+                            <AddIcon />
+                          </IconButton>
+                        ) : (
+                          <IconButton 
+                            onClick={() => removeFacultyCoordinator(index)} 
+                            color="error"
+                            sx={{ ml: 1 }}
+                            disabled={formData.faculty_coordinators.length <= 1}
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ))}
+                    
+                    <TextField 
+                      fullWidth 
+                      name="form_link" 
+                      label="Registration Link" 
+                      value={formData.form_link} 
+                      onChange={handleFormChange} 
+                      sx={{ mb: 2 }} 
+                    />
+                    <TextField 
+                      fullWidth 
+                      name="excel_link" 
+                      label="Excel Link" 
+                      value={formData.excel_link} 
+                      onChange={handleFormChange} 
+                      sx={{ mb: 2 }} 
+                    />
+                    <Button variant="contained" onClick={handleDetailsUpdate}>
+                      Save Changes
+                    </Button>
+                  </Box>
+                )}
 
                 <Divider sx={{ my: 3 }} />
 
@@ -373,22 +531,6 @@ const MyEvent = () => {
                     {isUpdating ? "Updating..." : "Save Status"}
                   </Button>
                 </Box>
-
-                {editMode && (
-                  <Box mt={3}>
-                    <TextField fullWidth name="venue" label="Venue" value={formData.venue} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="date_time" type="datetime-local" label="Date & Time" value={formData.date_time} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="fee" label="Fee" type="number" value={formData.fee} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="coordinator1" label="Coordinator 1" value={formData.coordinator1} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="coordinator2" label="Coordinator 2" value={formData.coordinator2} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="faculty_coor1" label="Faculty Coordinator 1" value={formData.faculty_coor1} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="faculty_coor2" label="Faculty Coordinator 2" value={formData.faculty_coor2} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <TextField fullWidth name="form_link" label="Registration Link" value={formData.form_link} onChange={handleFormChange} sx={{ mb: 2 }} />
-                    <Button variant="contained" onClick={handleDetailsUpdate}>
-                      Save Changes
-                    </Button>
-                  </Box>
-                )}
               </CardContent>
             </Card>
           </>

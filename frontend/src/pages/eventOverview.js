@@ -18,7 +18,7 @@ const EventOverview = () => {
   const [events, setEvents] = useState([]);
   const [totalRegistrations, setTotalRegistrations] = useState(0);
   const [verifiedRegistrations, setVerifiedRegistrations] = useState(0);
-  const [revenueData, setRevenueData] = useState([]); // New state for revenue data
+  const [revenueData, setRevenueData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const apiBaseURL = process.env.NODE_ENV === "production"
@@ -83,7 +83,7 @@ const EventOverview = () => {
           setEvents(eventsData);
           setTotalRegistrations(registrationsData.totalRegistrations);
           setVerifiedRegistrations(registrationsData.verifiedRegistrations);
-          setRevenueData(revenueData); // Set revenue data
+          setRevenueData(revenueData);
           setLoading(false);
         }
       } catch (error) {
@@ -103,6 +103,13 @@ const EventOverview = () => {
       socket?.off("error");
     };
   }, [socket, objID, navigate, apiBaseURL]);
+
+  // Helper function to display coordinators
+  const displayCoordinators = (coordinators) => {
+    if (!coordinators || coordinators.length === 0) return "No coordinators";
+    if (coordinators.length === 1) return `Coordinator: ${coordinators[0]}`;
+    return `Coordinators: ${coordinators.join(", ")}`;
+  };
 
   return (
     <Layout title="Events Overview" activePage="eventso">
@@ -158,61 +165,59 @@ const EventOverview = () => {
 
           {/* Right Side: Revenue Card */}
           <Grid item xs={12} md={6}>
-  {loading ? (
-    <Typography variant="body1">Loading...</Typography>
-  ) : socketError ? (
-    <Typography variant="body1" color="error">
-      Error: {socketError}
-    </Typography>
-  ) : revenueData.length > 0 ? (
-    <VisualizationCard
-      title="Revenue"
-      chartType="doughnut"
-      data={{
-        labels: revenueData.map((item) => item.name),
-        datasets: [
-          {
-            data: revenueData.map((item) => item.revenue),
-            backgroundColor: [
-              "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
-            ],
-            hoverBackgroundColor: [
-              "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
-            ],
-          },
-        ],
-      }}
-      options={{
-        responsive: true,
-        maintainAspectRatio: true, // Keep ratio to avoid sudden disappearance
-        aspectRatio: 2, // Adjust to control width-height balance
-        cutout: "50%", // Reduce donut hole size (Chart.js v3+)
-        plugins: {
-          legend: {
-            position: "right", // Move legend to right side
-            labels: {
-              boxWidth: 10, // Reduce box size for better spacing
-            },
-          },
-          tooltip: {
-            callbacks: {
-              label: (tooltipItem) => {
-                const label = revenueData[tooltipItem.dataIndex].name;
-                const value = revenueData[tooltipItem.dataIndex].revenue;
-                return `${label}: ₹${value}`;
-              },
-            },
-          },
-        },
-      }}
-      height="50vh" // Ensure the height stays stable
-    />
-  ) : (
-    <Typography variant="body1">No revenue data available</Typography>
-  )}
-</Grid>
-
-
+            {loading ? (
+              <Typography variant="body1">Loading...</Typography>
+            ) : socketError ? (
+              <Typography variant="body1" color="error">
+                Error: {socketError}
+              </Typography>
+            ) : revenueData.length > 0 ? (
+              <VisualizationCard
+                title="Revenue"
+                chartType="doughnut"
+                data={{
+                  labels: revenueData.map((item) => item.name),
+                  datasets: [
+                    {
+                      data: revenueData.map((item) => item.revenue),
+                      backgroundColor: [
+                        "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+                      ],
+                      hoverBackgroundColor: [
+                        "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+                      ],
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: true,
+                  aspectRatio: 2,
+                  cutout: "50%",
+                  plugins: {
+                    legend: {
+                      position: "right",
+                      labels: {
+                        boxWidth: 10,
+                      },
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (tooltipItem) => {
+                          const label = revenueData[tooltipItem.dataIndex].name;
+                          const value = revenueData[tooltipItem.dataIndex].revenue;
+                          return `${label}: ₹${value}`;
+                        },
+                      },
+                    },
+                  },
+                }}
+                height="50vh"
+              />
+            ) : (
+              <Typography variant="body1">No revenue data available</Typography>
+            )}
+          </Grid>
         </Grid>
 
         <div style={{ marginTop: "30px", marginLeft: "20px" }}>
@@ -226,7 +231,7 @@ const EventOverview = () => {
                 <MetricCard
                   title={event.name}
                   value={`Venue: ${event.venue}`}
-                  description={`Coordinator: ${event.coordinator1}`}
+                  description={displayCoordinators(event.coordinators)}
                   textColor="black"
                   action={
                     <Button

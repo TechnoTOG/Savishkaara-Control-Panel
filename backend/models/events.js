@@ -6,13 +6,24 @@ const eventSchema = new mongoose.Schema({
   date_time: { type: Date, required: true }, // Combined date and time
   form_link: { type: String, required: true },
   excel_link: { type: String, required: true },
-  coordinator1: { type: String, required: true },
-  coordinator2: { type: String, required: true },
-  faculty_coor1: { type: String, required: true },
-  faculty_coor2: { type: String, required: true },
+  coordinators: { 
+    type: [String],  // Array of strings
+    required: true,
+    validate: [arrayLimit, '{PATH} must have at least 1 coordinator']
+  },
+  faculty_coordinators: { 
+    type: [String],  // Array of strings
+    required: true,
+    validate: [arrayLimit, '{PATH} must have at least 1 faculty coordinator']
+  },
   status: { type: String, required: true },
   venue: { type: String, required: true }
-}, { collection: "events"});
+}, { collection: "events" });
 
-// Export the User model
+// Custom validator for array length
+function arrayLimit(val) {
+  return val.length >= 1;
+}
+
+// Export the Event model
 module.exports = mongoose.model('Event', eventSchema);

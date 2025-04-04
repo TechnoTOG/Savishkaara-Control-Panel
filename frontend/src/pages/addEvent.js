@@ -11,7 +11,9 @@ import {
   InputLabel,
   Snackbar,
   Alert,
+  IconButton,
 } from "@mui/material";
+import { Add as AddIcon, Remove as RemoveIcon } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import Cookies from "js-cookie";
 import { WebSocketContext } from "../App";
@@ -20,7 +22,7 @@ import Layout from "../layouts/layout";
 
 const AddEvent = () => {
   const socket = useContext(WebSocketContext);
-  const theme = useTheme(); // Get theme for light/dark mode
+  const theme = useTheme();
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null);
   const [eventName, setEventName] = useState("");
@@ -31,22 +33,14 @@ const AddEvent = () => {
   const [link, setLink] = useState("");
   const [excelLink, setExcelLink] = useState("");
   
-  const [coordinator1, setCoordinator1] = useState("");
-  const [facultyCoordinator1, setFacultyCoordinator1] = useState("");
-  const [coordinator2, setCoordinator2] = useState("");
-  const [facultyCoordinator2, setFacultyCoordinator2] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  // Dynamic coordinators state
+  const [coordinators, setCoordinators] = useState([{ id: 1, value: "" }]);
+  const [facultyCoordinators, setFacultyCoordinators] = useState([{ id: 1, value: "" }]);
+  
+  const [availableCoordinators, setAvailableCoordinators] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const apiBaseURL = process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
-    : process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-  const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
-
-  // Define separate arrays for coordinators and faculty coordinators
-  const [coordinators, setCoordinators] = useState([]);
-
-  const facultyCoordinators = [
+  const facultyCoordinatorOptions = [
     "Remya Nair T",
     "Savitha Gopal",
     "Leena V",
@@ -60,6 +54,12 @@ const AddEvent = () => {
     "Dr. Dhanaya R"
   ];
 
+  const venues = ["Auditorium", "Conference Hall", "Outdoor Stage", "Others"];
+
+  const apiBaseURL = process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+    : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const inputStyles = {
     backgroundColor: theme.palette.mode === "dark" ? "#222" : "#c7c3c3",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",
@@ -68,29 +68,71 @@ const AddEvent = () => {
     },
   };
 
+  // Add a new coordinator field
+  const addCoordinator = () => {
+    setCoordinators([...coordinators, { id: coordinators.length + 1, value: "" }]);
+  };
+
+  // Remove a coordinator field
+  const removeCoordinator = (id) => {
+    if (coordinators.length > 1) {
+      setCoordinators(coordinators.filter(coord => coord.id !== id));
+    }
+  };
+
+  // Update a specific coordinator
+  const updateCoordinator = (id, value) => {
+    setCoordinators(coordinators.map(coord => 
+      coord.id === id ? { ...coord, value } : coord
+    ));
+  };
+
+  // Add a new faculty coordinator field
+  const addFacultyCoordinator = () => {
+    setFacultyCoordinators([...facultyCoordinators, { 
+      id: facultyCoordinators.length + 1, 
+      value: "" 
+    }]);
+  };
+
+  // Remove a faculty coordinator field
+  const removeFacultyCoordinator = (id) => {
+    if (facultyCoordinators.length > 1) {
+      setFacultyCoordinators(facultyCoordinators.filter(fac => fac.id !== id));
+    }
+  };
+
+  // Update a specific faculty coordinator
+  const updateFacultyCoordinator = (id, value) => {
+    setFacultyCoordinators(facultyCoordinators.map(fac => 
+      fac.id === id ? { ...fac, value } : fac
+    ));
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     // Validate required fields
-    if (!eventName || !venue || !dateTime || !fee || !coordinator1 || !facultyCoordinator1) {
+    if (!eventName || !venue || !dateTime || !fee || 
+        coordinators[0].value === "" || facultyCoordinators[0].value === "") {
       alert("Please fill all required fields.");
       return;
     }
+    
     // Prepare the event data
     const eventData = {
       name: eventName,
       venue: venue === "Others" ? otherVenue : venue,
       dateAndTime: dateTime,
-      fee: parseFloat(fee), // Convert fee to a number
-      coor1: coordinator1,
-      coor2: coordinator2,
-      facoor1: facultyCoordinator1,
-      facoor2: facultyCoordinator2,
-      flinik: link,
-      elink: excelLink,
+      fee: parseFloat(fee),
+      coordinators: coordinators.map(coord => coord.value).filter(Boolean),
+      facultyCoordinators: facultyCoordinators.map(fac => fac.value).filter(Boolean),
+      registrationLink: link,
+      excelLink: excelLink,
     };
+
     try {
-      // Send a POST request to /addEvent
       const response = await fetch(`${apiBaseURL}/addEvent`, {
         method: "POST",
         headers: {
@@ -99,14 +141,14 @@ const AddEvent = () => {
         },
         body: JSON.stringify(eventData),
       });
-      // Check if the request was successful
+      
       if (!response.ok) {
         throw new Error(`Failed to add event: ${response.statusText}`);
       }
+      
       const result = await response.json();
-      // Set success message
       setSuccessMessage("Event added successfully!");
-      // Reset the form fields after 2 seconds
+      
       setTimeout(() => {
         setSuccessMessage("");
         resetFormFields();
@@ -117,7 +159,7 @@ const AddEvent = () => {
     }
   };
 
-  // Function to reset form fields
+  // Reset form fields
   const resetFormFields = () => {
     setEventName("");
     setVenue("");
@@ -126,18 +168,17 @@ const AddEvent = () => {
     setFee("");
     setLink("");
     setExcelLink("");
-    setCoordinator1("");
-    setFacultyCoordinator1("");
-    setCoordinator2("");
-    setFacultyCoordinator2("");
+    setCoordinators([{ id: 1, value: "" }]);
+    setFacultyCoordinators([{ id: 1, value: "" }]);
   };
+
   useEffect(() => {
     const fetchCoordinators = async () => {
       try {
         const response = await fetch(`${apiBaseURL}/coordinators`);
         const data = await response.json();
         if (response.ok) {
-          setCoordinators(data.coordinators || []);
+          setAvailableCoordinators(data.coordinators || []);
         } else {
           console.error("Error fetching coordinators:", data.error);
         }
@@ -148,11 +189,8 @@ const AddEvent = () => {
   
     fetchCoordinators();
   }, [apiBaseURL]);
-  
 
   useEffect(() => {
-
-    
     let hasJoinedRoom = false;
     if (socket && !hasJoinedRoom) {
       Room.join(socket, "eventsa", objID);
@@ -190,7 +228,7 @@ const AddEvent = () => {
             marginBottom: "25px",
           }}
         >
-           Add New Event
+          Add New Event
         </Typography>
   
         {socketError && (
@@ -221,7 +259,14 @@ const AddEvent = () => {
           <Grid container spacing={3}>
             {/* Event Name & Venue */}
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Event Name" value={eventName} onChange={(e) => setEventName(e.target.value)} required sx={inputStyles} />
+              <TextField 
+                fullWidth 
+                label="Event Name" 
+                value={eventName} 
+                onChange={(e) => setEventName(e.target.value)} 
+                required 
+                sx={inputStyles} 
+              />
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
@@ -236,72 +281,133 @@ const AddEvent = () => {
   
             {venue === "Others" && (
               <Grid item xs={12}>
-                <TextField fullWidth label="Specify Other Venue" value={otherVenue} onChange={(e) => setOtherVenue(e.target.value)} required sx={inputStyles} />
+                <TextField 
+                  fullWidth 
+                  label="Specify Other Venue" 
+                  value={otherVenue} 
+                  onChange={(e) => setOtherVenue(e.target.value)} 
+                  required 
+                  sx={inputStyles} 
+                />
               </Grid>
             )}
   
             {/* Date, Fee */}
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Date and Time" type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} InputLabelProps={{ shrink: true }} required sx={inputStyles} />
+              <TextField 
+                fullWidth 
+                label="Date and Time" 
+                type="datetime-local" 
+                value={dateTime} 
+                onChange={(e) => setDateTime(e.target.value)} 
+                InputLabelProps={{ shrink: true }} 
+                required 
+                sx={inputStyles} 
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Fee (₹)" type="number" value={fee} onChange={(e) => setFee(e.target.value)} required sx={inputStyles} />
+              <TextField 
+                fullWidth 
+                label="Fee (₹)" 
+                type="number" 
+                value={fee} 
+                onChange={(e) => setFee(e.target.value)} 
+                required 
+                sx={inputStyles} 
+              />
             </Grid>
   
-            {/* Coordinators */}
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Coordinator 1</InputLabel>
-                <Select value={coordinator1} onChange={(e) => setCoordinator1(e.target.value)} sx={inputStyles}>
-                  {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord.username}>
-                      {coord.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Coordinator 2</InputLabel>
-                <Select value={coordinator2} onChange={(e) => setCoordinator2(e.target.value)} sx={inputStyles}>
-                  {coordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord.username}>
-                      {coord.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            {/* Dynamic Coordinators */}
+            {coordinators.map((coord, index) => (
+              <Grid item xs={12} key={coord.id}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <FormControl fullWidth required={index === 0}>
+                    <InputLabel>{`Coordinator ${index + 1}`}</InputLabel>
+                    <Select 
+                      value={coord.value} 
+                      onChange={(e) => updateCoordinator(coord.id, e.target.value)}
+                      sx={inputStyles}
+                    >
+                      {availableCoordinators.map((availCoord, idx) => (
+                        <MenuItem key={idx} value={availCoord.username}>
+                          {availCoord.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {index === coordinators.length - 1 ? (
+                    <IconButton onClick={addCoordinator} color="primary">
+                      <AddIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton 
+                      onClick={() => removeCoordinator(coord.id)} 
+                      color="error"
+                      disabled={coordinators.length <= 1}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  )}
+                </Box>
+              </Grid>
+            ))}
   
-            {/* Faculty Coordinators */}
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Faculty Coordinator 1</InputLabel>
-                <Select value={facultyCoordinator1} onChange={(e) => setFacultyCoordinator1(e.target.value)} sx={inputStyles}>
-                  {facultyCoordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Faculty Coordinator 2</InputLabel>
-                <Select value={facultyCoordinator2} onChange={(e) => setFacultyCoordinator2(e.target.value)} sx={inputStyles}>
-                  {facultyCoordinators.map((coord, index) => (
-                    <MenuItem key={index} value={coord}>{coord}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            {/* Dynamic Faculty Coordinators */}
+            {facultyCoordinators.map((facCoord, index) => (
+              <Grid item xs={12} key={facCoord.id}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <FormControl fullWidth required={index === 0}>
+                    <InputLabel>{`Faculty Coordinator ${index + 1}`}</InputLabel>
+                    <Select 
+                      value={facCoord.value} 
+                      onChange={(e) => updateFacultyCoordinator(facCoord.id, e.target.value)}
+                      sx={inputStyles}
+                    >
+                      {availableCoordinators.map((coord, idx) => (
+                        <MenuItem key={idx} value={coord.username}>
+                          {coord.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {index === facultyCoordinators.length - 1 ? (
+                    <IconButton onClick={addFacultyCoordinator} color="primary">
+                      <AddIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton 
+                      onClick={() => removeFacultyCoordinator(facCoord.id)} 
+                      color="error"
+                      disabled={facultyCoordinators.length <= 1}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  )}
+                </Box>
+              </Grid>
+            ))}
+  
   
             {/* Links */}
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Registration Link" type="text" value={link} onChange={(e) => setLink(e.target.value)} sx={inputStyles} />
+              <TextField 
+                fullWidth 
+                label="Registration Link" 
+                type="text" 
+                value={link} 
+                onChange={(e) => setLink(e.target.value)} 
+                sx={inputStyles} 
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Excel Link" type="text" value={excelLink} onChange={(e) => setExcelLink(e.target.value)} sx={inputStyles} />
+              <TextField 
+                fullWidth 
+                label="Excel Link" 
+                type="text" 
+                value={excelLink} 
+                onChange={(e) => setExcelLink(e.target.value)} 
+                sx={inputStyles} 
+              />
             </Grid>
   
             {/* Submit */}
@@ -333,7 +439,6 @@ const AddEvent = () => {
       </Box>
     </Layout>
   );
-  
 };
 
 export default AddEvent;
