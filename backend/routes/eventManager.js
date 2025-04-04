@@ -94,7 +94,7 @@ router.get("/events/by-name/:name", async (req, res) => {
 router.get("/events/by-coordinator/:username", async (req, res) => {
   try {
     const username = req.params.username;
-    const event = await Event.findOne({
+    const event = await Event.find({
       $or: [
         { coordinator1: { $regex: new RegExp("^" + username + "$", "i") } },
         { coordinator2: { $regex: new RegExp("^" + username + "$", "i") } },
@@ -201,7 +201,7 @@ router.get('/events-revenue', async (req, res) => {
         $group: {
           _id: "$ticket_details.event", // Group by the nested `event` field in ticket_details
           revenue: {
-            $sum: { $toInt: "$ticket_details.amount" }, // Convert amount to integer before summing
+            $sum: { $toDouble: "$ticket_details.amount" }, // Convert amount to integer before summing
           },
         },
       },
