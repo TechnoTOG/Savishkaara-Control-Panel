@@ -64,11 +64,12 @@ const Login = () => {
         } else {
           const role = result.role?.toLowerCase();
           
-          if (role === "coor" || role === "coordinator") {
-            navigate("/my-event/" + result.objectID); // assuming you're using dynamic route
+          if (role === "coor") {
+            navigate(`/my-event/${result.objectID}`);
           } else {
-            navigate("/dashboard");
+            navigate(`/`);
           }
+          
         }
         
         
