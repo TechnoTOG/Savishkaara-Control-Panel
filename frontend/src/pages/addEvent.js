@@ -325,7 +325,7 @@ const AddEvent = () => {
   <Grid item xs={12} key={coord.id}>
     <Box display="flex" alignItems="center" gap={2}>
       <FormControl fullWidth required={index === 0}>
-        <InputLabel>{`Coordinator ${index + 1}`}</InputLabel>
+        <InputLabel>{` Student Coordinator ${index + 1}`}</InputLabel>
         <Select 
           value={coord.value} 
           onChange={(e) => updateCoordinator(coord.id, e.target.value)}
