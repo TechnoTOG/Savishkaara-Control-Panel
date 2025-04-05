@@ -45,12 +45,13 @@ router.post('/addEvent', async (req, res) => {
       excelLink
     } = req.body;
 
-    if (!name || !venue || !dateAndTime || !fee || 
-        !coordinators || coordinators.length === 0 ||
-        !facultyCoordinators || facultyCoordinators.length === 0) {
-      return res.status(400).json({ error: "All required fields must be provided" });
-    }
-
+    if (name == null || venue == null || dateAndTime == null || 
+      fee == null || // allows 0
+      !coordinators || coordinators.length === 0 ||
+      !facultyCoordinators || facultyCoordinators.length === 0) {
+    return res.status(400).json({ error: "All required fields must be provided" });
+  }
+  
     const newEvent = new Event({
       name,
       venue,
