@@ -244,6 +244,31 @@ router.get('/events-revenue', async (req, res) => {
  * POST /events/update-details-by-name
  * Update event details by name
  */
+router.get("/events/summary/:eventName", async (req, res) => {
+  const eventName = decodeURIComponent(req.params.eventName);
+
+  try {
+    // Find all registrations that match this event name
+    const registrations = await Event_reg.find({ "ticket_details.event": eventName });
+
+    if (!registrations || registrations.length === 0) {
+      return res.status(200).json({ totalRegistrations: 0, totalRevenue: 0 });
+    }
+
+    const totalRegistrations = registrations.length;
+
+    const totalRevenue = registrations.reduce((sum, reg) => {
+      const amount = parseFloat(reg?.ticket_details?.amount || 0);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+
+    res.status(200).json({ totalRegistrations, totalRevenue });
+  } catch (error) {
+    console.error("❌ Error fetching event summary:", error.message);
+    res.status(500).json({ error: "Failed to fetch event summary" });
+  }
+});
+
 router.post("/events/update-details-by-name", async (req, res) => {
   try {
     const { 

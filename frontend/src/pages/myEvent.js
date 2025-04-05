@@ -60,12 +60,33 @@ const MyEvent = () => {
     excel_link: ""
   });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [summary, setSummary] = useState({ totalRegistrations: 0, totalRevenue: 0 });
 
   const apiBaseURL =
     process.env.NODE_ENV === "production"
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
-
+      const fetchEventSummary = async (eventName) => {
+        try {
+          const response = await fetch(`${apiBaseURL}/events/summary/${encodeURIComponent(eventName)}`, {
+            headers: {
+              "X-Allowed-Origin": "savishkaara.in",
+              "Content-Type": "application/json",
+            },
+          });
+    
+          if (!response.ok) throw new Error("Failed to fetch summary");
+    
+          const data = await response.json();
+          setSummary({
+            totalRegistrations: data.totalRegistrations,
+            totalRevenue: data.totalRevenue,
+          });
+        } catch (error) {
+          console.error("Error fetching summary:", error);
+          setSummary({ totalRegistrations: 0, totalRevenue: 0 });
+        }
+      };
   useEffect(() => {
     let hasJoinedRoom = false;
 
@@ -92,6 +113,9 @@ const MyEvent = () => {
           const data = await idResponse.json();
           setEvents([data]);
           setSelectedEvent(data);
+          
+        fetchEventSummary(data.name); // Call it here
+
           setStatus(data.status || "");
           setFormData({
             venue: data.venue,
@@ -129,6 +153,9 @@ const MyEvent = () => {
         if (Array.isArray(fallbackData)) {
           setEvents(fallbackData);
           setSelectedEvent(fallbackData[0]);
+          
+          fetchEventSummary(fallbackData[0].name);
+
           if (fallbackData.length > 0) {
             setStatus(fallbackData[0].status || "");
             setFormData({
@@ -297,6 +324,7 @@ const MyEvent = () => {
   const handleEventChange = (eventId) => {
     const selected = events.find(ev => ev._id === eventId);
     setSelectedEvent(selected);
+    fetchEventSummary(selected.name);
     setStatus(selected.status || "");
     setFormData({
       venue: selected.venue,
@@ -309,7 +337,12 @@ const MyEvent = () => {
     });
     setEditMode(false);
   };
-
+  useEffect(() => {
+    if (selectedEvent && selectedEvent.name) {
+      fetchEventSummary(selectedEvent.name);
+    }
+  }, [selectedEvent]);
+  
   return (
     <Layout title="My Event" activePage="myevent">
       <Box mt={8} mx={3}>
@@ -382,14 +415,20 @@ const MyEvent = () => {
                         Coordinator {index + 1}: {coord}
                       </Typography>
                     ))}
-                    
+                  
+
                     {selectedEvent.faculty_coordinators?.map((faculty, index) => (
                       <Typography key={index} variant="subtitle1">
                         <School sx={{ mr: 1, verticalAlign: "middle" }} /> 
                         Faculty Coordinator {index + 1}: {faculty}
                       </Typography>
                     ))}
-                    
+                      <Typography variant="subtitle1">
+  🧾 Total Registrations: <strong>{summary.totalRegistrations}</strong>
+</Typography>
+<Typography variant="subtitle1">
+  💰 Total Revenue: <strong>₹{summary.totalRevenue}</strong>
+</Typography>
                     <Typography variant="subtitle1">
                       <LinkIcon sx={{ mr: 1, verticalAlign: "middle" }} />
                       <a href={selectedEvent.form_link} target="_blank" rel="noopener noreferrer">
