@@ -5,7 +5,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import { WebSocketContext } from "../App"; // Import WebSocket Context
-import Room from "../utils/roomManager"
+import Room from "../utils/roomManager";
 
 const Sidebar = ({ isMinimized, darkMode, activePage }) => {
   const [openEvents, setOpenEvents] = React.useState(false);
@@ -21,7 +21,7 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
   // Define role-based permissions
   const rolePermissions = {
-    super: ["Dashboard", "Events", "Samridhi", "Users", "Server"],
+    super: ["Dashboard", "Events", "Samridhi", "Users", "Server", "Event Registration"], // Added "Event Registration"
     admin: ["Dashboard", "vEvents", "Samridhi"],
     coor: ["My Event"],
   };
@@ -42,19 +42,19 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
   return (
     <Box
-  className="sidebar"
-  sx={{
-    width: isMinimized ? 80 : 250,
-    height: "100vh",
-    backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
-    color: "#fff",
-    paddingTop: "20px",
-    overflowX: "hidden",
-    borderRight: "1px solid #444",
-    transition: "width 0.6s ease",
-  }}
-> 
-
+      className="sidebar"
+      sx={{
+        width: isMinimized ? 80 : 250,
+        height: "100vh",
+        backgroundColor: darkMode ? "#1b1c1e" : "#111c43",
+        color: "#fff",
+        paddingTop: "20px",
+        overflowX: "hidden",
+        borderRight: "1px solid #444",
+        transition: "width 0.6s ease",
+      }}
+    >
+      {/* Logo Section */}
       <Box
         textAlign="center"
         mb={4}
@@ -66,12 +66,14 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
         <img src="/icons/saavishkaara_logo_new.png" alt="logo" width={isMinimized ? "40" : "80"} />
         {!isMinimized && <span style={{ fontSize: "1.2rem", fontWeight: "bold", paddingRight: "5px" }}>Savishkaara</span>}
       </Box>
+
+      {/* Sidebar Navigation */}
       <List component="nav">
         {/* Render Dashboard if allowed */}
         {allowedOptions.includes("Dashboard") && (
           <Tooltip title="Dashboard" placement="right" disableHoverListener={!isMinimized}>
             <ListItemButton
-              onClick={() => navigateTo("/", "dashboard")} // Navigate to the dashboard
+              onClick={() => navigateTo("/", "dashboard")}
               sx={{
                 color: "#fff",
                 justifyContent: isMinimized ? "left" : "flex-start",
@@ -84,6 +86,27 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
                 <img src="/icons/home_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="dashboard" width="24" />
               </ListItemIcon>
               {!isMinimized && <ListItemText primary="Dashboard" />}
+            </ListItemButton>
+          </Tooltip>
+        )}
+
+        {/* Render Event Registration if allowed */}
+        {allowedOptions.includes("Event Registration") && (
+          <Tooltip title="Event Registration" placement="right" disableHoverListener={!isMinimized}>
+            <ListItemButton
+              onClick={() => navigateTo("/event-registration", "eventreg")} // Navigate to event registration
+              sx={{
+                color: "#fff",
+                justifyContent: isMinimized ? "left" : "flex-start",
+                "&:hover": {
+                  backgroundColor: darkMode ? "#333" : "#222a57",
+                },
+              }}
+            >
+              <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
+                <img src="/icons/event_registration_icon.svg" alt="event registration" width="24" /> {/* Add an icon */}
+              </ListItemIcon>
+              {!isMinimized && <ListItemText primary="Event Registration" />}
             </ListItemButton>
           </Tooltip>
         )}
@@ -149,27 +172,6 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
           </>
         )}
 
-        {/* Render Samridhi if allowed
-        {allowedOptions.includes("Samridhi") && (
-          <Tooltip title="Samridhi" placement="right" disableHoverListener={!isMinimized}>
-            <ListItemButton
-              onClick={() => navigateTo("/samridhi", "samridhi")} // Navigate to samridhi
-              sx={{
-                color: "#fff",
-                justifyContent: isMinimized ? "left" : "flex-start",
-                "&:hover": {
-                  backgroundColor: darkMode ? "#333" : "#222a57",
-                },
-              }}
-            >
-              <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/icons/fastfood_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="samridhi" width="24" />
-              </ListItemIcon>
-              {!isMinimized && <ListItemText primary="Samridhi" />}
-            </ListItemButton>
-          </Tooltip>
-        )} */}
-
         {/* Render Users if allowed */}
         {allowedOptions.includes("Users") && (
           <>
@@ -233,13 +235,19 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
         {/* Render My Event if allowed */}
         {allowedOptions.includes("My Event") && (
-  <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
-    <ListItemButton
-      onClick={() => {
-        const objId = Cookies.get("objId");
-        navigateTo(`/my-event/${objId}`, "myevent");
-      }}
-
+          <Tooltip title="My Event" placement="right" disableHoverListener={!isMinimized}>
+            <ListItemButton
+              onClick={() => {
+                const objId = Cookies.get("objId");
+                navigateTo(`/my-event/${objId}`, "myevent");
+              }}
+              sx={{
+                color: "#fff",
+                justifyContent: isMinimized ? "left" : "flex-start",
+                "&:hover": {
+                  backgroundColor: darkMode ? "#333" : "#222a57",
+                },
+              }}
             >
               <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
                 <img src="/icons/theater_comedy_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="server" width="24" />
