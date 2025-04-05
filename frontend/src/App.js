@@ -16,6 +16,7 @@ import UserOverview from "./pages/userOverview";
 import AddUser from "./pages/addUser";
 import Server from "./pages/server";
 import ForbiddenPage from "./pages/forbidden"; // Import the 403 page component
+import Cookies from "js-cookie"; // make sure it's imported
 
 
 
@@ -80,7 +81,14 @@ function App() {
       <Router>
         <Routes>
           {/* Protected Routes */}
-          <Route path="/" element={<ProtectedRoute element={<Dashboard />} />} />
+          <Route
+  path="/"
+  element={
+    Cookies.get("role") === "coor"
+      ? <Navigate to={`/my-event/${Cookies.get("objId")}`} replace />
+      : <ProtectedRoute element={<Dashboard />} />
+  }
+/>
           <Route path="/update-password" element={<ProtectedRoute element={<UpdatePassword />} />} />
           <Route path="/events/overview" element={<ProtectedRoute element={<EventOverview />} />} />
           <Route path="/events/add" element={<ProtectedRoute element={<AddEvent />} />} />
