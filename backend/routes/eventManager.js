@@ -392,5 +392,51 @@ router.get('/ongoing-events', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch ongoing events data", details: error.message });
   }
 });
+router.get('/event-registrations', async (req, res) => {
+  try {
+    const registrations = await Event_reg.find({})
+      .select('ticket_number timestamp ticket_details verified')
+      .lean();
+
+    res.status(200).json(registrations);
+  } catch (error) {
+    console.error("Error fetching event registrations:", error);
+    res.status(500).json({
+      error: "Failed to fetch event registrations",
+      details: error.message,
+    });
+  }
+});
+/**
+ * DELETE /api/event-registrations/:id
+ * Delete a registration by ID
+ */
+router.post('/delete-event-registrations/:id', async (req, res) => {
+  try {
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid registration ID format" });
+    }
+
+    // Attempt deletion
+    const result = await Event_reg.findByIdAndDelete(req.params.id);
+
+    if (!result) {
+      return res.status(404).json({ error: "Registration not found" });
+    }
+
+    res.status(200).json({
+      message: "Registration deleted successfully",
+      deletedId: req.params.id
+    });
+
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ 
+      error: "Failed to delete registration",
+      details: error.message 
+    });
+  }
+});
 
 module.exports = router;
