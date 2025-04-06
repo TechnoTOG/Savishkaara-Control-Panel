@@ -41,6 +41,7 @@ const MyEvent = () => {
   const socket = useContext(WebSocketContext);
   const objID = Cookies.get("objId");
   const { eventId } = useParams();
+  const [coordinatorDepts, setCoordinatorDepts] = useState({});
 
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -68,25 +69,36 @@ const MyEvent = () => {
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
       const fetchEventSummary = async (eventName) => {
         try {
-          const response = await fetch(`${apiBaseURL}/events/summary/${encodeURIComponent(eventName)}`, {
-            headers: {
-              "X-Allowed-Origin": "savishkaara.in",
-              "Content-Type": "application/json",
-            },
-          });
-    
-          if (!response.ok) throw new Error("Failed to fetch summary");
-    
-          const data = await response.json();
+          const [regRes, revRes] = await Promise.all([
+            fetch(`${apiBaseURL}/events/summary/${encodeURIComponent(eventName)}`, {
+              headers: {
+                "X-Allowed-Origin": "savishkaara.in",
+                "Content-Type": "application/json",
+              },
+            }),
+            fetch(`${apiBaseURL}/events-revenueper/${encodeURIComponent(eventName)}`, {
+              headers: {
+                "X-Allowed-Origin": "savishkaara.in",
+                "Content-Type": "application/json",
+              },
+            }),
+          ]);
+      
+          if (!regRes.ok || !revRes.ok) throw new Error("Failed to fetch summary or revenue");
+      
+          const regData = await regRes.json();
+          const revData = await revRes.json();
+      
           setSummary({
-            totalRegistrations: data.totalRegistrations,
-            totalRevenue: data.totalRevenue,
+            totalRegistrations: regData.totalRegistrations,
+            totalRevenue: revData.totalRevenue,
           });
         } catch (error) {
-          console.error("Error fetching summary:", error);
+          console.error("Error fetching event summary:", error);
           setSummary({ totalRegistrations: 0, totalRevenue: 0 });
         }
       };
+      
   useEffect(() => {
     let hasJoinedRoom = false;
 
@@ -98,7 +110,28 @@ const MyEvent = () => {
       socket.on("redirect", (data) => navigate(data.url));
       socket.on("error", (error) => setSocketError(error.message));
     }
-
+    const fetchCoordinatorDeptsByName = async (names) => {
+      try {
+        const response = await fetch(`${apiBaseURL}/users/depts-by-name`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Allowed-Origin": "savishkaara.in"
+          },
+          body: JSON.stringify({ names })
+        });
+    
+        if (response.ok) {
+          const data = await response.json(); // expected format: { "John Doe": "CSE", "Jane Smith": "2" }
+          setCoordinatorDepts(data);
+        } else {
+          console.error("Failed to fetch coordinator departments by name");
+        }
+      } catch (error) {
+        console.error("Error fetching coordinator departments:", error);
+      }
+    };
+    
     const fetchEventDetails = async () => {
       try {
         const idResponse = await fetch(`${apiBaseURL}/events/${eventId}`, {
@@ -113,8 +146,9 @@ const MyEvent = () => {
           const data = await idResponse.json();
           setEvents([data]);
           setSelectedEvent(data);
+          fetchEventSummary(data.name);
+          fetchCoordinatorDeptsByName(data.coordinators || []);
           
-        fetchEventSummary(data.name); // Call it here
 
           setStatus(data.status || "");
           setFormData({
@@ -153,7 +187,8 @@ const MyEvent = () => {
         if (Array.isArray(fallbackData)) {
           setEvents(fallbackData);
           setSelectedEvent(fallbackData[0]);
-          
+          fetchCoordinatorDeptsByName(fallbackData[0].coordinators || []);
+
           fetchEventSummary(fallbackData[0].name);
 
           if (fallbackData.length > 0) {
@@ -409,12 +444,15 @@ const MyEvent = () => {
                       <MonetizationOn sx={{ mr: 1, verticalAlign: "middle" }} /> Fee: ₹{selectedEvent.fee}
                     </Typography>
                     
-                    {selectedEvent.coordinators?.map((coord, index) => (
-                      <Typography key={index} variant="subtitle1">
-                        <Group sx={{ mr: 1, verticalAlign: "middle" }} /> 
-                        Coordinator {index + 1}: {coord}
-                      </Typography>
-                    ))}
+                    {selectedEvent.coordinators
+  ?.filter((coord) => coordinatorDepts[coord] !== "2")
+  .map((coord, index) => (
+    <Typography key={index} variant="subtitle1">
+      <Group sx={{ mr: 1, verticalAlign: "middle" }} />
+      Coordinator {index + 1}: {coord}
+    </Typography>
+))}
+
                   
 
                     {selectedEvent.faculty_coordinators?.map((faculty, index) => (
