@@ -60,6 +60,11 @@ const AddEvent = () => {
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+  useEffect(() => {
+      // Update the document title when the component mounts
+      document.title = 'Add Event';
+    }, []);
+
   const inputStyles = {
     backgroundColor: theme.palette.mode === "dark" ? "#222" : "#c7c3c3",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",

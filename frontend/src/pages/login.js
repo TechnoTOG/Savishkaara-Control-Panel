@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for programmatic navigation
 import Cookies from "js-cookie";
 import {
@@ -24,6 +24,11 @@ const Login = () => {
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+    useEffect(() => {
+      // Update the document title when the component mounts
+      document.title = 'Login';
+    }, []);
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });

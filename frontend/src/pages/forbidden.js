@@ -1,10 +1,15 @@
 // src/pages/ForbiddenPage.js
-import React from 'react';
+import React, { useEffect} from 'react';
 import { Typography, Box, Button, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const ForbiddenPage = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Update the document title when the component mounts
+        document.title = 'Forbidden';
+      }, []);
 
     return (
         <Box

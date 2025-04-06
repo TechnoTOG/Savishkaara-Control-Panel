@@ -20,6 +20,11 @@ const UserOverview = () => {
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+      useEffect(() => {
+        // Update the document title when the component mounts
+        document.title = 'User Overview';
+      }, []);
+
   // Fetch user details and update totalUsers metric
   const fetchUserDetails = async () => {
     try {

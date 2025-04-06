@@ -29,6 +29,11 @@ const AddUser = () => {
     process.env.NODE_ENV === "production"
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
+  
+  useEffect(() => {
+    // Update the document title when the component mounts
+    document.title = 'Add User';
+  }, []);
 
   // When the role is coordinator ("coor"), fetch available distinct events
   useEffect(() => {

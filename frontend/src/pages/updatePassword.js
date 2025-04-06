@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -26,6 +26,11 @@ const ChangePassword = () => {
   const apiBaseURL = process.env.NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
     : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+    useEffect(() => {
+      // Update the document title when the component mounts
+      document.title = 'Update Password';
+    }, []);
 
   const handleChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });

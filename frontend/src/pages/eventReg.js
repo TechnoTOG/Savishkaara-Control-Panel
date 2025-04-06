@@ -23,6 +23,11 @@ const EventReg = () => {
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+  useEffect(() => {
+    // Update the document title when the component mounts
+    document.title = 'Registration Data';
+  }, []);
+
   // Fetch registrations
   const fetchRegistrations = async () => {
     try {
@@ -214,9 +219,9 @@ const EventReg = () => {
   };
 
   return (
-    <Layout title="Event Registration" activePage="eventreg">
+    <Layout title="Registration Data" activePage="eventreg">
       <div className="container">
-        <h1 style={{ textAlign: "center" }}>Event Registration</h1>
+        <h1 style={{ textAlign: "center" }}>Registration Data</h1>
         {loading && <p>Loading registrations...</p>}
         {socketError && (
           <div
