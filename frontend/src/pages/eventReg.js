@@ -243,9 +243,8 @@ const EventReg = () => {
               style={{
                 marginBottom: "20px",
                 padding: "15px",
-                backgroundColor: "#f9f9f9",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
+                
+              
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -391,9 +390,7 @@ const EventReg = () => {
         )}
       </div>
       <style jsx>{`
-        .registration-table tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
+       
         .registration-table tr:hover {
           background-color: #f1f1f1;
         }
