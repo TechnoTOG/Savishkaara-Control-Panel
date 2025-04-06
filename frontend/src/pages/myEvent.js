@@ -368,23 +368,32 @@ const MyEvent = () => {
           <Typography variant="body1">Loading...</Typography>
         ) : events.length > 0 ? (
           <>
-            {events.length > 1 && (
-              <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-                <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Select Event</InputLabel>
-                  <Select
-                    value={selectedEvent?._id || ''}
-                    onChange={(e) => handleEventChange(e.target.value)}
-                  >
-                    {events.map((ev) => (
-                      <MenuItem key={ev._id} value={ev._id}>
-                        {ev.name} ({ev.status})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
+           {events.length > 1 && (
+  <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+    <FormControl sx={{ minWidth: 200 }}>
+      <InputLabel sx={{ color: 'white' }}>Select Event</InputLabel>
+      <Select
+        value={selectedEvent?._id || ''}
+        onChange={(e) => handleEventChange(e.target.value)}
+        sx={{
+          backgroundColor: '#3674B5',
+          color: 'white',
+          '& .MuiSelect-icon': { color: 'white' }, // dropdown arrow
+        }}
+      >
+        {events.map((ev) => (
+          <MenuItem
+            key={ev._id}
+            value={ev._id}
+            sx={{  color: 'black' }}
+          >
+            {ev.name} ({ev.status})
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  </Box>
+)}
 
             <Card elevation={4} sx={{ maxWidth: "800px", margin: "auto", p: 2 }}>
               <CardContent>
