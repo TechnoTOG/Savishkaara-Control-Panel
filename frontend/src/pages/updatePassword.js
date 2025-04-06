@@ -10,7 +10,7 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-
+import Cookies from "js-cookie";
 const ChangePassword = () => {
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
@@ -63,8 +63,17 @@ const ChangePassword = () => {
       if (response.ok) {
         const result = await response.json(); // Parse the JSON body
         setSuccess(result.message || "Password updated successfully.");
-        navigate("/");
-      } else {
+      
+        const role = Cookies.get("role");
+        const objId = Cookies.get("objId");
+      
+        if (role === "coor") {
+          navigate(`/my-event/${objId}`);
+        } else {
+          navigate("/");
+        }
+      }
+       else {
         const errorData = await response.json(); // Parse the JSON body for error details
         setError(errorData.error || "Password update failed. Please try again.");
       }
