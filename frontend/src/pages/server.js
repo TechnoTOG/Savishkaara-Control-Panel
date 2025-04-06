@@ -14,6 +14,11 @@ const Server = () => {
     const [socketError, setSocketError] = useState(null); // State to track errors
 
     useEffect(() => {
+      // Update the document title when the component mounts
+      document.title = 'Server';
+    }, []);
+
+    useEffect(() => {
       let hasJoinedRoom = false; // Local variable to track room join status
 
       if (socket && !hasJoinedRoom) {

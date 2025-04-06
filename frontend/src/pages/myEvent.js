@@ -67,6 +67,12 @@ const MyEvent = () => {
     process.env.NODE_ENV === "production"
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+      useEffect(() => {
+        // Update the document title when the component mounts
+        document.title = 'My Event';
+      }, []);
+    
       const fetchEventSummary = async (eventName) => {
         try {
           const [regRes, revRes] = await Promise.all([

@@ -23,6 +23,11 @@ const EventReg = () => {
       ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
       : process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+  useEffect(() => {
+    // Update the document title when the component mounts
+    document.title = 'Registration Data';
+  }, []);
+
   // Fetch registrations
   const fetchRegistrations = async () => {
     try {
@@ -214,9 +219,9 @@ const EventReg = () => {
   };
 
   return (
-    <Layout title="Event Registration" activePage="eventreg">
+    <Layout title="Registration Data" activePage="eventreg">
       <div className="container">
-        <h1 style={{ textAlign: "center" }}>Event Registration</h1>
+        <h1 style={{ textAlign: "center" }}>Registration Data</h1>
         {loading && <p>Loading registrations...</p>}
         {socketError && (
           <div
@@ -243,9 +248,8 @@ const EventReg = () => {
               style={{
                 marginBottom: "20px",
                 padding: "15px",
-                backgroundColor: "#f9f9f9",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
+                
+              
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -391,11 +395,9 @@ const EventReg = () => {
         )}
       </div>
       <style jsx>{`
-        .registration-table tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
+       
         .registration-table tr:hover {
-          background-color: #f1f1f1;
+          background-color:rgb(107, 100, 100);
         }
         .registration-table td,
         .registration-table th {
