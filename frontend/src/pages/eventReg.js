@@ -392,7 +392,7 @@ const EventReg = () => {
       <style jsx>{`
        
         .registration-table tr:hover {
-          background-color: #f1f1f1;
+          background-color:rgb(107, 100, 100);
         }
         .registration-table td,
         .registration-table th {
