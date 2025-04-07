@@ -16,6 +16,8 @@ const EventOverview = () => {
   const objID = Cookies.get("objId");
   const [socketError, setSocketError] = useState(null);
   const [events, setEvents] = useState([]);
+  const [coordinatorDepts, setCoordinatorDepts] = useState({});
+
   const [totalRegistrations, setTotalRegistrations] = useState(0);
   const [verifiedRegistrations, setVerifiedRegistrations] = useState(0);
   const [revenueData, setRevenueData] = useState([]);
@@ -41,63 +43,67 @@ const EventOverview = () => {
 
     const fetchData = async () => {
       try {
-        // Fetch events
-        const eventsResponse = await fetch(`${apiBaseURL}/events`, {
-          method: "GET",
+        const [eventsRes, registrationsRes, revenueRes] = await Promise.all([
+          fetch(`${apiBaseURL}/events`, {
+            method: "GET",
+            headers: { 'X-Allowed-Origin': 'savishkaara.in', "Content-Type": "application/json" },
+          }),
+          fetch(`${apiBaseURL}/events-count`, {
+            method: "GET",
+            headers: { 'X-Allowed-Origin': 'savishkaara.in', "Content-Type": "application/json" },
+          }),
+          fetch(`${apiBaseURL}/events-revenue`, {
+            method: "GET",
+            headers: { 'X-Allowed-Origin': 'savishkaara.in', "Content-Type": "application/json" },
+          }),
+        ]);
+    
+        if (!eventsRes.ok || !registrationsRes.ok || !revenueRes.ok) {
+          throw new Error("Failed to fetch event data");
+        }
+    
+        const [eventsData, registrationsData, revenueData] = await Promise.all([
+          eventsRes.json(),
+          registrationsRes.json(),
+          revenueRes.json(),
+        ]);
+    
+        // Flatten and deduplicate all coordinator names
+        const allCoordinators = Array.from(
+          new Set(eventsData.flatMap(ev => ev.coordinators || []))
+        );
+    
+        // Fetch their dept info
+        const deptRes = await fetch(`${apiBaseURL}/users/depts-by-name`, {
+          method: "POST",
           headers: {
-            'X-Allowed-Origin': 'savishkaara.in',
             "Content-Type": "application/json",
+            "X-Allowed-Origin": "savishkaara.in"
           },
+          body: JSON.stringify({ names: allCoordinators })
         });
-
-        if (!eventsResponse.ok) {
-          throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
-        }
-
-        // Fetch registration counts
-        const registrationsResponse = await fetch(`${apiBaseURL}/events-count`, {
-          method: "GET",
-          headers: {
-            'X-Allowed-Origin': 'savishkaara.in',
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!registrationsResponse.ok) {
-          throw new Error(`Failed to fetch registration counts: ${registrationsResponse.statusText}`);
-        }
-
-        // Fetch revenue data
-        const revenueResponse = await fetch(`${apiBaseURL}/events-revenue`, {
-          method: "GET",
-          headers: {
-            'X-Allowed-Origin': 'savishkaara.in',
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!revenueResponse.ok) {
-          throw new Error(`Failed to fetch revenue data: ${revenueResponse.statusText}`);
-        }
-
-        const eventsData = await eventsResponse.json();
-        const registrationsData = await registrationsResponse.json();
-        const revenueData = await revenueResponse.json();
-
-        if (isMounted) {
-          setEvents(eventsData);
-          setTotalRegistrations(registrationsData.totalRegistrations);
-          setVerifiedRegistrations(registrationsData.verifiedRegistrations);
-          setRevenueData(revenueData);
-          setLoading(false);
-        }
+    
+        if (!deptRes.ok) throw new Error("Failed to fetch coordinator depts");
+        const deptMap = await deptRes.json(); // { "John Doe": "CSE", "Someone": "2" }
+    
+        // Filter coordinators inside each event
+        const filteredEvents = eventsData.map(ev => ({
+          ...ev,
+          coordinators: (ev.coordinators || []).filter(name => deptMap[name] !== "2")
+        }));
+    
+        setEvents(filteredEvents);
+        setTotalRegistrations(registrationsData.totalRegistrations);
+        setVerifiedRegistrations(registrationsData.verifiedRegistrations);
+        setRevenueData(revenueData);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setSocketError(error.message || "An error occurred while fetching data.");
         setLoading(false);
       }
     };
-
+    
     fetchData();
 
     return () => {
@@ -112,9 +118,11 @@ const EventOverview = () => {
   // Helper function to display coordinators
   const displayCoordinators = (coordinators) => {
     if (!coordinators || coordinators.length === 0) return "No coordinators";
-    if (coordinators.length === 1) return `Coordinator: ${coordinators[0]}`;
-    return `Coordinators: ${coordinators.join(", ")}`;
+    return coordinators.length === 1
+      ? `Coordinator: ${coordinators[0]}`
+      : `Coordinators: ${coordinators.join(", ")}`;
   };
+  
 
   return (
     <Layout title="Events Overview" activePage="eventso">

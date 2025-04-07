@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require("axios");
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -8,6 +9,7 @@ const mongoConnect = require('../db/mongodb');
 // Import the Event and Event_reg models
 const Event = require('../models/events');
 const Event_reg = require('../models/event_registration');
+const User = require('../models/User');
 
 /**
  * GET /events-count
@@ -150,6 +152,28 @@ router.get('/events', async (req, res) => {
  * POST /events/update-status-by-name
  * Update event status by name
  */
+router.post('/users/depts-by-name', async (req, res) => {
+  const { names } = req.body;
+
+  if (!Array.isArray(names)) {
+    return res.status(400).json({ error: "Names must be an array" });
+  }
+
+  try {
+    const users = await User.find({ name: { $in: names } });
+
+    const deptMap = {};
+    users.forEach(user => {
+      deptMap[user.name] = user.dept;
+    });
+
+    res.json(deptMap);
+  } catch (err) {
+    console.error("Error fetching depts by name:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/events/update-status-by-name", async (req, res) => {
   try {
     const { name, status } = req.body;
@@ -239,6 +263,43 @@ router.get('/events-revenue', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch revenue data", details: error.message });
   }
 });
+/**
+ * GET /events-revenue/:eventName
+ * Fetch total revenue for a single event
+ */
+router.get('/events-revenueper/:eventName', async (req, res) => {
+  const eventName = decodeURIComponent(req.params.eventName);
+
+  try {
+    const result = await Event_reg.aggregate([
+      {
+        $match: {
+          "ticket_details.event": eventName,
+          "ticket_details.amount": { $exists: true, $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: {
+            $sum: { $toDouble: "$ticket_details.amount" }
+          }
+        }
+      }
+    ]);
+
+    const totalRevenue = result.length > 0 ? result[0].totalRevenue : 0;
+
+    res.status(200).json({ eventName, totalRevenue });
+  } catch (error) {
+    console.error("Error fetching event revenue:", error);
+    res.status(500).json({
+      error: "Failed to fetch event revenue",
+      details: error.message
+    });
+  }
+});
+
 
 /**
  * POST /events/update-details-by-name
@@ -461,6 +522,26 @@ router.post('/delete-event-registrations/:id', async (req, res) => {
       error: "Failed to delete registration",
       details: error.message 
     });
+  }
+});
+
+// POST request handler to forward requests to localhost:3030
+router.post("/request_ticket", async (req, res) => {
+  try {
+    // Forward the request to localhost:3030 using Axios
+    const response = await axios.post("http://localhost:3030/generate_ticket", req.body, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Allowed-Origin": "savishkaara.in",
+      },
+      withCredentials: true, // Include credentials if needed
+    });
+
+    // Send the response back to the original client
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error("Error forwarding request:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to forward request to localhost:3030" });
   }
 });
 
