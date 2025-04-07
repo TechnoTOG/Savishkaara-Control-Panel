@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -36,7 +36,29 @@ const Mailer = () => {
   };
 
   // Possible values for Batch and Year dropdowns
-  const batchOptions = ["BCA", "B.Sc (Visual Media)", "M.Sc (Applied Statistics and Data Analytics)", "BA-MA (English Language & Literature)", "M.Sc (Mathematics)", "MA (Journalism & Mass Communication)", "MA (Visual Media & Communication)", "MA (English Language & Literature)", "MFA (Applied Art & Advertising)", "MFA (Animation & VFX)", "Int Physics", "PhD Scholar"];
+  const batchOptions = [
+    "BCA",
+    "BCA (Data Science)",
+    "BCA (HONOURS)",
+    "Integrated MCA",
+    "MCA",
+    "BBA",
+    "B.Com (Taxation & Finance)",
+    "B.Com (Fintech)",
+    "M.Com (Finance & Systems)",
+    "B.Des (Communication Design)",
+    "B.Sc (Visual Media)",
+    "M.Sc (Applied Statistics and Data Analytics)",
+    "BA-MA (English Language & Literature)",
+    "M.Sc (Mathematics)",
+    "MA (Journalism & Mass Communication)",
+    "MA (Visual Media & Communication)",
+    "MA (English Language & Literature)",
+    "MFA (Applied Art & Advertising)",
+    "MFA (Animation & VFX)",
+    "Int Physics",
+    "PhD Scholar"
+  ];
   const yearOptions = ["2020", "2021", "2022", "2023", "2024", "2025"];
 
   const [formData, setFormData] = useState({
@@ -44,11 +66,11 @@ const Mailer = () => {
     use_image_url: false,
     template_image_url: "",
     template_image_path: "REPLIT Workshop.png", // Default value for the dropdown
-    image_size: { width: 2000, height: 647 },
+    image_size: { width: 2000, height: 647 }, // Changed to integers
     qr_config: {
-      size: 350,
-      offset: { x: 100, y: 200 },
-      rotation: 0,
+      size: 350, // Changed to integer
+      offset: { x: 100, y: 200 }, // Changed to integers
+      rotation: 0, // Changed to integer
     },
     ticket_details: {
       name: "",
@@ -81,21 +103,29 @@ const Mailer = () => {
 
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    document.title = "Mailer";
+  }, []);
+
+  const apiBaseURL =
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_PROD_API_URL || "https://testapi.amritaiedc.site"
+      : process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
+    // Handle checkbox inputs
     if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }));
       return;
     }
-
+    // Handle nested objects (e.g., ticket_details, qr_config, image_size, mail_credentials)
     if (name.includes(".")) {
       const [parentKey, childKey] = name.split(".");
       setFormData((prev) => ({
         ...prev,
         [parentKey]: { ...prev[parentKey], [childKey]: value },
       }));
-
       // If the event field changes, update the template_image_path and email_subject accordingly
       if (name === "ticket_details.event") {
         const newTemplatePath = eventToTemplatePath[value];
@@ -108,63 +138,54 @@ const Mailer = () => {
       }
       return;
     }
-
+    // Handle normal fields
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("Request Body:", formData);
-
-      const response = await fetch(`https://ticket.savishkaara.in/generate_ticket`, {
+      // Convert image-related values to integers before sending
+      const sanitizedFormData = {
+        ...formData,
+        image_size: {
+          width: parseInt(formData.image_size.width, 10),
+          height: parseInt(formData.image_size.height, 10),
+        },
+        qr_config: {
+          size: parseInt(formData.qr_config.size, 10),
+          offset: {
+            x: parseInt(formData.qr_config.offset.x, 10),
+            y: parseInt(formData.qr_config.offset.y, 10),
+          },
+          rotation: parseInt(formData.qr_config.rotation, 10),
+        },
+      };
+      const response = await fetch(`${apiBaseURL}/request_ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Allowed-Origin": "savishkaara.in",
         },
         credentials: "include",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(sanitizedFormData),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        // Clear the Ticket Details fields
+        // Clear Ticket Details fields on success
         setFormData((prev) => ({
           ...prev,
           ticket_details: {
             name: "",
             roll_no: "",
-            event: "Workshop on Replit AI",
-            batch: "",
-            year: "",
+            event: "Workshop on Replit AI", // Reset to default event
+            batch: "BCA", // Reset to default batch
+            year: "2020", // Reset to default year
             mobile: "",
             amount: "",
           },
         }));
-
-        // Show success message in green
-        setMessage(
-          <Typography
-            variant="body1"
-            style={{
-              color: "#28a745",
-              fontWeight: "bold",
-              textAlign: "center",
-              padding: "10px",
-              borderRadius: "5px",
-              backgroundColor: "#d4edda",
-              border: "1px solid #c3e6cb",
-              marginBottom: "10px",
-            }}
-          >
-            ✅ Mail Sent Successfully! Ticket URL:{" "}
-            <a href={data.ticket_url} target="_blank" rel="noopener noreferrer">
-              {data.ticket_url}
-            </a>
-          </Typography>
-        );
+        setMessage(`Mail was sent successfully! URL: ${data.ticket_url}`);
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -180,7 +201,17 @@ const Mailer = () => {
         <Typography variant="h5" component="h2" gutterBottom>
           Send Email
         </Typography>
-        {message && <div>{message}</div>}
+        {message && (
+          <Typography
+            variant="body1"
+            style={{
+              marginBottom: "10px",
+              color: message.startsWith("Mail was sent successfully") ? "green" : "red",
+            }}
+          >
+            {message}
+          </Typography>
+        )}
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Section 1: Mail Settings */}
@@ -293,7 +324,6 @@ const Mailer = () => {
                 )}
               </Paper>
             </Grid>
-
             {/* Section 2: Image Settings */}
             <Grid item xs={4}>
               <Paper elevation={3} style={{ padding: "20px" }}>
@@ -449,7 +479,6 @@ const Mailer = () => {
                 </Grid>
               </Paper>
             </Grid>
-
             {/* Section 3: Ticket Details */}
             <Grid item xs={4}>
               <Paper elevation={3} style={{ padding: "20px" }}>
@@ -564,7 +593,6 @@ const Mailer = () => {
                 />
               </Paper>
             </Grid>
-
             {/* Submit Button */}
             <Grid item xs={12}>
               <Button type="submit" variant="contained" color="primary" fullWidth>
