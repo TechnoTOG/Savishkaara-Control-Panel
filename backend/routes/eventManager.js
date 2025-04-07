@@ -528,8 +528,6 @@ router.post('/delete-event-registrations/:id', async (req, res) => {
 // POST request handler to forward requests to localhost:3030
 router.post("/request_ticket", async (req, res) => {
   try {
-    console.log("Received request:", req.body);
-
     // Forward the request to localhost:3030 using Axios
     const response = await axios.post("http://localhost:3030/generate_ticket", req.body, {
       headers: {
