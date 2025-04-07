@@ -57,7 +57,7 @@ const Mailer = () => {
     "MFA (Applied Art & Advertising)",
     "MFA (Animation & VFX)",
     "Int Physics",
-    "PhD Scholar"
+    "PhD Scholar",
   ];
   const yearOptions = ["2020", "2021", "2022", "2023", "2024", "2025"];
 
@@ -172,9 +172,10 @@ const Mailer = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // Clear Ticket Details fields on success
+        // Clear Ticket Details fields and email field on success
         setFormData((prev) => ({
           ...prev,
+          email: "", // Clear the email field
           ticket_details: {
             name: "",
             roll_no: "",
@@ -185,7 +186,7 @@ const Mailer = () => {
             amount: "",
           },
         }));
-        setMessage(`Mail was sent successfully! URL: ${data.ticket_url}`);
+        setMessage(`Email was sent successfully!`);
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -206,7 +207,7 @@ const Mailer = () => {
             variant="body1"
             style={{
               marginBottom: "10px",
-              color: message.startsWith("Mail was sent successfully") ? "green" : "red",
+              color: message.startsWith("Email was sent successfully") ? "green" : "red",
             }}
           >
             {message}
