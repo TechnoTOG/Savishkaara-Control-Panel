@@ -11,6 +11,7 @@ import EventOverview from "./pages/eventOverview";
 import AddEvent from "./pages/addEvent";
 import Events from "./pages/eventOverview";
 import MyEvent from "./pages/myEvent";
+import Mailer from "./pages/mailer";
 import Samridhi from "./pages/samridhi";
 import UserOverview from "./pages/userOverview";
 import AddUser from "./pages/addUser";
@@ -28,7 +29,7 @@ const checkAuth = async () => {
     
   try {
     const response = await fetch(`${apiBaseURL}/check-auth`, {
-      headers: {'X-Allowed-Origin': 'testsavi.amritaiedc.site'},
+      headers: {'X-Allowed-Origin': 'savishkaara.in'},
       credentials: "include", // Important to send cookies
     });
 
@@ -93,10 +94,8 @@ function App() {
   <Route path="/events/overview" element={<ProtectedRoute element={<EventOverview />} />} />
   <Route path="/events/add" element={<ProtectedRoute element={<AddEvent />} />} />
   <Route path="/events" element={<ProtectedRoute element={<Events />} />} />
-  <Route
-    path="/my-event/:eventId" // Dynamic route for event details
-    element={<ProtectedRoute element={<MyEvent />} />}
-  />
+  <Route path="/my-event/:eventId" element={<ProtectedRoute element={<MyEvent />} />}/> {/* Dynamic route for Events */}
+  <Route path="/Mailer" element={<ProtectedRoute element={<Mailer />} />} />
   <Route path="/samridhi" element={<ProtectedRoute element={<Samridhi />} />} />
   <Route path="/users/overview" element={<ProtectedRoute element={<UserOverview />} />} />
   <Route path="/users/add" element={<ProtectedRoute element={<AddUser />} />} />

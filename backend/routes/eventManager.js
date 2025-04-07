@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require("axios");
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -521,6 +522,28 @@ router.post('/delete-event-registrations/:id', async (req, res) => {
       error: "Failed to delete registration",
       details: error.message 
     });
+  }
+});
+
+// POST request handler to forward requests to localhost:3030
+router.post("/request_ticket", async (req, res) => {
+  try {
+    console.log("Received request:", req.body);
+
+    // Forward the request to localhost:3030 using Axios
+    const response = await axios.post("http://localhost:3030/generate_ticket", req.body, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Allowed-Origin": "savishkaara.in",
+      },
+      withCredentials: true, // Include credentials if needed
+    });
+
+    // Send the response back to the original client
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error("Error forwarding request:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to forward request to localhost:3030" });
   }
 });
 

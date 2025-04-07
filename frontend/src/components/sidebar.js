@@ -21,7 +21,7 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
 
   // Define role-based permissions
   const rolePermissions = {
-    super: ["Dashboard", "Events", "Samridhi", "Users", "Server", "Event Registration"], // Added "Event Registration"
+    super: ["Dashboard", "Events", "Samridhi", "Users", "Server", "Registration Data", "Mailer"], // Added "Event Registration"
     admin: ["Dashboard", "vEvents", "Samridhi"],
     coor: ["My Event"],
   };
@@ -90,27 +90,6 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
           </Tooltip>
         )}
 
-        {/* Render Event Registration if allowed */}
-        {allowedOptions.includes("Event Registration") && (
-          <Tooltip title="Event Registration" placement="right" disableHoverListener={!isMinimized}>
-            <ListItemButton
-              onClick={() => navigateTo("/event-registration", "eventreg")} // Navigate to event registration
-              sx={{
-                color: "#fff",
-                justifyContent: isMinimized ? "left" : "flex-start",
-                "&:hover": {
-                  backgroundColor: darkMode ? "#333" : "#222a57",
-                },
-              }}
-            >
-              <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
-                <img src="/icons/event_registration_icon.svg" alt="event registration" width="24" /> {/* Add an icon */}
-              </ListItemIcon>
-              {!isMinimized && <ListItemText primary="Event Registration" />}
-            </ListItemButton>
-          </Tooltip>
-        )}
-
         {/* Render My Event if allowed */}
         {allowedOptions.includes("vEvents") && (
           <Tooltip title="Events" placement="right" disableHoverListener={!isMinimized}>
@@ -170,6 +149,48 @@ const Sidebar = ({ isMinimized, darkMode, activePage }) => {
               </List>
             </Collapse>
           </>
+        )}
+        
+        {/* Render Event Registration if allowed */}
+        {allowedOptions.includes("Registration Data") && (
+          <Tooltip title="Registration Data" placement="right" disableHoverListener={!isMinimized}>
+            <ListItemButton
+              onClick={() => navigateTo("/event-registration", "eventreg")} // Navigate to event registration
+              sx={{
+                color: "#fff",
+                justifyContent: isMinimized ? "left" : "flex-start",
+                "&:hover": {
+                  backgroundColor: darkMode ? "#333" : "#222a57",
+                },
+              }}
+            >
+              <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
+                <img src="/icons/hard_drive_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="Registration Data" width="24" /> {/* Add an icon */}
+              </ListItemIcon>
+              {!isMinimized && <ListItemText primary="Registration Data" />}
+            </ListItemButton>
+          </Tooltip>
+        )}
+
+        {/* Render Mailer if allowed */}
+        {allowedOptions.includes("Registration Data") && (
+          <Tooltip title="Mailer" placement="right" disableHoverListener={!isMinimized}>
+            <ListItemButton
+              onClick={() => navigateTo("/Mailer", "mailer")} // Navigate to event registration
+              sx={{
+                color: "#fff",
+                justifyContent: isMinimized ? "left" : "flex-start",
+                "&:hover": {
+                  backgroundColor: darkMode ? "#333" : "#222a57",
+                },
+              }}
+            >
+              <ListItemIcon sx={{ paddingLeft: isMinimized ? "10px" : "0px" }}>
+                <img src="/icons/outgoing_mail_24dp_EFEFEF_FILL0_wght400_GRAD0_opsz24.svg" alt="Mailer" width="24" /> {/* Add an icon */}
+              </ListItemIcon>
+              {!isMinimized && <ListItemText primary="Mailer" />}
+            </ListItemButton>
+          </Tooltip>
         )}
 
         {/* Render Users if allowed */}
