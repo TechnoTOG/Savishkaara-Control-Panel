@@ -145,9 +145,16 @@ const Mailer = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Replace {{name}} in the email body with the actual name from ticket_details
+      const updatedEmailBody = formData.email_body.replace(
+        "{{name}}",
+        formData.ticket_details.name || "User"
+      );
+
       // Convert image-related values to integers before sending
       const sanitizedFormData = {
         ...formData,
+        email_body: updatedEmailBody, // Use the updated email body
         image_size: {
           width: parseInt(formData.image_size.width, 10),
           height: parseInt(formData.image_size.height, 10),
